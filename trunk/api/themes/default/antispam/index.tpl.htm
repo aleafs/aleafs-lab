@@ -1,0 +1,38 @@
+(function(){
+	var obj = {
+		_form: function(o){
+			if (o == null || o == ''){
+				return document.forms;
+			}
+			
+			if (typeof(o) == 'object') {
+				return Array(o);
+			}
+			
+			var f = [];
+			var s = document.getElementById(o);
+			if (typeof(s) == 'object') {
+				f[0] = s;
+			}
+			var s = document.getElementsByName(0);
+			for (var i = 0; i < s.length; i++) {
+				f[f.length] = s[i];
+			}
+
+			return f;
+		},
+		_fill: function(o,s){
+			var i = document.createElement('input');
+			i.setAttribute('type', 'hidden');
+			i.setAttribute('value',s);
+			o.appendChild(i);
+		},
+		init: function(s,o){
+			var f = this._form(o);
+			for (var i = 0; i < f.length; i++) {
+				this._fill(f[i],s);
+			}
+		}
+	}
+	obj.init('$sessid', '$formid');
+})();
