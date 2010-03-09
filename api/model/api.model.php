@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +--------------------------------------------------------------------+
-// | APIÄ£ĞÍ															|
+// | APIæ¨¡å‹															|
 // +--------------------------------------------------------------------+
 // | Copyright (c) 2009 Baidu. Inc. All Rights Reserved					|
 // +--------------------------------------------------------------------+
@@ -13,10 +13,10 @@
 class App_Model_Api extends HA_Single
 {
 
-    /* {{{ ³£Á¿¶¨Òå */
+    /* {{{ å¸¸é‡å®šä¹‰ */
 
     /**
-     * @ API×´Ì¬
+     * @ APIçŠ¶æ€
      */
     const API_STATUS_NEW    = 100;
     const API_STATUS_WAIT   = 200;
@@ -24,46 +24,46 @@ class App_Model_Api extends HA_Single
 
     /* }}} */
 
-    /* {{{ ¾²Ì¬±äÁ¿ */
+    /* {{{ é™æ€å˜é‡ */
 
     /**
-     * @Ö÷±í
+     * @ä¸»è¡¨
      */
     private static $_strDb  = 'aleafs_api';
 
     /**
-     * @APPÁĞ±í
+     * @APPåˆ—è¡¨
      */
     private static $_arrApp = array(
         1   => array(
-            'name'  => 'antispam',                  /**<  Ãû³Æ      */
-            'desc'  => 'aleafs antispam',           /**<  ÃèÊö      */
-            'limit' => 1,                           /**<  µ¥ÓÃ»§Ó¦ÓÃ¸öÊı      */
-            'table' => 'as_sitelist',               /**<  Ö÷±íÃû      */
+            'name'  => 'antispam',                  /**<  åç§°      */
+            'desc'  => 'aleafs antispam',           /**<  æè¿°      */
+            'limit' => 1,                           /**<  å•ç”¨æˆ·åº”ç”¨ä¸ªæ•°      */
+            'table' => 'as_sitelist',               /**<  ä¸»è¡¨å      */
         ),
     );
 
     /**
-     * @ÁĞÃû
+     * @åˆ—å
      */
     private static $_arrCol;
 
     /* }}} */
 
-    /* {{{ ³ÉÔ±±äÁ¿ */
+    /* {{{ æˆå‘˜å˜é‡ */
 
     /**
-     * @¶ÔÏó²ÎÊı
+     * @å¯¹è±¡å‚æ•°
      */
     private $_arrOpt;
 
     /**
-     * @ĞÂµÄ²ÎÊı
+     * @æ–°çš„å‚æ•°
      */
     private $_arrNew;
 
     /**
-     * @¶ÌÂ·±ê¼Ç
+     * @çŸ­è·¯æ ‡è®°
      */
     private $_bolErr;
 
@@ -71,7 +71,7 @@ class App_Model_Api extends HA_Single
 
     /* {{{ public Object  instance() */
     /**
-     * »ñÈ¡µ¥Àı¶ÔÏóµÄÒ»¸öÊµÀı
+     * è·å–å•ä¾‹å¯¹è±¡çš„ä¸€ä¸ªå®ä¾‹
      *
      * @access public static
      * @param  Mixture $mixArg
@@ -86,7 +86,7 @@ class App_Model_Api extends HA_Single
 
     /* {{{ public Mixture get() */
     /**
-     * »ñÈ¡¶ÔÏóµÄÄ³¸öÊôĞÔ
+     * è·å–å¯¹è±¡çš„æŸä¸ªå±æ€§
      *
      * @access public
      * @param  String $strKey
@@ -109,7 +109,7 @@ class App_Model_Api extends HA_Single
 
     /* {{{ public Boolean set() */
     /**
-     * ÉèÖÃÊôĞÔ
+     * è®¾ç½®å±æ€§
      *
      * @access public
      * @param  Mixture $arrOpt
@@ -129,7 +129,7 @@ class App_Model_Api extends HA_Single
 
     /* {{{ public Boolean add() */
     /**
-     * Ìí¼ÓÒ»¸öAPI¼ÇÂ¼
+     * æ·»åŠ ä¸€ä¸ªAPIè®°å½•
      *
      * @access public static
      * @param  Mixture $mixCol
@@ -181,7 +181,7 @@ class App_Model_Api extends HA_Single
 
     /* {{{ public Boolean status() */
     /**
-     * ÅĞ¶ÏAPIÕË»§µÄ×´Ì¬
+     * åˆ¤æ–­APIè´¦æˆ·çš„çŠ¶æ€
      *
      * @access public
      * @param  Integer $status (default null)
@@ -204,7 +204,7 @@ class App_Model_Api extends HA_Single
 
     /* {{{ public Boolean __destruct() */
     /**
-     * Îö¹¹º¯Êı
+     * ææ„å‡½æ•°
      *
      * @access public
      * @return Boolean true or false
@@ -218,7 +218,7 @@ class App_Model_Api extends HA_Single
 
     /* {{{ private Boolean _load() */
     /**
-     * ¼ÓÔØĞÅÏ¢
+     * åŠ è½½ä¿¡æ¯
      *
      * @access private
      * @return Boolean true or false
@@ -250,7 +250,7 @@ class App_Model_Api extends HA_Single
 
     /* {{{ private Boolean _update() */
     /**
-     * ¸üĞÂÊı¾İµ½DB
+     * æ›´æ–°æ•°æ®åˆ°DB
      *
      * @access private
      * @return Boolean true or false
@@ -304,7 +304,7 @@ class App_Model_Api extends HA_Single
 
     /* {{{ private Mixture _col_filter() */
     /**
-     * ¹ıÂË²»Ïà¹ØµÄÁĞ
+     * è¿‡æ»¤ä¸ç›¸å…³çš„åˆ—
      *
      * @access private static
      * @param  Mixture $mixCol
@@ -335,7 +335,7 @@ class App_Model_Api extends HA_Single
 
     /* {{{ private String  _gen_code() */
     /**
-     * Éú³ÉĞÂµÄAPI´úÂë
+     * ç”Ÿæˆæ–°çš„APIä»£ç 
      *
      * @access private static
      * @param  Interger $intApp

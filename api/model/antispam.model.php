@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +------------------------------------------------------------------------+
-// | ·´À¬»øÁôÑÔÄ£ÐÍ															|
+// | ååžƒåœ¾ç•™è¨€æ¨¡åž‹															|
 // +------------------------------------------------------------------------+
 // | Copyright (c) 2009 Aleafs. All Rights Reserved							|
 // +------------------------------------------------------------------------+
@@ -13,29 +13,29 @@
 class App_Model_Antispam extends HA_Single
 {
 
-    /* {{{ ¾²Ì¬±äÁ¿ */
+    /* {{{ é™æ€å˜é‡ */
 
     /**
-     * @¿âÃû
+     * @åº“å
      */
     private static $_strDb  = 'aleafs_api';
 
     /**
-     * @GETÇëÇó²ÎÊý
+     * @GETè¯·æ±‚å‚æ•°
      */
     private static $_arrGet = array('ck', 'ln', 'rf', 'sw');
 
     /* }}} */
 
-    /* {{{ ³ÉÔ±±äÁ¿ */
+    /* {{{ æˆå‘˜å˜é‡ */
 
     /**
-     * @ÊôÐÔ
+     * @å±žæ€§
      */
     private $_arrOpt;
 
     /**
-     * @¶ÌÂ·±ê¼Ç
+     * @çŸ­è·¯æ ‡è®°
      */
     private $_bolErr;
 
@@ -43,7 +43,7 @@ class App_Model_Antispam extends HA_Single
 
     /* {{{ public Object  instance() */
     /**
-     * »ñÈ¡µ¥Àý¶ÔÏóµÄÒ»¸öÊµÀý
+     * èŽ·å–å•ä¾‹å¯¹è±¡çš„ä¸€ä¸ªå®žä¾‹
      *
      * @access public static
      * @param  Mixture $mixArg
@@ -58,7 +58,7 @@ class App_Model_Antispam extends HA_Single
 
     /* {{{ public Mixture get() */
     /**
-     * »ñÈ¡¶ÔÏóµÄÄ³¸öÊôÐÔ
+     * èŽ·å–å¯¹è±¡çš„æŸä¸ªå±žæ€§
      *
      * @access public
      * @param  String $strKey
@@ -81,7 +81,7 @@ class App_Model_Antispam extends HA_Single
 
     /* {{{ public Object  api() */
     /**
-     * »ñÈ¡¶ÔÓ¦µÄAPI¶ÔÏó
+     * èŽ·å–å¯¹åº”çš„APIå¯¹è±¡
      *
      * @access public
      * @return Object
@@ -94,7 +94,7 @@ class App_Model_Antispam extends HA_Single
 
     /* {{{ public Mixture session() */
     /**
-     * Ð´Èësession
+     * å†™å…¥session
      *
      * @access public static
      * @return Boolean true or false
@@ -130,7 +130,7 @@ class App_Model_Antispam extends HA_Single
 
     /* {{{ public Boolean __destruct() */
     /**
-     * Îö¹¹º¯Êý
+     * æžæž„å‡½æ•°
      *
      * @access public
      * @return Boolean true or false
@@ -150,7 +150,7 @@ class App_Model_Antispam extends HA_Single
 
     /* {{{ private Boolean _load() */
     /**
-     * ¼ÓÔØÊôÐÔ
+     * åŠ è½½å±žæ€§
      *
      * @access private
      * @return Boolean true or false
@@ -182,7 +182,7 @@ class App_Model_Antispam extends HA_Single
 
     /* {{{ private String  _domain() */
     /**
-     * ´ÓURLÖÐ»ñÈ¡ÓòÃû
+     * ä»ŽURLä¸­èŽ·å–åŸŸå
      *
      * @access private static
      * @param  String $strUrl
@@ -199,7 +199,7 @@ class App_Model_Antispam extends HA_Single
 
     /* {{{ private String  _query() */
     /**
-     * »ñÈ¡GET²ÎÊý
+     * èŽ·å–GETå‚æ•°
      *
      * @access private static
      * @return String
@@ -218,7 +218,7 @@ class App_Model_Antispam extends HA_Single
 
     /* {{{ protected String  _index() */
     /**
-     * ¹¹Ôìµ¥ÀýÄ£Ê½¶ÔÏóË÷Òý
+     * æž„é€ å•ä¾‹æ¨¡å¼å¯¹è±¡ç´¢å¼•
      *
      * @access protected static
      * @return String

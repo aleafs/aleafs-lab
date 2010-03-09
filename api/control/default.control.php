@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +--------------------------------------------------------------------+
-// | Ä¬ÈÏ¿ØÖÆÆ÷															|
+// | é»˜è®¤æŽ§åˆ¶å™¨															|
 // +--------------------------------------------------------------------+
 // | Copyright (c) 2009 Baidu. Inc. All Rights Reserved					|
 // +--------------------------------------------------------------------+
@@ -19,7 +19,7 @@ class App_Control_Default extends HA_Control_Abstract
 
     /* {{{ protected Boolean _actionIndex() */
     /**
-     * Ä¬ÈÏaction
+     * é»˜è®¤action
      *
      * @access protected
      * @return Boolean true or false

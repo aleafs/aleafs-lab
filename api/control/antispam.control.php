@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +--------------------------------------------------------------------+
-// | ·´À¬»øÁôÑÔ¿ØÖÆÆ÷													|
+// | ååžƒåœ¾ç•™è¨€æŽ§åˆ¶å™¨													|
 // +--------------------------------------------------------------------+
 // | Copyright (c) 2009 Baidu. Inc. All Rights Reserved					|
 // +--------------------------------------------------------------------+
@@ -17,13 +17,13 @@ if (!class_exists('HA_Control_Abstract')) {
 class App_Control_Antispam extends HA_Control_Abstract
 {
 
-    /* {{{ ¾²Ì¬±äÁ¿ */
+    /* {{{ é™æ€å˜é‡ */
 
     /* }}} */
 
     /* {{{ protected Boolean _before_excute() */
     /**
-     * Ö´ÐÐÇ°´¥·¢Æ÷
+     * æ‰§è¡Œå‰è§¦å‘å™¨
      *
      * @access protected
      * @return Boolean true or false
@@ -36,7 +36,7 @@ class App_Control_Antispam extends HA_Control_Abstract
 
     /* {{{ protected Mixture _actionIndex() */
     /**
-     * Ä¬ÈÏaction
+     * é»˜è®¤action
      *
      * @access protected
      * @return Mixture
@@ -76,7 +76,7 @@ return 0;
 
     /* {{{ protected Mixture _actionCheck() */
     /**
-     * POSTÇëÇóÑéÖ¤
+     * POSTè¯·æ±‚éªŒè¯
      *
      * @access protected
      * @return Mixture
@@ -88,7 +88,7 @@ return 0;
 
     /* {{{ protected Mixture _actionPrison() */
     /**
-     * ·â½ûÂ©É±µÄÁôÑÔ
+     * å°ç¦æ¼æ€çš„ç•™è¨€
      *
      * @access protected
      * @return Mixture
@@ -100,7 +100,7 @@ return 0;
 
     /* {{{ protected Mixture _actionFree() */
     /**
-     * ÊÍ·ÅÎóÉ±µÄÁôÑÔ
+     * é‡Šæ”¾è¯¯æ€çš„ç•™è¨€
      *
      * @access protected
      * @return Mixture
