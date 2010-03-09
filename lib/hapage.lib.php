@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +------------------------------------------------------------------------+
-// | Ä£°åÀà                    								   		  	    |
+// | æ¨¡æ¿ç±»                    								   		  	    |
 // +------------------------------------------------------------------------+
 // | Copyright (c) 2009 Baidu. Inc. All Rights Reserved						|
 // +------------------------------------------------------------------------+
@@ -17,39 +17,39 @@ if (!class_exists('HA_Object')) {
 class HA_Hapage extends HA_Object
 {
 
-    /* {{{ ¾²Ì¬±äÁ¿ */
+    /* {{{ é™æ€å˜é‡ */
 
     /**
-     * @Ä£°åÔ´ÎÄ¼ş´æ·ÅÄ¿Â¼
+     * @æ¨¡æ¿æºæ–‡ä»¶å­˜æ”¾ç›®å½•
      */
     private static $_tplPath  = '';
 
     /**
-     * @Ä£°åÄ¿±êÎÄ¼ş´æ·ÅÄ¿Â¼
+     * @æ¨¡æ¿ç›®æ ‡æ–‡ä»¶å­˜æ”¾ç›®å½•
      */
     private static $_objPath  = '';
 
     /**
-     * @³õÊ¼»¯±ê¼Ç
+     * @åˆå§‹åŒ–æ ‡è®°
      */
     private static $_bolInit  = false;
 
     /* }}} */
 
-    /* {{{ ³ÉÔ±±äÁ¿ */
+    /* {{{ æˆå‘˜å˜é‡ */
 
     /**
-     * @Ä£°åÔ´ÎÄ¼ş
+     * @æ¨¡æ¿æºæ–‡ä»¶
      */
     private $_strSrcFile;
 
     /**
-     * @Ä£°åÄ¿±êÎÄ¼ş
+     * @æ¨¡æ¿ç›®æ ‡æ–‡ä»¶
      */
     private $_strObjFile;
 
     /**
-     * @±àÒëÉî¶È
+     * @ç¼–è¯‘æ·±åº¦
      */
     private $_intComDepth;
 
@@ -57,7 +57,7 @@ class HA_Hapage extends HA_Object
 
     /* {{{ public Boolean __construct() */
     /**
-     * ¹¹Ôìº¯Êı
+     * æ„é€ å‡½æ•°
      *
      * @access public
      * @return Boolean true
@@ -77,7 +77,7 @@ class HA_Hapage extends HA_Object
 
     /* {{{ public Boolean setSrcFile() */
     /**
-     * ÉèÖÃÄ£°æÔ´ÎÄ¼ş
+     * è®¾ç½®æ¨¡ç‰ˆæºæ–‡ä»¶
      *
      * @access public
      * @param String $strSrc
@@ -87,7 +87,7 @@ class HA_Hapage extends HA_Object
     {
         $strSrc = self::realpath($strSrc);
         if (!is_file($strSrc)) {
-            self::_error(101, sprintf('Ô´ÎÄ¼ş "%s" ²»´æÔÚ', $strSrc));
+            self::_error(101, sprintf('æºæ–‡ä»¶ "%s" ä¸å­˜åœ¨', $strSrc));
             return false;
         }
         $this->_strSrcFile = $strSrc;
@@ -98,7 +98,7 @@ class HA_Hapage extends HA_Object
 
     /* {{{ public Boolean setObjFile() */
     /**
-     * ÉèÖÃ±àÒëÄ¿±êÎÄ¼ş
+     * è®¾ç½®ç¼–è¯‘ç›®æ ‡æ–‡ä»¶
      *
      * @access public
      * @param String $strObj
@@ -107,7 +107,7 @@ class HA_Hapage extends HA_Object
     public function setObjFile($strObj)
     {
         if (!is_scalar($strObj)) {
-            self::_error(102, 'Ä¿±êÎÄ¼ş²ÎÊı´íÎó');
+            self::_error(102, 'ç›®æ ‡æ–‡ä»¶å‚æ•°é”™è¯¯');
             return false;
         }
         $this->_strObjFile = self::realpath($strObj);
@@ -118,7 +118,7 @@ class HA_Hapage extends HA_Object
 
     /* {{{ public Boolean compile() */
     /**
-     * ±àÒëÄ£°æÎÄ¼ş
+     * ç¼–è¯‘æ¨¡ç‰ˆæ–‡ä»¶
      *
      * @access public
      * @param  String $strTpl (default '')
@@ -127,7 +127,7 @@ class HA_Hapage extends HA_Object
     public function compile($strTpl = '')
     {
         if (false === ($arrTmp = file($this->_strSrcFile))) {
-            self::_error(103, sprintf('Ô´ÎÄ¼ş "%s" ¶ÁÈ¡Ê§°Ü', $this->_strSrcFile));
+            self::_error(103, sprintf('æºæ–‡ä»¶ "%s" è¯»å–å¤±è´¥', $this->_strSrcFile));
             return false;
         }
 
@@ -173,12 +173,12 @@ class HA_Hapage extends HA_Object
 
         $strDir = dirname($this->_strObjFile);
         if (!is_dir($strDir) && !mkdir($strDir, 0777, true)) {
-            self::_error(104, sprintf('Ä¿±êÂ·¾¶ "%s" ´´½¨Ê§°Ü', $strDir));
+            self::_error(104, sprintf('ç›®æ ‡è·¯å¾„ "%s" åˆ›å»ºå¤±è´¥', $strDir));
             return false;
         }
 
         if (file_put_contents($this->_strObjFile, $strVal, LOCK_EX) !== strlen($strVal)) {
-            self::_error(105, sprintf('Ä¿±êÎÄ¼ş "%s" Ğ´ÈëÊ§°Ü', $this->_strObjFile));
+            self::_error(105, sprintf('ç›®æ ‡æ–‡ä»¶ "%s" å†™å…¥å¤±è´¥', $this->_strObjFile));
             return false;
         }
 
@@ -188,7 +188,7 @@ class HA_Hapage extends HA_Object
 
     /* {{{ public static Boolean changed() */
     /**
-     * ¼ì²éÔ´ÎÄ¼şÊÇ·ñÓĞ¸üĞÂ
+     * æ£€æŸ¥æºæ–‡ä»¶æ˜¯å¦æœ‰æ›´æ–°
      *
      * @access public static
      * @param  String $strHtm (refferrence)
@@ -222,7 +222,7 @@ class HA_Hapage extends HA_Object
 
     /* {{{ private static String addquote() */
     /**
-     * Ìí¼ÓÒıºÅ
+     * æ·»åŠ å¼•å·
      *
      * @access private
      * @param String $var
@@ -237,7 +237,7 @@ class HA_Hapage extends HA_Object
 
     /* {{{ private static String stripvtags() */
     /**
-     * ¹ıÂËPHP tag
+     * è¿‡æ»¤PHP tag
      *
      * @access private static
      * @param String $expr
@@ -256,7 +256,7 @@ class HA_Hapage extends HA_Object
 
     /* {{{ private static Boolean _init_path() */
     /**
-     * ³õÊ¼»¯Ä£°åÂ·¾¶
+     * åˆå§‹åŒ–æ¨¡æ¿è·¯å¾„
      *
      * @access private static
      * @return Boolean true or false

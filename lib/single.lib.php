@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +------------------------------------------------------------------------+
-// | µ¥ÀýÄ£Ê½»ùÀà	    					    							|
+// | å•ä¾‹æ¨¡å¼åŸºç±»	    					    							|
 // +------------------------------------------------------------------------+
 // | Copyright (c) 2009 Baidu. Inc. All Rights Reserved						|
 // +------------------------------------------------------------------------+
@@ -16,20 +16,20 @@ if (!class_exists('HA_Object')) {
 }
 
 /**
- * @µ¥ÀýÄ£Ê½»ùÀà
+ * @å•ä¾‹æ¨¡å¼åŸºç±»
  */
 class HA_Single extends HA_Object
 {
 
-    /* {{{ ³ÉÔ±±äÁ¿ */
+    /* {{{ æˆå‘˜å˜é‡ */
 
     /**
-     * @ÊµÀýÊý×é
+     * @å®žä¾‹æ•°ç»„
      */
     private static $_arrObj = array();
 
     /**
-     * @¶ÔÏóË÷Òý
+     * @å¯¹è±¡ç´¢å¼•
      */
     protected $_strIdx;
 
@@ -37,7 +37,7 @@ class HA_Single extends HA_Object
 
     /* {{{ public Object instance() */
     /**
-     * »ñÈ¡µ¥Àý¶ÔÏóµÄÒ»¸öÊµÀý
+     * èŽ·å–å•ä¾‹å¯¹è±¡çš„ä¸€ä¸ªå®žä¾‹
      *
      * @access public static
      * @param  Mixture $mixArg
@@ -63,7 +63,7 @@ class HA_Single extends HA_Object
 
     /* {{{ public Boolean __destruct() */
     /**
-     * Îö¹¹º¯Êý
+     * æžæž„å‡½æ•°
      *
      * @access public
      * @return Boolean true
@@ -78,7 +78,7 @@ class HA_Single extends HA_Object
 
     /* {{{ protected Object __construct() */
     /**
-     * ÊÜ±£»¤µÄ¹¹Ôìº¯Êý
+     * å—ä¿æŠ¤çš„æž„é€ å‡½æ•°
      *
      * @access protected
      * @param  String  $strIdx
@@ -95,7 +95,7 @@ class HA_Single extends HA_Object
 
     /* {{{ protected Object _options() */
     /**
-     * ÉèÖÃ¶ÔÏóÊôÐÔ
+     * è®¾ç½®å¯¹è±¡å±žæ€§
      *
      * @access protected
      * @param  Mixture $mixArg (default null)
@@ -109,7 +109,7 @@ class HA_Single extends HA_Object
 
     /* {{{ protected String  _index() */
     /**
-     * ¹¹Ôìµ¥ÀýÄ£Ê½¶ÔÏóË÷Òý
+     * æž„é€ å•ä¾‹æ¨¡å¼å¯¹è±¡ç´¢å¼•
      *
      * @access protected static
      * @return String
@@ -127,7 +127,7 @@ class HA_Single extends HA_Object
 
     /* {{{ protected Mixture _brother() */
     /**
-     * »ñÈ¡Í¬ÀàÐÖµÜÊµÀý
+     * èŽ·å–åŒç±»å…„å¼Ÿå®žä¾‹
      *
      * @access public
      * @return Mixture
@@ -140,7 +140,7 @@ class HA_Single extends HA_Object
 
     /* {{{ protected Boolean _alias() */
     /**
-     * Îªµ±Ç°¶ÔÏó´´½¨±ðÃû
+     * ä¸ºå½“å‰å¯¹è±¡åˆ›å»ºåˆ«å
      *
      * @access protected
      * @param  String $strIdx

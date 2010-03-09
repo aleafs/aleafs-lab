@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +------------------------------------------------------------------------+
-// | ¹ú¼Ê»¯ÓïÑÔ´¦Àí°ü														|
+// | å›½é™…åŒ–è¯­è¨€å¤„ç†åŒ…														|
 // +------------------------------------------------------------------------+
 // | Copyright (c) 2009 Aleafs. All Rights Reserved							|
 // +------------------------------------------------------------------------+
@@ -17,29 +17,29 @@ if (!class_exists('HA_Single')) {
 class HA_Gettext extends HA_Single
 {
 
-    /* {{{ ¾²Ì¬±äÁ¿ */
+    /* {{{ é™æ€å˜é‡ */
 
     /**
-     * @ÊÇ·ñÆôÓÃ»º´æ
+     * @æ˜¯å¦å¯ç”¨ç¼“å­˜
      */
     private static $_cached = false;
 
     /**
-     * @ÓïÑÔÓò
+     * @è¯­è¨€åŸŸ
      */
     private static $_domain = array();
 
     /* }}} */
 
-    /* {{{ ³ÉÔ±±äÁ¿ */
+    /* {{{ æˆå‘˜å˜é‡ */
 
     /**
-     * @¸÷Óò×´Ì¬
+     * @å„åŸŸçŠ¶æ€
      */
     private $_status = array();
 
     /**
-     * @»º´æÊý¾Ý
+     * @ç¼“å­˜æ•°æ®
      */
     private $_caches = array();
 
@@ -47,7 +47,7 @@ class HA_Gettext extends HA_Single
 
     /* {{{ public Object  instance() */
     /**
-     * »ñÈ¡Ò»¸öÈÕÖ¾ÊµÀý
+     * èŽ·å–ä¸€ä¸ªæ—¥å¿—å®žä¾‹
      *
      * @access public static
      * @return Object
@@ -60,7 +60,7 @@ class HA_Gettext extends HA_Single
 
     /* {{{ public Boolean __destruct() */
     /**
-     * Îö¹¹º¯Êý
+     * æžæž„å‡½æ•°
      *
      * @access public
      * @return Boolean true or false
@@ -73,7 +73,7 @@ class HA_Gettext extends HA_Single
 
     /* {{{ public Boolean bind() */
     /**
-     * °ó¶¨ÓòÂ·¾¶
+     * ç»‘å®šåŸŸè·¯å¾„
      *
      * @access public static
      * @param  String $domain
@@ -95,7 +95,7 @@ class HA_Gettext extends HA_Single
 
     /* {{{ public String  translate() */
     /**
-     * ·­ÒëÒ»¸ö×Ö·û´®
+     * ç¿»è¯‘ä¸€ä¸ªå­—ç¬¦ä¸²
      *
      * @access public
      * @param  String $string
@@ -122,7 +122,7 @@ class HA_Gettext extends HA_Single
 
     /* {{{ private Boolean _translate() */
     /**
-     * ´Ó¹Ì¶¨µÄÓò·­Òë
+     * ä»Žå›ºå®šçš„åŸŸç¿»è¯‘
      *
      * @access private
      * @param  String $string (refferrence)
@@ -160,7 +160,7 @@ class HA_Gettext extends HA_Single
 
     /* {{{ private Boolean _load_mofile() */
     /**
-     * ¼ÓÔØÒ»¸öMOÎÄ¼þ
+     * åŠ è½½ä¸€ä¸ªMOæ–‡ä»¶
      *
      * @access private
      * @param  String $domain
@@ -218,7 +218,7 @@ class HA_Gettext extends HA_Single
 
     /* {{{ private Mixture _parse_head() */
     /**
-     * ¶ÁÈ¡MOÎÄ¼þÍ·ÐÅÏ¢
+     * è¯»å–MOæ–‡ä»¶å¤´ä¿¡æ¯
      *
      * @access private
      * @param  String $string
@@ -257,7 +257,7 @@ class HA_Gettext extends HA_Single
 
     /* {{{ private String  _read_file() */
     /**
-     * ¶ÁÈ¡ÎÄ¼þ
+     * è¯»å–æ–‡ä»¶
      *
      * @access private
      * @param  String $file
@@ -287,7 +287,7 @@ class HA_Gettext extends HA_Single
 
     /* {{{ private String  _get_original_string() */
     /**
-     * ¶ÁÈ¡Ô­Ê¼×Ö·û´®
+     * è¯»å–åŽŸå§‹å­—ç¬¦ä¸²
      *
      * @access private
      * @param Interger $intIdx
@@ -310,7 +310,7 @@ class HA_Gettext extends HA_Single
 
     /* {{{ private String  _get_translate_string() */
     /**
-     * ¶ÁÈ¡·­Òë×Ö·û´®
+     * è¯»å–ç¿»è¯‘å­—ç¬¦ä¸²
      *
      * @access private
      * @param  Interger $intIdx
@@ -333,7 +333,7 @@ class HA_Gettext extends HA_Single
 
     /* {{{ private Interger _find() */
     /**
-     * ¶þ·Ö²éÕÒ×Ö·û´®
+     * äºŒåˆ†æŸ¥æ‰¾å­—ç¬¦ä¸²
      *
      * @access private
      * @param  String $string

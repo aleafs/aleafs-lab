@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +-------------------------------------------------------------+
-// | ÎÄ¼şÈÕÖ¾Àà                		   		  				     |
+// | æ–‡ä»¶æ—¥å¿—ç±»                		   		  				     |
 // +-------------------------------------------------------------+
 // | Author: Zhang Xuancheng <zhangxuancheng@baidu.com>          |
 // +-------------------------------------------------------------+
@@ -16,7 +16,7 @@ if (!class_exists('HA_Single')) {
 class HA_Filelog extends HA_Single
 {
 
-    /* {{{ ¾²Ì¬³£Á¿ */
+    /* {{{ é™æ€å¸¸é‡ */
 
     const LOG_MAX_FILESIZE  = 2143289000;
 
@@ -35,10 +35,10 @@ class HA_Filelog extends HA_Single
 
     /* }}} */
 
-    /* {{{ ¾²Ì¬±äÁ¿ */
+    /* {{{ é™æ€å˜é‡ */
 
     /**
-     * @¹ıÂËµÄ×Ö·û
+     * @è¿‡æ»¤çš„å­—ç¬¦
      */
     private static $_arrEscapeChar = array(
         "\r"    => "\\r",
@@ -46,7 +46,7 @@ class HA_Filelog extends HA_Single
     );
 
     /**
-     * @ÈÕÖ¾¼¶±ğÃèÊö
+     * @æ—¥å¿—çº§åˆ«æè¿°
      */
     private static $_arrLogLevel = array(
         self::LOG_LEVEL_FATAL => 'FATAL',
@@ -59,50 +59,50 @@ class HA_Filelog extends HA_Single
 
     /* }}} */
 
-    /* {{{ ³ÉÔ±±äÁ¿ */
+    /* {{{ æˆå‘˜å˜é‡ */
 
     /**
-     * @ÈÕÖ¾»º´æ
+     * @æ—¥å¿—ç¼“å­˜
      */
     private $_strLogCache;
 
     /**
-     * @×î´ó»º´æÊı
+     * @æœ€å¤§ç¼“å­˜æ•°
      */
     private $_intMaxCache;
 
     /**
-     * @ÈÕÖ¾¼¶±ğ
+     * @æ—¥å¿—çº§åˆ«
      */
     private $_intLogLevel;
 
     /**
-     * @ÈÕÖ¾µÃ·Ö(±ãÓÚ¼à¿ØÊ¹ÓÃ)
+     * @æ—¥å¿—å¾—åˆ†(ä¾¿äºç›‘æ§ä½¿ç”¨)
      */
     private $_intLogEvent;
 
     /**
-     * @ÈÕÖ¾ÇĞ¸î·½Ê½
+     * @æ—¥å¿—åˆ‡å‰²æ–¹å¼
      */
     private $_intRotate;
 
     /**
-     * @²Ù×÷ÈË
+     * @æ“ä½œäºº
      */
     private $_intUserId  = '-';
 
     /**
-     * @ÈÕÖ¾´æ·ÅÂ·¾¶
+     * @æ—¥å¿—å­˜æ”¾è·¯å¾„
      */
     private $_strLogPath = './';
 
     /**
-     * @ÈÕÖ¾ÎÄ¼şÃû
+     * @æ—¥å¿—æ–‡ä»¶å
      */
     private $_strLogName = 'default';
 
     /**
-     * @ÈÕÖ¾À©Õ¹Ãû
+     * @æ—¥å¿—æ‰©å±•å
      */
     private $_strLogExt  = 'php';
 
@@ -110,7 +110,7 @@ class HA_Filelog extends HA_Single
 
     /* {{{ public static  instance() */
     /**
-     * »ñÈ¡Ò»¸öÈÕÖ¾ÊµÀı
+     * è·å–ä¸€ä¸ªæ—¥å¿—å®ä¾‹
      *
      * @access public static
      * @param  String $strLogName (default null)
@@ -124,7 +124,7 @@ class HA_Filelog extends HA_Single
 
     /* {{{ public Object logfile() */
     /**
-     * ÉèÖÃÈÕÖ¾ÎÄ¼şÃû
+     * è®¾ç½®æ—¥å¿—æ–‡ä»¶å
      *
      * @access public
      * @param  String $strFile
@@ -156,7 +156,7 @@ class HA_Filelog extends HA_Single
 
     /* {{{ public Object level() */
     /**
-     * ÉèÖÃÈÕÖ¾¼ÇÂ¼¼¶±ğ
+     * è®¾ç½®æ—¥å¿—è®°å½•çº§åˆ«
      *
      * @access public
      * @param  Integer $intLogLevel
@@ -171,7 +171,7 @@ class HA_Filelog extends HA_Single
 
     /* {{{ public Object rotate() */
     /**
-     * ÉèÖÃÈÕÖ¾ÇĞ¸î·½Ê½
+     * è®¾ç½®æ—¥å¿—åˆ‡å‰²æ–¹å¼
      *
      * @access public
      * @param  Integer $intRotate
@@ -189,7 +189,7 @@ class HA_Filelog extends HA_Single
 
     /* {{{ public Object cache() */
     /**
-     * ÉèÖÃ×î´ó»º´æ×Ö½ÚÊı
+     * è®¾ç½®æœ€å¤§ç¼“å­˜å­—èŠ‚æ•°
      *
      * @access public
      * @param  Integer $intMaxSize
@@ -204,7 +204,7 @@ class HA_Filelog extends HA_Single
 
     /* {{{ public Object userid() */
     /**
-     * ÉèÖÃÓÃ»§ID
+     * è®¾ç½®ç”¨æˆ·ID
      *
      * @access public
      * @param  Integer $intUid
@@ -219,7 +219,7 @@ class HA_Filelog extends HA_Single
 
     /* {{{ public Boolean write() */
     /**
-     * ÈÕÖ¾Ğ´ÈëÀà
+     * æ—¥å¿—å†™å…¥ç±»
      *
      * @access public
      * @return Boolean true or false
@@ -230,7 +230,7 @@ class HA_Filelog extends HA_Single
         $intLvl = (int)array_shift($arrArg);
         $bolErr = false;
         if (($intLvl & self::LOG_LEVEL_FATAL) > 0) {
-            $this->_intLogEvent += 500;     //error ÈÕÖ¾»áÔö¼ÓÒ»±¶
+            $this->_intLogEvent += 500;     //error æ—¥å¿—ä¼šå¢åŠ ä¸€å€
             $bolErr = true;
         }
         if (($intLvl & self::LOG_LEVEL_ERROR) > 0) {
@@ -257,7 +257,7 @@ class HA_Filelog extends HA_Single
 
     /* {{{ public Boolean __destruct() */
     /**
-     * Îö¹¹º¯Êı
+     * ææ„å‡½æ•°
      *
      * @access public
      * @return Boolean true
@@ -273,7 +273,7 @@ class HA_Filelog extends HA_Single
 
     /* {{{ protected Boolean _log() */
     /**
-     * Ğ´ÈëÈÕÖ¾¼ÇÂ¼
+     * å†™å…¥æ—¥å¿—è®°å½•
      *
      * @access protected static
      * @param  String  $strTag
@@ -289,7 +289,7 @@ class HA_Filelog extends HA_Single
 
     /* {{{ protected Object  _options() */
     /**
-     * ÉèÖÃ¶ÔÏóÊôĞÔ
+     * è®¾ç½®å¯¹è±¡å±æ€§
      *
      * @access protected
      * @param  Mixture $mixArg (default null)
@@ -309,7 +309,7 @@ class HA_Filelog extends HA_Single
 
     /* {{{ private String  _file() */
     /**
-     * »ñÈ¡ÈÕÖ¾ÎÄ¼şÃû
+     * è·å–æ—¥å¿—æ–‡ä»¶å
      *
      * @access private
      * @param  Boolean $bolGen (default false)
@@ -317,7 +317,7 @@ class HA_Filelog extends HA_Single
      */
     private function _file($bolGen = false)
     {
-        if (!is_string($this->_strIdx)) {         /**<  ´òÓ¡µ½ÆÁÄ»      */
+        if (!is_string($this->_strIdx)) {         /**<  æ‰“å°åˆ°å±å¹•      */
             return false;
         }
 
@@ -343,7 +343,7 @@ class HA_Filelog extends HA_Single
             $strPathExt, $this->_strLogName, $strFileExt, $this->_strLogExt
         ));
 
-        if (is_file($strFileName) &&   /* <±¸·İÒÑÂúÈÕÖ¾> */
+        if (is_file($strFileName) &&   /* <å¤‡ä»½å·²æ»¡æ—¥å¿—> */
             filesize($strFileName) > self::LOG_MAX_FILESIZE - strlen($this->_strLogCache))
         {
             for ($i = 1; $i < 100; $i++)
@@ -359,7 +359,7 @@ class HA_Filelog extends HA_Single
             return $strFileName;
         }
 
-        if ($bolGen === true) {               /* <¼ì²é²¢´´½¨Ä¿Â¼> */
+        if ($bolGen === true) {               /* <æ£€æŸ¥å¹¶åˆ›å»ºç›®å½•> */
             $strTempName = dirname($strFileName);
             if (!is_dir($strTempName) && !@mkdir($strTempName, 0777, true)) {
                 //nothing
@@ -372,7 +372,7 @@ class HA_Filelog extends HA_Single
 
     /* {{{ private Boolean _write() */
     /**
-     * ½«»º´æĞ´ÈëÎÄ¼ş
+     * å°†ç¼“å­˜å†™å…¥æ–‡ä»¶
      *
      * @access protected
      * @param  Boolean $bolErr (default false)
@@ -403,7 +403,7 @@ class HA_Filelog extends HA_Single
 
     /* {{{ private String  _build() */
     /**
-     * ¹¹ÔìÒ»ĞĞÈÕÖ¾
+     * æ„é€ ä¸€è¡Œæ—¥å¿—
      *
      * @access protected
      * @param  Integer $intLvl (default LOG_LEVEL_NOTICE)
@@ -439,7 +439,7 @@ class HA_Filelog extends HA_Single
 
     /* {{{ protected static String  _index() */
     /**
-     * ¹¹Ôìµ¥ÀıÄ£Ê½¶ÔÏóË÷Òı
+     * æ„é€ å•ä¾‹æ¨¡å¼å¯¹è±¡ç´¢å¼•
      *
      * @access protected static
      * @return String

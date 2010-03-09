@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +------------------------------------------------------------------------+
-// | Á¬½Ó¹ÜÀíÆ÷																|
+// | è¿žæŽ¥ç®¡ç†å™¨																|
 // +------------------------------------------------------------------------+
 // | Copyright (c) 2009 Aleafs. All Rights Reserved							|
 // +------------------------------------------------------------------------+
@@ -15,55 +15,55 @@ if (!class_exists('HA_Single')) {
 }
 
 /**
- * @Á¬½Ó¹ÜÀíÆ÷
+ * @è¿žæŽ¥ç®¡ç†å™¨
  */
 class HA_Hapool extends HA_Single
 {
 
-    /* {{{ ³ÉÔ±±äÁ¿ */
+    /* {{{ æˆå‘˜å˜é‡ */
 
     /**
-     * @ÊÇ·ñÖ÷Á¬½Ó
+     * @æ˜¯å¦ä¸»è¿žæŽ¥
      */
     protected $_bolIsMaster = false;
 
     /**
-     * @Á´½Ó¾ä±ú
+     * @é“¾æŽ¥å¥æŸ„
      */
     protected $_resHandle;
 
     /**
-     * @Í¨Ñ¶´ÎÊý
+     * @é€šè®¯æ¬¡æ•°
      */
     protected $_intQueries  = 0;
 
     /**
-     * @¿ÉÁ¬½Ó´ÎÊý
+     * @å¯è¿žæŽ¥æ¬¡æ•°
      */
     protected $_intCnLimit  = 10;
 
     /**
-     * @Ö÷»úµØÖ·
+     * @ä¸»æœºåœ°å€
      */
     protected $_strHostAddr;
 
     /**
-     * @Ö÷»ú¶Ë¿Ú
+     * @ä¸»æœºç«¯å£
      */
     protected $_intHostPort;
 
     /**
-     * @ÓÃ»§Ãû
+     * @ç”¨æˆ·å
      */
     protected $_strUserName;
 
     /**
-     * @ÃÜÂë
+     * @å¯†ç 
      */
     protected $_strPassWord;
 
     /**
-     * @´Ó·þÎñÆ÷
+     * @ä»ŽæœåŠ¡å™¨
      */
     protected $_mixSlave;
 
@@ -71,7 +71,7 @@ class HA_Hapool extends HA_Single
 
     /* {{{ public Object instance() */
     /**
-     * »ñÈ¡µ¥Àý¶ÔÏóµÄÒ»¸öÊµÀý
+     * èŽ·å–å•ä¾‹å¯¹è±¡çš„ä¸€ä¸ªå®žä¾‹
      *
      * @access public static
      * @param  Mixture $mixArg
@@ -86,7 +86,7 @@ class HA_Hapool extends HA_Single
 
     /* {{{ public Boolean __destruct() */
     /**
-     * Îö¹¹º¯Êý
+     * æžæž„å‡½æ•°
      *
      * @access public
      * @return Boolean true or false
@@ -104,7 +104,7 @@ class HA_Hapool extends HA_Single
 
     /* {{{ public Resource handle() */
     /**
-     * »ñÈ¡Á¬½Ó·û
+     * èŽ·å–è¿žæŽ¥ç¬¦
      *
      * @access public
      * @return Resource
@@ -117,7 +117,7 @@ class HA_Hapool extends HA_Single
 
     /* {{{ public Mixture  random() */
     /**
-     * Ëæ»úÑ¡È¡Ò»Ì¨·þÎñÆ÷
+     * éšæœºé€‰å–ä¸€å°æœåŠ¡å™¨
      *
      * @access public static
      * @param  Array $arrAddr
@@ -152,7 +152,7 @@ class HA_Hapool extends HA_Single
 
     /* {{{ protected String  _index() */
     /**
-     * »ñÈ¡Á¬½ÓµÄidx
+     * èŽ·å–è¿žæŽ¥çš„idx
      *
      * @access protected static
      * @param  Mixture $mixArg (refferrence)
@@ -179,7 +179,7 @@ class HA_Hapool extends HA_Single
 
     /* {{{ protected Boolean _connectToMaster() */
     /**
-     * Ç¿ÖÆÁ´½ÓMASTER·þÎñÆ÷
+     * å¼ºåˆ¶é“¾æŽ¥MASTERæœåŠ¡å™¨
      *
      * @access protected
      * @return Boolean true or false
@@ -208,7 +208,7 @@ class HA_Hapool extends HA_Single
 
     /* {{{ protected Boolean _connectToSlave() */
     /**
-     * Ç¿ÖÆÁ´½ÓSLAVE·þÎñÆ÷
+     * å¼ºåˆ¶é“¾æŽ¥SLAVEæœåŠ¡å™¨
      *
      * @access protected
      * @return Boolean true or false
@@ -252,7 +252,7 @@ class HA_Hapool extends HA_Single
 
     /* {{{ protected Boolean _connect() */
     /**
-     * Á¬½Ó·þÎñ
+     * è¿žæŽ¥æœåŠ¡
      *
      * @access protected
      * @param  String  $strHost
@@ -269,7 +269,7 @@ class HA_Hapool extends HA_Single
 
     /* {{{ protected Object  _options() */
     /**
-     * ÉèÖÃ¶ÔÏóÊôÐÔ
+     * è®¾ç½®å¯¹è±¡å±žæ€§
      *
      * @access protected
      * @param  Mixture $mixArg (default null)

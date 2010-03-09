@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +--------------------------------------------------------------------+
-// | ÎÄ±¾¶ÁÈ¡Àà															|
+// | æ–‡æœ¬è¯»å–ç±»															|
 // +--------------------------------------------------------------------+
 // | Copyright (c) 2009 Baidu. Inc. All Rights Reserved					|
 // +--------------------------------------------------------------------+
@@ -17,71 +17,71 @@ if (!class_exists('HA_Object')) {
 class HA_Txtread extends HA_Object
 {
 
-    /* {{{ ³£Á¿ */
+    /* {{{ å¸¸é‡ */
 
     /**
-     * @¶ÁÈ¡»º´æ
+     * @è¯»å–ç¼“å­˜
      */
     const READ_BUFFER   = 10485760;       /**< 10M       */
 
     /**
-     * @¶ÁÈ¡·µ»ØÂë
+     * @è¯»å–è¿”å›žç 
      */
-    const READ_STATUS_ERROR = 0;          /**<  ³ö´íÁË      */
-    const READ_STATUS_MORE  = 1;          /**<  ¼ÌÐø      */
-    const READ_STATUS_EOF   = 2;          /**<  Íê³É      */
+    const READ_STATUS_ERROR = 0;          /**<  å‡ºé”™äº†      */
+    const READ_STATUS_MORE  = 1;          /**<  ç»§ç»­      */
+    const READ_STATUS_EOF   = 2;          /**<  å®Œæˆ      */
 
     /* }}} */
 
-    /* {{{ ³ÉÔ±±äÁ¿ */
+    /* {{{ æˆå‘˜å˜é‡ */
 
     /**
-     * @ÎÄ¼þÃû
+     * @æ–‡ä»¶å
      */
     private $_filename;
 
     /**
-     * @´óÐ¡
+     * @å¤§å°
      */
     private $_filesize;
 
     /**
-     * @ÎÄ¼þÓÎ±ê
+     * @æ–‡ä»¶æ¸¸æ ‡
      */
     private $_fileoff;
 
     /**
-     * @»º´æÓÎ±ê
+     * @ç¼“å­˜æ¸¸æ ‡
      */
     private $_readidx;
 
     /**
-     * @¶ÁÈ¡×´Ì¬
+     * @è¯»å–çŠ¶æ€
      */
     private $_status    = self::READ_STATUS_EOF;
 
     /**
-     * @Êý¾Ý»º´æ
+     * @æ•°æ®ç¼“å­˜
      */
     private $_caches;
 
     /**
-     * @´ý·µ»ØµÄ¶þÎ¬Êý×é
+     * @å¾…è¿”å›žçš„äºŒç»´æ•°ç»„
      */
     private $_return    = array();
 
     /**
-     * @ÁÐÓ³Éä±í
+     * @åˆ—æ˜ å°„è¡¨
      */
     private $_arrMap;
 
     /**
-     * @ÁÐÊý
+     * @åˆ—æ•°
      */
     private $_intCol;
 
     /**
-     * @IO´ÎÊý
+     * @IOæ¬¡æ•°
      */
     private $_iotimes   = 0;
 
@@ -89,7 +89,7 @@ class HA_Txtread extends HA_Object
 
     /* {{{ public Boolean __construct() */
     /**
-     * ¹¹Ôìº¯Êý
+     * æž„é€ å‡½æ•°
      *
      * @access public
      * @return Boolean true
@@ -103,7 +103,7 @@ class HA_Txtread extends HA_Object
 
     /* {{{ public Object clear() */
     /**
-     * ÇåÀí¶ÔÏó»º´æ
+     * æ¸…ç†å¯¹è±¡ç¼“å­˜
      *
      * @access public
      * @return Object $this
@@ -124,7 +124,7 @@ class HA_Txtread extends HA_Object
 
     /* {{{ public Object filename() */
     /**
-     * ÉèÖÃÎÄ¼þÃû
+     * è®¾ç½®æ–‡ä»¶å
      *
      * @access public
      * @param  String $filename
@@ -155,7 +155,7 @@ class HA_Txtread extends HA_Object
 
     /* {{{ public Object parser() */
     /**
-     * ÉèÖÃ½âÎö¶ÔÏó
+     * è®¾ç½®è§£æžå¯¹è±¡
      *
      * @access public
      * @param  Object or String $parser
@@ -180,7 +180,7 @@ class HA_Txtread extends HA_Object
 
     /* {{{ public Object setmap() */
     /**
-     * ÉèÖÃÁÐµÄÓ³Éä¹æÔò
+     * è®¾ç½®åˆ—çš„æ˜ å°„è§„åˆ™
      *
      * @access public
      * @param  Array $arrMap
@@ -199,7 +199,7 @@ class HA_Txtread extends HA_Object
 
     /* {{{ public Mixture fetch() */
     /**
-     * È¡³öÊý¾Ý
+     * å–å‡ºæ•°æ®
      *
      * @access public
      * @return Mixture
@@ -248,7 +248,7 @@ class HA_Txtread extends HA_Object
 
     /* {{{ private Interger _read_file() */
     /**
-     * ¶ÁÈ¡ÎÄ¼þÊý¾Ý
+     * è¯»å–æ–‡ä»¶æ•°æ®
      *
      * @access private
      * @param  Interger $intOff
@@ -289,7 +289,7 @@ class HA_Txtread extends HA_Object
 
     /* {{{ private Mixture  _row_filter() */
     /**
-     * ¹ýÂËÇÐ¸îºóµÄÐÐ
+     * è¿‡æ»¤åˆ‡å‰²åŽçš„è¡Œ
      *
      * @access private
      * @param  Mixture $mixVal
@@ -320,11 +320,11 @@ interface TxtRead_Parser_Interface
 {
 
     /**
-     * ÇÐ¸îÒ»¿é»º³åÊý¾Ý
+     * åˆ‡å‰²ä¸€å—ç¼“å†²æ•°æ®
      *
      * @access public
      * @param  String  $strVal (refferrence)
-     * @param  Boolean $bolAll : ÊÇ·ñ×îºóÒ»´ÎÊý¾Ý
+     * @param  Boolean $bolAll : æ˜¯å¦æœ€åŽä¸€æ¬¡æ•°æ®
      * @return Mixture
      */
     public function explode(&$strVal, $bolAll = false);
@@ -334,20 +334,20 @@ interface TxtRead_Parser_Interface
 class TxtRead_Parser_Default implements TxtRead_Parser_Interface
 {
 
-    /* {{{ ³ÉÔ±±äÁ¿ */
+    /* {{{ æˆå‘˜å˜é‡ */
 
     /**
-     * @ ÁÐ·Ö¸ô·û
+     * @ åˆ—åˆ†éš”ç¬¦
      */
     private $_strColSeg;
 
     /**
-     * @ ÐÐ·Ö¸ô·û
+     * @ è¡Œåˆ†éš”ç¬¦
      */
     private $_strEolSeg;
 
     /**
-     * @ ºöÂÔ¿ÕÁÐ
+     * @ å¿½ç•¥ç©ºåˆ—
      */
     private $_bolIgnWht;
 
@@ -355,7 +355,7 @@ class TxtRead_Parser_Default implements TxtRead_Parser_Interface
 
     /* {{{ public Boolean __construct() */
     /**
-     * ¹¹Ôìº¯Êý
+     * æž„é€ å‡½æ•°
      *
      * @access public
      * @return Boolean true or false
@@ -372,11 +372,11 @@ class TxtRead_Parser_Default implements TxtRead_Parser_Interface
 
     /* {{{ public Mixture explode() */
     /**
-     * ÇÐ¸îÒ»¿é»º³åÊý¾Ý
+     * åˆ‡å‰²ä¸€å—ç¼“å†²æ•°æ®
      *
      * @access public
      * @param  String  $strVal (refferrence)
-     * @param  Boolean $bolAll : ÊÇ·ñ×îºóÒ»´ÎÊý¾Ý
+     * @param  Boolean $bolAll : æ˜¯å¦æœ€åŽä¸€æ¬¡æ•°æ®
      * @return Mixture
      */
     public function explode(&$strVal, $bolAll = false)

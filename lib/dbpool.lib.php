@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +----------------------------------------------------------------------+
-// | Êý¾Ý¿â³Ø	    		  								   		  	  |
+// | æ•°æ®åº“æ± 	    		  								   		  	  |
 // +----------------------------------------------------------------------+
 // | Copyright (c) 2006-2008 Baidu.com                                    |
 // +----------------------------------------------------------------------+
@@ -17,29 +17,29 @@ if (!class_exists('HA_Hapool')) {
 class HA_Dbpool extends HA_Hapool
 {
 
-    /* {{{ ¾²Ì¬±äÁ¿ */
+    /* {{{ é™æ€å˜é‡ */
 
     /**
-     * @Ãû×ÖÁÐ±í
+     * @åå­—åˆ—è¡¨
      */
     private static $_arrServers = array();
 
     /* }}} */
 
-    /* {{{ ³ÉÔ±±äÁ¿ */
+    /* {{{ æˆå‘˜å˜é‡ */
 
     /**
-     * @ÊÂÎñµ÷ÓÃ´ÎÊý
+     * @äº‹åŠ¡è°ƒç”¨æ¬¡æ•°
      */
     private $_intTransCnt = 0;
 
     /**
-     * @×Ö·û¼¯
+     * @å­—ç¬¦é›†
      */
     private $_strCharset;
 
     /**
-     * @¶ÔÏó
+     * @å¯¹è±¡
      */
     private $_objRes;
 
@@ -47,7 +47,7 @@ class HA_Dbpool extends HA_Hapool
 
     /* {{{ public Object  instance() */
     /**
-     * »ñÈ¡µ¥Àý¶ÔÏóµÄÒ»¸öÊµÀý
+     * èŽ·å–å•ä¾‹å¯¹è±¡çš„ä¸€ä¸ªå®žä¾‹
      *
      * @access public static
      * @param  Mixture $mixArg
@@ -62,7 +62,7 @@ class HA_Dbpool extends HA_Hapool
 
     /* {{{ public Boolean register() */
     /**
-     * ×¢²áÒ»¸öÊý¾Ý¿â·þÎñÆ÷
+     * æ³¨å†Œä¸€ä¸ªæ•°æ®åº“æœåŠ¡å™¨
      *
      * @access public static
      * @param  String $strIdx
@@ -97,7 +97,7 @@ class HA_Dbpool extends HA_Hapool
 
     /* {{{ public Mixture __call() */
     /**
-     * ·½·¨µ÷ÓÃÖØÔØ
+     * æ–¹æ³•è°ƒç”¨é‡è½½
      *
      * @access public
      * @param  String  $method
@@ -120,7 +120,7 @@ class HA_Dbpool extends HA_Hapool
 
     /* {{{ public Mixture query() */
     /**
-     * Ö´ÐÐÒ»ÌõSQL
+     * æ‰§è¡Œä¸€æ¡SQL
      *
      * @access public
      * @param  Mixture $mixSql
@@ -177,7 +177,7 @@ class HA_Dbpool extends HA_Hapool
 
     /* {{{ public Mixture getOne() */
     /**
-     * »ñÈ¡Ò»¸ö½á¹û
+     * èŽ·å–ä¸€ä¸ªç»“æžœ
      *
      * @access public
      * @param  String $strSql
@@ -205,7 +205,7 @@ class HA_Dbpool extends HA_Hapool
 
     /* {{{ public Mixture getAll() */
     /**
-     * »ñÈ¡Ò»´Î²éÑ¯µÄËùÓÐ½á¹û
+     * èŽ·å–ä¸€æ¬¡æŸ¥è¯¢çš„æ‰€æœ‰ç»“æžœ
      *
      * @access public
      * @param  Mixture $mixRes
@@ -238,7 +238,7 @@ class HA_Dbpool extends HA_Hapool
 
     /* {{{ public Boolean begin() */
     /**
-     * ¿ªÊ¼Ò»¸öÊÂÎñ
+     * å¼€å§‹ä¸€ä¸ªäº‹åŠ¡
      *
      * @access public
      * @return Boolean true or false
@@ -260,7 +260,7 @@ class HA_Dbpool extends HA_Hapool
 
     /* {{{ public Boolean commit() */
     /**
-     * Ìá½»Ò»¸öÊÂÎñ
+     * æäº¤ä¸€ä¸ªäº‹åŠ¡
      *
      * @access public
      * @return Boolean true or false
@@ -278,7 +278,7 @@ class HA_Dbpool extends HA_Hapool
 
     /* {{{ public Boolean rollback() */
     /**
-     * »Ø¹öÒ»¸öÊÂÎñ
+     * å›žæ»šä¸€ä¸ªäº‹åŠ¡
      *
      * @access public
      * @return Boolean true or false
@@ -296,7 +296,7 @@ class HA_Dbpool extends HA_Hapool
 
     /* {{{ public String  escape() */
     /**
-     * SQL°²È«¹ýÂËº¯Êý
+     * SQLå®‰å…¨è¿‡æ»¤å‡½æ•°
      *
      * @access public
      * @param  String $strVal
@@ -320,7 +320,7 @@ class HA_Dbpool extends HA_Hapool
 
     /* {{{ public String  version() */
     /**
-     * ·µ»ØMySQL°æ±¾ºÅ
+     * è¿”å›žMySQLç‰ˆæœ¬å·
      *
      * @access public
      * @param  Integer $intDep
@@ -348,7 +348,7 @@ class HA_Dbpool extends HA_Hapool
 
     /* {{{ protected Object  _options() */
     /**
-     * ÉèÖÃ¶ÔÏóÊôÐÔ
+     * è®¾ç½®å¯¹è±¡å±žæ€§
      *
      * @access protected
      * @param  Mixture $mixArg (default null)
@@ -371,7 +371,7 @@ class HA_Dbpool extends HA_Hapool
 
     /* {{{ protected Boolean _connect() */
     /**
-     * Á¬½Ó·þÎñ
+     * è¿žæŽ¥æœåŠ¡
      *
      * @access protected
      * @param  String  $strHost
@@ -401,7 +401,7 @@ class HA_Dbpool extends HA_Hapool
 
     /* {{{ private Boolean _disconnect() */
     /**
-     * ¹Ø±ÕÁ¬½Ó
+     * å…³é—­è¿žæŽ¥
      *
      * @access private
      * @return Boolean true
@@ -418,7 +418,7 @@ class HA_Dbpool extends HA_Hapool
 
     /* {{{ private Boolean _isManip() */
     /**
-     * ÅÐ¶ÏÒ»ÌõSQLÊÇ·ñÐ´SQL
+     * åˆ¤æ–­ä¸€æ¡SQLæ˜¯å¦å†™SQL
      *
      * @access private static
      * @param  String $strSql
@@ -437,7 +437,7 @@ class HA_Dbpool extends HA_Hapool
 
     /* {{{ private Boolean _verify_dns() */
     /**
-     * Ð£Ñé´«ÈëµÄDNSÅäÖÃÊÇ·ñÕýÈ·
+     * æ ¡éªŒä¼ å…¥çš„DNSé…ç½®æ˜¯å¦æ­£ç¡®
      *
      * @access private static
      * @param [in/out] $arrDns   : &
@@ -481,20 +481,20 @@ class HA_Dbpool extends HA_Hapool
 }
 
 /**
- * @MySQL²Ù×÷Àà
+ * @MySQLæ“ä½œç±»
  */
 class HA_Db_Mysql extends HA_Object
 {
 
-    /* {{{ ³ÉÔ±±äÁ¿ */
+    /* {{{ æˆå‘˜å˜é‡ */
 
     /**
-     * @Á¬½Ó·û
+     * @è¿žæŽ¥ç¬¦
      */
     private $_resHandle;
 
     /**
-     * @°æ±¾ºÅ
+     * @ç‰ˆæœ¬å·
      */
     private $_strVersion;
 
@@ -502,7 +502,7 @@ class HA_Db_Mysql extends HA_Object
 
     /* {{{ public Mixture query() */
     /**
-     * Ö´ÐÐquery ·½·¨
+     * æ‰§è¡Œquery æ–¹æ³•
      *
      * @access public
      * @param  String $query
@@ -516,7 +516,7 @@ class HA_Db_Mysql extends HA_Object
 
     /* {{{ public Mixture connect() */
     /**
-     * Á¬½Ó
+     * è¿žæŽ¥
      *
      * @param  String  $strHost
      * @param  Integer $intPort
@@ -538,7 +538,7 @@ class HA_Db_Mysql extends HA_Object
 
     /* {{{ public Boolean charset() */
     /**
-     * ÉèÖÃ×Ö·û¼¯
+     * è®¾ç½®å­—ç¬¦é›†
      *
      * @access public
      * @param  String $charset
@@ -557,7 +557,7 @@ class HA_Db_Mysql extends HA_Object
 
     /* {{{ public String  version() */
     /**
-     * »ñÈ¡MySQL°æ±¾ºÅ
+     * èŽ·å–MySQLç‰ˆæœ¬å·
      *
      * @access public
      * @return String
@@ -574,7 +574,7 @@ class HA_Db_Mysql extends HA_Object
 
     /* {{{ public String  escape() */
     /**
-     * SQL×¢Èë×ªÒå
+     * SQLæ³¨å…¥è½¬ä¹‰
      *
      * @access public
      * @param  String $strVal
@@ -592,7 +592,7 @@ class HA_Db_Mysql extends HA_Object
 
     /* {{{ public Mixture fetch() */
     /**
-     * »ñÈ¡²éÑ¯¼ÇÂ¼
+     * èŽ·å–æŸ¥è¯¢è®°å½•
      *
      * @access public
      * @param  Resource $res
@@ -615,7 +615,7 @@ class HA_Db_Mysql extends HA_Object
 
     /* {{{ public Integer rows() */
     /**
-     * ·µ»Ø½á¹û¼¯ÐÐÊý
+     * è¿”å›žç»“æžœé›†è¡Œæ•°
      *
      * @access public
      * @param  Resource $res
@@ -633,7 +633,7 @@ class HA_Db_Mysql extends HA_Object
 
     /* {{{ public Integer affected() */
     /**
-     * »ñÈ¡¸üÐÂµÄÐÐÊý
+     * èŽ·å–æ›´æ–°çš„è¡Œæ•°
      *
      * @access public
      * @return Integer
@@ -646,7 +646,7 @@ class HA_Db_Mysql extends HA_Object
 
     /* {{{ public Boolean free() */
     /**
-     * ÊÍ·Å²éÑ¯½á¹û¼¯
+     * é‡Šæ”¾æŸ¥è¯¢ç»“æžœé›†
      *
      * @access public
      * @param  Resource $res
@@ -664,7 +664,7 @@ class HA_Db_Mysql extends HA_Object
 
     /* {{{ public Boolean begin() */
     /**
-     * ¿ªÊ¼Ò»¸öÊÂÎñ
+     * å¼€å§‹ä¸€ä¸ªäº‹åŠ¡
      *
      * @access public
      * @return Boolean true or false
@@ -680,7 +680,7 @@ class HA_Db_Mysql extends HA_Object
 
     /* {{{ public Boolean commit() */
     /**
-     * Ìá½»Ò»¸öÊÂÎñ
+     * æäº¤ä¸€ä¸ªäº‹åŠ¡
      *
      * @access public
      * @return Boolean true or false
@@ -696,7 +696,7 @@ class HA_Db_Mysql extends HA_Object
 
     /* {{{ public Boolean rollback() */
     /**
-     * »Ø¹öÒ»¸öÊÂÎñ
+     * å›žæ»šä¸€ä¸ªäº‹åŠ¡
      *
      * @access public
      * @return Boolean true or false
@@ -712,7 +712,7 @@ class HA_Db_Mysql extends HA_Object
 
     /* {{{ public Integer lastId() */
     /**
-     * »ñÈ¡¸ø¶¨SQL²úÉúµÄ²åÈëID
+     * èŽ·å–ç»™å®šSQLäº§ç”Ÿçš„æ’å…¥ID
      *
      * @access public
      * @return Integer or Boolean false
@@ -725,7 +725,7 @@ class HA_Db_Mysql extends HA_Object
 
     /* {{{ public Mixture field() */
     /**
-     * »ñÈ¡±í½á¹¹
+     * èŽ·å–è¡¨ç»“æž„
      *
      * @access public
      * @param  String $strTab
@@ -763,7 +763,7 @@ class HA_Db_Mysql extends HA_Object
 
     /* {{{ public Mixture index() */
     /**
-     * ·ÖÎö±íË÷Òý
+     * åˆ†æžè¡¨ç´¢å¼•
      *
      * @access public
      * @param  String $strTab
@@ -800,7 +800,7 @@ class HA_Db_Mysql extends HA_Object
 
     /* {{{ public Boolean disconnect() */
     /**
-     * ¹Ø±ÕÁ¬½Ó
+     * å…³é—­è¿žæŽ¥
      *
      * @access public
      * @return Boolean true
