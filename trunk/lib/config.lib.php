@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +------------------------------------------------------------------------+
-// | ÅäÖÃ¶ÁÈ¡Àà																|
+// | é…ç½®è¯»å–ç±»																|
 // +------------------------------------------------------------------------+
 // | Copyright (c) 2009 Baidu. Inc. All Rights Reserved						|
 // +------------------------------------------------------------------------+
@@ -17,24 +17,24 @@ if (!class_exists('HA_Single')) {
 class HA_Config extends HA_Single
 {
 
-    /* {{{ ³ÉÔ±±äÁ¿ */
+    /* {{{ æˆå‘˜å˜é‡ */
 
     /**
-     * @ÅäÖÃÏî
+     * @é…ç½®é¡¹
      */
     private $_arrOpt = array();
 
     /**
-     * @ÊÇ·ñÒÑ¾­¼ÓÔØ
+     * @æ˜¯å¦å·²ç»åŠ è½½
      */
     private $_isload = false;
 
     /* }}} */
 
-    /* {{{ ¾²Ì¬±äÁ¿ */
+    /* {{{ é™æ€å˜é‡ */
 
     /**
-     * @×¢²áµÄ×ÊÔ´
+     * @æ³¨å†Œçš„èµ„æº
      */
     private static $_arrRes = array();
 
@@ -42,7 +42,7 @@ class HA_Config extends HA_Single
 
     /* {{{ public static Object  instance() */
     /**
-     * »ñÈ¡µ¥Àý¶ÔÏóµÄÒ»¸öÊµÀý
+     * èŽ·å–å•ä¾‹å¯¹è±¡çš„ä¸€ä¸ªå®žä¾‹
      *
      * @access public static
      * @param  Mixture $mixArg
@@ -57,7 +57,7 @@ class HA_Config extends HA_Single
 
     /* {{{ public static Boolean bind() */
     /**
-     * ×¢²áÅäÖÃ×ÊÔ´
+     * æ³¨å†Œé…ç½®èµ„æº
      *
      * @access public static
      * @param  String $strKey
@@ -90,7 +90,7 @@ class HA_Config extends HA_Single
 
     /* {{{ public Mixture get() */
     /**
-     * »ñÈ¡ÅäÖÃÏîÖµ
+     * èŽ·å–é…ç½®é¡¹å€¼
      *
      * @access public
      * @param  String  $strKey
@@ -117,7 +117,7 @@ class HA_Config extends HA_Single
 
     /* {{{ protected Boolean _load() */
     /**
-     * ¼ÓÔØÅäÖÃÎÄ¼þ
+     * åŠ è½½é…ç½®æ–‡ä»¶
      *
      * @access protected
      * @return Boolean true or false
@@ -147,9 +147,9 @@ class HA_Config extends HA_Single
 class HA_Config_Parser_Ini extends HA_Object
 {
 
-    /* {{{ ³ÉÔ±±äÁ¿ */
+    /* {{{ æˆå‘˜å˜é‡ */
     /**
-     * @INIÎÄ¼þÂ·¾¶
+     * @INIæ–‡ä»¶è·¯å¾„
      */
     private $_strRes;
 
@@ -157,7 +157,7 @@ class HA_Config_Parser_Ini extends HA_Object
 
     /* {{{ public Boolean __construct() */
     /**
-     * ¹¹Ôìº¯Êý
+     * æž„é€ å‡½æ•°
      *
      * @access public
      * @param  String $strRes
@@ -172,7 +172,7 @@ class HA_Config_Parser_Ini extends HA_Object
 
     /* {{{ public Mixture parse() */
     /**
-     * ½âÎöÅäÖÃÊý¾Ý
+     * è§£æžé…ç½®æ•°æ®
      *
      * @access public
      * @return Mixture

@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +------------------------------------------------------------------------+
-// | ¿ØÖÆÆ÷ĞéÄâÀà															|
+// | æ§åˆ¶å™¨è™šæ‹Ÿç±»															|
 // +------------------------------------------------------------------------+
 // | Copyright (c) 2009 Baidu. Inc. All Rights Reserved						|
 // +------------------------------------------------------------------------+
@@ -17,25 +17,25 @@ if (!class_exists('HA_Object')) {
 abstract class HA_Control_Abstract extends HA_Object
 {
 
-    /* {{{ ¾²Ì¬±äÁ¿ */
+    /* {{{ é™æ€å˜é‡ */
     /**
-     * @ÊôĞÔÁĞ±í
+     * @å±æ€§åˆ—è¡¨
      */
     protected static $_arrOpt = array(
         'theme' => 'default',
     );
 
     /**
-     * @Ó¦ÓÃÂ·¾¶
+     * @åº”ç”¨è·¯å¾„
      */
     protected static $_appDir;
 
     /* }}} */
 
-    /* {{{ ³ÉÔ±±äÁ¿ */
+    /* {{{ æˆå‘˜å˜é‡ */
 
     /**
-     * @±äÁ¿ÁĞ±í
+     * @å˜é‡åˆ—è¡¨
      */
     protected $_arrVal = array();
 
@@ -43,7 +43,7 @@ abstract class HA_Control_Abstract extends HA_Object
 
     /* {{{ public Boolean __construct() */
     /**
-     * ¹¹Ôìº¯Êı
+     * æ„é€ å‡½æ•°
      *
      * @access public
      * @param  Mixture $arrOpt
@@ -58,7 +58,7 @@ abstract class HA_Control_Abstract extends HA_Object
 
     /* {{{ public Object  approot() */
     /**
-     * ÉèÖÃapproot
+     * è®¾ç½®approot
      *
      * @access public
      * @return Object $this
@@ -72,7 +72,7 @@ abstract class HA_Control_Abstract extends HA_Object
 
     /* {{{ public Mixture excute() */
     /**
-     * Ò³ÃæÕ¹ÏÖ
+     * é¡µé¢å±•ç°
      *
      * @access public
      * @return Mixture
@@ -117,7 +117,7 @@ abstract class HA_Control_Abstract extends HA_Object
 
     /* {{{ public Object  assign() */
     /**
-     * ÎªÊä³öÒ³Ãæ·ÖÅäÊı¾İ
+     * ä¸ºè¾“å‡ºé¡µé¢åˆ†é…æ•°æ®
      *
      * @access public
      * @param  String  $strKey
@@ -136,7 +136,7 @@ abstract class HA_Control_Abstract extends HA_Object
 
     /* {{{ public String  url() */
     /**
-     * ¹¹ÔìURL
+     * æ„é€ URL
      *
      * @access public
      * @param  String  $strAct
@@ -154,7 +154,7 @@ abstract class HA_Control_Abstract extends HA_Object
 
     /* {{{ public String  multipage() */
     /**
-     * ¼ÆËã·ÖÒ³Á´½Ó
+     * è®¡ç®—åˆ†é¡µé“¾æ¥
      *
      * @access public static
      */
@@ -206,7 +206,7 @@ abstract class HA_Control_Abstract extends HA_Object
 
     /* {{{ protected Boolean _loadModel() */
     /**
-     * ¼ÓÔØModelÎÄ¼ş
+     * åŠ è½½Modelæ–‡ä»¶
      *
      * @access protected
      * @return Boolean true or false
@@ -229,7 +229,7 @@ abstract class HA_Control_Abstract extends HA_Object
 
     /* {{{ protected Boolean _before_excute() */
     /**
-     * Ö´ĞĞÇ°´¥·¢Æ÷
+     * æ‰§è¡Œå‰è§¦å‘å™¨
      *
      * @access protected
      * @return Boolean true or false
@@ -241,7 +241,7 @@ abstract class HA_Control_Abstract extends HA_Object
 
     /* {{{ protected Boolean _after_excute() */
     /**
-     * Ö´ĞĞºó´¥·¢Æ÷
+     * æ‰§è¡Œåè§¦å‘å™¨
      *
      * @access protected
      * @return Boolean true or false
@@ -253,7 +253,7 @@ abstract class HA_Control_Abstract extends HA_Object
 
     /* {{{ protected Boolean _actionIndex() */
     /**
-     * Ä¬ÈÏaction
+     * é»˜è®¤action
      *
      * @access protected
      * @return Boolean true or false
@@ -265,7 +265,7 @@ abstract class HA_Control_Abstract extends HA_Object
 
     /* {{{ protected Boolean _undefined_action() */
     /**
-     * Î´¶¨ÒåµÄaction´¦Àí·½·¨
+     * æœªå®šä¹‰çš„actionå¤„ç†æ–¹æ³•
      *
      * @access protected
      * @param  String $strAct

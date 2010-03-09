@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +------------------------------------------------------------------------+
-// | Í³Ò»Èë¿Ú³ÌÐò															|
+// | ç»Ÿä¸€å…¥å£ç¨‹åº															|
 // +------------------------------------------------------------------------+
 // | Copyright (c) 2009 Baidu. Inc. All Rights Reserved						|
 // +------------------------------------------------------------------------+
@@ -31,9 +31,9 @@ require_once(HA_LIB_PATH . '/hapage.lib.php');
 class HA_Router extends HA_Single
 {
 
-    /* {{{ ¾²Ì¬±äÁ¿ */
+    /* {{{ é™æ€å˜é‡ */
     /**
-     * @lib¿âÂ·¾¶
+     * @libåº“è·¯å¾„
      */
     protected static $_baseDir;
 
@@ -41,7 +41,7 @@ class HA_Router extends HA_Single
 
     /* {{{ public static Object instance() */
     /**
-     * »ñÈ¡µ¥Àý¶ÔÏóµÄÒ»¸öÊµÀý
+     * èŽ·å–å•ä¾‹å¯¹è±¡çš„ä¸€ä¸ªå®žä¾‹
      *
      * @access public static
      * @param  Mixture $mixArg
@@ -56,7 +56,7 @@ class HA_Router extends HA_Single
 
     /* {{{ public Boolean dispatch() */
     /**
-     * ·ÖÅäÇëÇó
+     * åˆ†é…è¯·æ±‚
      *
      * @access public
      * @return Boolean true or false
@@ -93,7 +93,7 @@ class HA_Router extends HA_Single
 
     /* {{{ protected Object _options() */
     /**
-     * ÉèÖÃ¶ÔÏóÊôÐÔ
+     * è®¾ç½®å¯¹è±¡å±žæ€§
      *
      * @access protected
      * @param  Mixture $mixArg (default null)
@@ -108,12 +108,12 @@ class HA_Router extends HA_Single
         }
 
         /**
-         * @°ó¶¨Ä¬ÈÏÓïÑÔ°ü
+         * @ç»‘å®šé»˜è®¤è¯­è¨€åŒ…
          */
         HA_Gettext::bind('', self::$_baseDir . '/lang');
 
         /**
-         * @°ó¶¨Ä¬ÈÏÅäÖÃÎÄ¼þ
+         * @ç»‘å®šé»˜è®¤é…ç½®æ–‡ä»¶
          */
         HA_Config::bind('', 'ini', self::$_baseDir . '/etc/config.etc.ini');
 
@@ -143,7 +143,7 @@ class HA_Router extends HA_Single
 
     /* {{{ protected Boolean _undefined_control() */
     /**
-     * ¿ØÖÆÆ÷Î´¶¨Òå
+     * æŽ§åˆ¶å™¨æœªå®šä¹‰
      *
      * @access protected
      * @param  String $control

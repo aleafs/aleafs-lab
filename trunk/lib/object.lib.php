@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +------------------------------------------------------------------------+
-// | HA_Lib ¶ÔÏó»ùÀà						    							|
+// | HA_Lib å¯¹è±¡åŸºç±»						    							|
 // +------------------------------------------------------------------------+
 // | Copyright (c) 2009 Baidu. Inc. All Rights Reserved						|
 // +------------------------------------------------------------------------+
@@ -17,30 +17,30 @@ if (!defined('HALIB_OBJECT')) {
 abstract class HA_Object
 {
 
-    /* {{{ ³ÉÔ±±äÁ¿ */
+    /* {{{ æˆå‘˜å˜é‡ */
 
     /**
-     * @´íÎóºÅ
+     * @é”™è¯¯å·
      */
     private $_intLastErrNo;
 
     /**
-     * @´íÎóÃèÊö
+     * @é”™è¯¯æè¿°
      */
     private $_strLastError;
 
     /**
-     * @½ø³ÌºÅ
+     * @è¿›ç¨‹å·
      */
     protected static $_intPid;
 
     /**
-     * @ÈÕÖ¾¶ÔÏó
+     * @æ—¥å¿—å¯¹è±¡
      */
     protected static $_objLog;
 
     /**
-     * @LIB¿âÂ·¾¶
+     * @LIBåº“è·¯å¾„
      */
     protected static $_libDir;
 
@@ -48,7 +48,7 @@ abstract class HA_Object
 
     /* {{{ public static String  getclass() */
     /**
-     * »ñÈ¡Ò¶×ÓÀàµÄÀàÃû
+     * èŽ·å–å¶å­ç±»çš„ç±»å
      *
      * @access public static
      * @param  String $strFat (default null)
@@ -76,7 +76,7 @@ abstract class HA_Object
 
     /* {{{ public static String  realpath() */
     /**
-     * ·µ»ØÒ»¸ö¾ø¶ÔÂ·¾¶Ãû
+     * è¿”å›žä¸€ä¸ªç»å¯¹è·¯å¾„å
      *
      * @access public static
      * @param  String $strVal
@@ -108,7 +108,7 @@ abstract class HA_Object
 
     /* {{{ public static Boolean import() */
     /**
-     * ¼ÓÔØÎÄ¼þ
+     * åŠ è½½æ–‡ä»¶
      *
      * @access public static
      * @param  String $strDir
@@ -142,7 +142,7 @@ abstract class HA_Object
 
     /* {{{ public static Boolean unlink() */
     /**
-     * ÇåÀí¹ýÆÚÎÄ¼þ
+     * æ¸…ç†è¿‡æœŸæ–‡ä»¶
      *
      * @access protected
      * @param  String  $strDir
@@ -196,7 +196,7 @@ abstract class HA_Object
 
     /* {{{ public static Mixture htmlescape() */
     /**
-     * ¶ÔÊä³ö½øÐÐHTML×ªÒå
+     * å¯¹è¾“å‡ºè¿›è¡ŒHTMLè½¬ä¹‰
      *
      * @access public static
      * @param  Mixture $mixVal
@@ -223,7 +223,7 @@ abstract class HA_Object
 
     /* {{{ public static String  userip() */
     /**
-     * »ñÈ¡ÓÃ»§IP
+     * èŽ·å–ç”¨æˆ·IP
      *
      * @access public static
      * @param  Boolean $bolInt (default false)
@@ -252,7 +252,7 @@ abstract class HA_Object
 
     /* {{{ protected Object  _init()  */
     /**
-     * ¶ÔÏó³õÊ¼·½·¨
+     * å¯¹è±¡åˆå§‹æ–¹æ³•
      *
      * @access protected
      * @return Object $this
@@ -275,7 +275,7 @@ abstract class HA_Object
 
     /* {{{ protected static Boolean _notice() */
     /**
-     * NOTICEÈÕÖ¾
+     * NOTICEæ—¥å¿—
      *
      * @access protected static
      * @return Boolean true or false
@@ -289,12 +289,12 @@ abstract class HA_Object
 
     /* {{{ protected Boolean _error() */
     /**
-     * Å×³öÒ»¸ö´íÎóÐÅÏ¢
+     * æŠ›å‡ºä¸€ä¸ªé”™è¯¯ä¿¡æ¯
      *
      * @access protected
-     * @param  Integer $intErrNo ´íÎóºÅ
-     * @param  String  $strError ´íÎóÃèÊö
-     * @param  Boolean $bolHalt  ÊÇ·ñÖÕÖ¹ default false
+     * @param  Integer $intErrNo é”™è¯¯å·
+     * @param  String  $strError é”™è¯¯æè¿°
+     * @param  Boolean $bolHalt  æ˜¯å¦ç»ˆæ­¢ default false
      * @return Boolean true or false
      */
     protected function _error($intErrNo, $strError, $bolHalt = false)
@@ -322,7 +322,7 @@ abstract class HA_Object
 
     /* {{{ private static Boolean _log() */
     /**
-     * Ð´ÈëÈÕÖ¾¼ÇÂ¼
+     * å†™å…¥æ—¥å¿—è®°å½•
      *
      * @access private static
      * @return Boolean true  or false

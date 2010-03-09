@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +------------------------------------------------------------------------+
-// | ÉÏÏÂÎÄ»·¾³																|
+// | ä¸Šä¸‹æ–‡ç¯å¢ƒ																|
 // +------------------------------------------------------------------------+
 // | Copyright (c) 2009 Baidu. Inc. All Rights Reserved						|
 // +------------------------------------------------------------------------+
@@ -17,15 +17,15 @@ if (!class_exists('HA_Single')) {
 class HA_Context extends HA_Single
 {
 
-    /* {{{ ¾²Ì¬±äÁ¿ */
+    /* {{{ é™æ€å˜é‡ */
 
     /**
-     * @²ÎÊıÊı×é
+     * @å‚æ•°æ•°ç»„
      */
     private static $_arrContext = array();
 
     /**
-     * @ÊôĞÔ²ÎÊı
+     * @å±æ€§å‚æ•°
      */
     private static $_arrOption  = array();
 
@@ -45,7 +45,7 @@ class HA_Context extends HA_Single
     private static $_webRoot    = null;
 
     /**
-     * @ÓòÃû¹ú¼Òºó×º
+     * @åŸŸåå›½å®¶åç¼€
      */
     private static $_arrNation1 = array(
         'ac','ad','ae','af','ag','ai','al','am','an','ao','aq','ar','as','at','au','aw','ax','az',
@@ -76,7 +76,7 @@ class HA_Context extends HA_Single
     );
 
     /**
-     * @¹ú¼ÒÓòÃû¶ş¼¶ºó×º
+     * @å›½å®¶åŸŸåäºŒçº§åç¼€
      */
     private static $_arrNation2 = array(
         'cn' => 'ac|ah|bj|cq|fj|gd|gs|gz|gx|ha|hb|he|hi|hl|hn|jl|js|jx|ln|nm|nx|qh|sc|sd|sh|sn|sx|tj|tw|xj|xz|yn|zj',
@@ -93,7 +93,7 @@ class HA_Context extends HA_Single
 
     /* {{{ public static Object instance() */
     /**
-     * »ñÈ¡µ¥Àı¶ÔÏóµÄÒ»¸öÊµÀı
+     * è·å–å•ä¾‹å¯¹è±¡çš„ä¸€ä¸ªå®ä¾‹
      *
      * @access public static
      * @param  Mixture $mixArg
@@ -108,7 +108,7 @@ class HA_Context extends HA_Single
 
     /* {{{ public String referer() */
     /**
-     * »ñÈ¡·ÃÎÊREFER
+     * è·å–è®¿é—®REFER
      *
      * @access public
      * @return String
@@ -121,7 +121,7 @@ class HA_Context extends HA_Single
 
     /* {{{ public String method() */
     /**
-     * »ñÈ¡ÇëÇó·½·¨
+     * è·å–è¯·æ±‚æ–¹æ³•
      *
      * @access public
      * @return String
@@ -134,7 +134,7 @@ class HA_Context extends HA_Single
 
     /* {{{ public String idname() */
     /**
-     * ·µ»Ø idname ÊôĞÔ
+     * è¿”å› idname å±æ€§
      *
      * @access public
      * @return String
@@ -147,7 +147,7 @@ class HA_Context extends HA_Single
 
     /* {{{ public Object setid() */
     /**
-     * ÉèÖÃÊÇ·ñĞ´Èëidname
+     * è®¾ç½®æ˜¯å¦å†™å…¥idname
      *
      * @access public
      * @param  Boolean $bolSet
@@ -162,7 +162,7 @@ class HA_Context extends HA_Single
 
     /* {{{ public String domain() */
     /**
-     * »ñÈ¡Ö÷ÓòÃû
+     * è·å–ä¸»åŸŸå
      *
      * @access public static
      * @param  String $strUrl (default null)
@@ -209,7 +209,7 @@ class HA_Context extends HA_Single
 
     /* {{{ public String webroot() */
     /**
-     * »ñÈ¡ webroot
+     * è·å– webroot
      *
      * @access public
      * @return String
@@ -241,7 +241,7 @@ class HA_Context extends HA_Single
 
     /* {{{ public String session() */
     /**
-     * »ñÈ¡sessionÖĞµÄĞÅÏ¢
+     * è·å–sessionä¸­çš„ä¿¡æ¯
      *
      * @access public
      * @param  String $strKey
@@ -256,7 +256,7 @@ class HA_Context extends HA_Single
 
     /* {{{ public String cookie() */
     /**
-     * »ñÈ¡cookieÖĞµÄĞÅÏ¢
+     * è·å–cookieä¸­çš„ä¿¡æ¯
      *
      * @access public
      * @param  String $strKey
@@ -271,7 +271,7 @@ class HA_Context extends HA_Single
 
     /* {{{ public String script() */
     /**
-     * ·µ»Øµ±Ç°Ö´ĞĞ½Å±¾Ãû³Æ
+     * è¿”å›å½“å‰æ‰§è¡Œè„šæœ¬åç§°
      *
      * @access public
      * @return String
@@ -284,7 +284,7 @@ class HA_Context extends HA_Single
 
     /* {{{ public Mixture get() */
     /**
-     * »ñÈ¡ÄÚÈİ
+     * è·å–å†…å®¹
      *
      * @access public
      * @param  String $strKey
@@ -299,7 +299,7 @@ class HA_Context extends HA_Single
 
     /* {{{ public Mixture __get() */
     /**
-     * ·ÃÎÊÒ»¸öË½ÓĞ±äÁ¿µÄ·½·¨
+     * è®¿é—®ä¸€ä¸ªç§æœ‰å˜é‡çš„æ–¹æ³•
      *
      * @access protected
      * @param  String  $strKey
@@ -313,7 +313,7 @@ class HA_Context extends HA_Single
 
     /* {{{ public Mixture strip() */
     /**
-     * ¹ıÂË×ªÒåºóµÄ×Ö·û´®
+     * è¿‡æ»¤è½¬ä¹‰åçš„å­—ç¬¦ä¸²
      *
      * @access public static
      * @param  Mixture $mixVal
@@ -343,7 +343,7 @@ class HA_Context extends HA_Single
 
     /* {{{ protected Object _options() */
     /**
-     * ÉèÖÃ¶ÔÏóÊôĞÔ
+     * è®¾ç½®å¯¹è±¡å±æ€§
      *
      * @access protected
      * @param  Mixture $mixArg (default null)
@@ -358,7 +358,7 @@ class HA_Context extends HA_Single
 
     /* {{{ protected String _index() */
     /**
-     * ¹¹Ôìµ¥ÀıÄ£Ê½¶ÔÏóË÷Òı
+     * æ„é€ å•ä¾‹æ¨¡å¼å¯¹è±¡ç´¢å¼•
      *
      * @access protected static
      * @return String
@@ -371,7 +371,7 @@ class HA_Context extends HA_Single
 
     /* {{{ private Object  _init_option() */
     /**
-     * ³õÊ¼»¯option
+     * åˆå§‹åŒ–option
      *
      * @access private
      * @param  Array $arrOpt
@@ -417,7 +417,7 @@ class HA_Context extends HA_Single
 
     /* {{{ private Object  _init_context() */
     /**
-     * ³õÊ¼»¯ÉÏÏÂÎÄÊı¾İ
+     * åˆå§‹åŒ–ä¸Šä¸‹æ–‡æ•°æ®
      *
      * @access private
      * @TODO : urldecode ?
@@ -454,7 +454,7 @@ class HA_Context extends HA_Single
 
     /* {{{ private Boolean _idname_verify() */
     /**
-     * Ğ£Ñé idname ÊÇ·ñºÏ·¨
+     * æ ¡éªŒ idname æ˜¯å¦åˆæ³•
      *
      * @access private static
      * @param  String $strVal
@@ -477,7 +477,7 @@ class HA_Context extends HA_Single
 
     /* {{{ private String  _idname_create() */
     /**
-     * Éú³É idname 
+     * ç”Ÿæˆ idname 
      *
      * @access private static
      * @return String
@@ -502,7 +502,7 @@ class HA_Context extends HA_Single
 
     /* {{{ private Integer _idname_encode() */
     /**
-     * ¼ÆËã CRC32
+     * è®¡ç®— CRC32
      *
      * @access private static
      * @param  String
@@ -522,7 +522,7 @@ class HA_Context extends HA_Single
 
     /* {{{ private Mixture _parse_opt() */
     /**
-     * ½âÎöÃüÁîĞĞ²ÎÊı
+     * è§£æå‘½ä»¤è¡Œå‚æ•°
      *
      * @access private static
      * @return Mixture
