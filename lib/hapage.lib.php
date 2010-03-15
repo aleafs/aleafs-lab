@@ -263,10 +263,10 @@ class HA_Hapage extends HA_Object
      */
     private static function _init_path()
     {
-        self::$_tplPath = sprintf('%s/themes', HA_APP_ROOT);
+        self::$_tplPath = sprintf('%s/theme', HA_APP_ROOT);
 
         if (!defined('TEMPLATE_OBJ_PATH')) {
-            self::$_objPath = sprintf('%s/var/themes', HA_APP_ROOT);
+            self::$_objPath = sprintf('%s/var/theme', HA_APP_ROOT);
         } else {
             self::$_objPath = TEMPLATE_OBJ_PATH;
         }
