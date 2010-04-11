@@ -334,14 +334,14 @@ abstract class Db
 		return sprintf($comma ? "'%s'" : '%s', addslashes($value));
 	}
 
-	abstract protected function _connect();
-	abstract protected function _disconnect($link);
-	abstract protected function _query($sql);
-	abstract protected function _begin();
-	abstract protected function _commit();
-	abstract protected function _rollback();
-	abstract protected function _fetch($res);
-	abstract protected function _error($res);
+	abstract private function _connect();
+	abstract private function _disconnect($link);
+	abstract private function _query($sql);
+	abstract private function _begin();
+	abstract private function _commit();
+	abstract private function _rollback();
+	abstract private function _fetch($res);
+	abstract private function _error($res);
 
 }
 
