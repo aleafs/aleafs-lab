@@ -35,39 +35,39 @@ class Sqlite extends Db
         return sqlite_fetch_all($this->datares, SQLITE_ASSOC);
     }
 
-	private function _connect()
+	protected function _connect()
 	{
         $this->link = sqlite_open($this->file, $this->mode, $error);
     }
 
-    private function _disconnect($link)
+    protected function _disconnect($link)
     {
         return sqlite_close($link);
     }
 
-    private function _query($sql)
+    protected function _query($sql)
     {
         return sqlite_query($this->link, $sql);
     }
 
-    private function _begin()
+    protected function _begin()
     {
     }
 
-    private function _commit()
+    protected function _commit()
     {
     }
 
-    private function _rollback()
+    protected function _rollback()
     {
     }
 
-    private function _fetch($res)
+    protected function _fetch($res)
     {
         return sqlite_fetch_array($res, SQLITE_ASSOC);
     }
 
-    private function _error()
+    protected function _error()
     {
         $code = sqlite_last_error($this->link);
         if (!$code) {
@@ -78,6 +78,11 @@ class Sqlite extends Db
             'code'    => $code,
             'message' => sqlite_error_string($code),
         );
+    }
+
+    protected static function _escape($string)
+    {
+        return sqlite_escape_string($string);
     }
 
 }

@@ -323,7 +323,7 @@ abstract class Db
 	protected static function escape($value, $comma = true)
 	{
 		if (is_array($value)) {
-			$value	= array_unique(array_map('addslashes', $value));
+			$value	= array_unique(array_map(array(self, '_escape'), $value));
 			if ($comma) {
 				return sprintf("'%s'", implode("','", $value));
 			} else {
@@ -331,17 +331,22 @@ abstract class Db
 			}
 		}
 
-		return sprintf($comma ? "'%s'" : '%s', addslashes($value));
-	}
+		return sprintf($comma ? "'%s'" : '%s', self::_escape($value));
+    }
 
-	abstract private function _connect();
-	abstract private function _disconnect($link);
-	abstract private function _query($sql);
-	abstract private function _begin();
-	abstract private function _commit();
-	abstract private function _rollback();
-	abstract private function _fetch($res);
-	abstract private function _error($res);
+    private static function _escape($string)
+    {
+        return addslashes($string);
+    }
+
+	abstract protected function _connect();
+	abstract protected function _disconnect($link);
+	abstract protected function _query($sql);
+	abstract protected function _begin();
+	abstract protected function _commit();
+	abstract protected function _rollback();
+	abstract protected function _fetch($res);
+	abstract protected function _error($res);
 
 }
 
