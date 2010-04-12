@@ -10,7 +10,7 @@
 //
 // $Id$
 //
-//
+
 class Sqlite extends Db
 {
 

@@ -28,6 +28,8 @@ abstract class Db
 
 	/* }}} */
 
+    /* {{{ 静态变量 */
+
 	private static $eqs	= array(
 		self::EQ		=> '%s = %s',
 		self::NE		=> '%s != %s',
@@ -39,7 +41,8 @@ abstract class Db
 		self::NOTIN		=> '%s NOT IN (%s)',
 		self::LIKE		=> "%s LIKE '%%%s%%'",
 		self::NOTLIKE	=> "%s NOT LIKE %%%s%%'",
-	);
+    );
+    /* }}} */
 
 	/* {{{ 成员变量 */
 
@@ -89,18 +92,41 @@ abstract class Db
 
 	/* }}} */
 
+	/* {{{ public void __construct() */
+    /**
+     * 构造函数
+     *
+     * @access public
+	 * @return void
+	 */
 	public function __construct($ini)
 	{
 		$this->ini	= $ini;
-	}
+    }
+    /* }}} */
 
+	/* {{{ public void __destruct() */
+    /**
+     * 析构函数
+     *
+     * @access public
+	 * @return void
+	 */
 	public function __destruct()
 	{
 		if (!empty($this->link)) {
 			$this->_disconnect($this->link) && $this->link = null;
 		}
-	}
+    }
+    /* }}} */
 
+	/* {{{ public Object clear() */
+    /**
+     * 清理SQL属性
+     *
+     * @access public
+	 * @return Object $this
+	 */
 	public function clear()
 	{
 		$this->where	= array();
@@ -108,33 +134,74 @@ abstract class Db
 		$this->group	= array();
 		$this->limit	= array();
 		return $this;
-	}
+    }
+    /* }}} */
 
+	/* {{{ public Object table() */
+    /**
+     * 设置当前操作表
+     *
+     * @access public
+     * @param  String $table : 表名
+	 * @return Object $this
+	 */
 	public function table($table)
 	{
 		$this->table	= (string)$table;
 		return $this;
-	}
+    }
+    /* }}} */
 
+    /* {{{ public Object where() */
+    /**
+     * 设置过滤条件
+     *
+     * @access public
+     * @param  String $name : 字段名
+     * @param  Mixture $value : 值
+     * @param  Integer $mode : 过滤方式
+     * @param  Boolean $comma : 是否加引号
+     * @return Object $this
+     */
 	public function where($name, $value, $mode = self::EQ, $comma = true)
 	{
 		$this->where[] = array(
 			trim($name), $value, $mode, (bool)$comma
 		);
 		return $this;
-	}
+    }
+    /* }}} */
 
+    /* {{{ public Object order() */
+    /**
+     * 设置排序方式
+     *
+     * @access public
+     * @param  String $name : 列名
+     * @param  String $mode : ASC / DESC
+     * @return Object $this
+     */
 	public function order($name, $mode = 'ASC')
 	{
-		$this->order[trim($name)] = strtoupper($mode);
+		$this->order[trim($name)] = strtoupper(trim($mode));
 		return $this;
-	}
+    }
+    /* }}} */
 
+	/* {{{ public Object group() */
+    /**
+     * 设置类聚方式
+     *
+     * @access public
+     * @param  String $column
+	 * @return Object $this
+	 */
 	public function group($column)
 	{
 		$this->group[trim($column)] = true;
 		return $this;
-	}
+    }
+    /* }}} */
 
 	public function limit($count, $offset = 0)
 	{
