@@ -18,27 +18,32 @@ class Sqlite extends Db
 
     private $mode;
 
-	public function __construct($file, $mode = 0666)
-	{
-		$this->file = $file;
+    public function __construct($file, $mode = 0666)
+    {
+        $this->file = $file;
         $this->mode = $mode;
 
         ini_set('sqlite.assoc_case', 2);    /* LOWER CASE*/
-	}
+    }
 
     public function getAll()
     {
-		if (empty($this->datares)) {
-			return null;
+        if (empty($this->datares)) {
+            return null;
         }
 
         return sqlite_fetch_all($this->datares, SQLITE_ASSOC);
     }
 
-	protected function _connect()
+    protected function _connect()
     {
-        //TODO: 错误处理
-        $this->link = sqlite_open($this->file, $this->mode, $error);
+        $this->link = sqlite_open($this->file, $this>mode, $error);
+        if (!$this->link) {
+            $this->link = null;
+            return false;
+        }
+
+        return true;
     }
 
     protected function _disconnect()
@@ -55,14 +60,17 @@ class Sqlite extends Db
 
     protected function _begin()
     {
+        return $this->query('BEGIN');
     }
 
     protected function _commit()
     {
+        return $this->query('COMMIT');
     }
 
     protected function _rollback()
     {
+        return $this->query('ROLLBACK');
     }
 
     protected function _fetch($res)
