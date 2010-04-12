@@ -36,13 +36,16 @@ class Sqlite extends Db
     }
 
 	protected function _connect()
-	{
+    {
+        //TODO: 错误处理
         $this->link = sqlite_open($this->file, $this->mode, $error);
     }
 
-    protected function _disconnect($link)
+    protected function _disconnect()
     {
-        return sqlite_close($link);
+        if (!empty($this->link)) {
+            sqlite_close($this->link);
+        }
     }
 
     protected function _query($sql)
