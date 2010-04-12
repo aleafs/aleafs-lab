@@ -26,6 +26,11 @@ abstract class Db
     const LIKE		= 9;
     const NOTLIKE	= 10;
 
+    /**
+     * @短路边界
+     */
+    const CIRCUIT   = 3;
+
     /* }}} */
 
     /* {{{ 静态变量 */
@@ -50,6 +55,11 @@ abstract class Db
      * @配置属性
      */
     protected $ini;
+
+    /**
+     * @连接短路
+     */
+    protected $circuit  = 0;
 
     /**
      * @事务
@@ -235,7 +245,7 @@ abstract class Db
 
         $this->datares	= $this->query(sprintf(
             'SELECT %s FROM %s %s %s %s %s',
-            self::escape($column, false),
+            implode(',', $column),
             $this->table,
             $this->_build_where(),
             $this->_build_group(),
@@ -273,7 +283,7 @@ abstract class Db
         $this->datares	= $this->query(sprintf(
             'INSERT INTO %s (%s) VALUES (%s)',
             $this->table,
-            self::escape(array_keys($value), false),
+            implode(',', array_keys($value)),
             self::escape($value, true)
         ));
 
@@ -364,8 +374,24 @@ abstract class Db
      */
     public function query($sql)
     {
-        if (empty($this->link) && !$this->_connect()) {
-            return false;
+        if (empty($this->link)) {
+            if ($this->circuit >= self::CIRCUIT) {
+                return false;
+            }
+
+            $error = true;
+            for ($i = 0; $i < 3; $i++) {
+                if (false !== $this->_connect()) {
+                    $error = false;
+                    break;
+                }
+                usleep(($i + 1) * 10000);
+            }
+            $this->circuit++;
+
+            if ($error) {
+                return false;
+            }
         }
 
         return $this->_query(self::sqlClean($sql));
