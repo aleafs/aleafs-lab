@@ -13,142 +13,142 @@
 abstract class Db
 {
 
-	/* {{{ 静态常量 */
+    /* {{{ 静态常量 */
 
-	const EQ		= 1;
-	const NE		= 2;
-	const GT		= 3;
-	const GE		= 4;
-	const LT		= 5;
-	const LE		= 6;
-	const IN		= 7;
-	const NOTIN		= 8;
-	const LIKE		= 9;
-	const NOTLIKE	= 10;
+    const EQ		= 1;
+    const NE		= 2;
+    const GT		= 3;
+    const GE		= 4;
+    const LT		= 5;
+    const LE		= 6;
+    const IN		= 7;
+    const NOTIN		= 8;
+    const LIKE		= 9;
+    const NOTLIKE	= 10;
 
-	/* }}} */
+    /* }}} */
 
     /* {{{ 静态变量 */
 
-	private static $eqs	= array(
-		self::EQ		=> '%s = %s',
-		self::NE		=> '%s != %s',
-		self::GT		=> '%s > %s',
-		self::GE		=> '%s >= %s',
-		self::LT		=> '%s < %s',
-		self::LE		=> '%s <= %s',
-		self::IN		=> '%s IN (%s)',
-		self::NOTIN		=> '%s NOT IN (%s)',
-		self::LIKE		=> "%s LIKE '%%%s%%'",
-		self::NOTLIKE	=> "%s NOT LIKE %%%s%%'",
+    private static $eqs	= array(
+        self::EQ		=> '%s = %s',
+        self::NE		=> '%s != %s',
+        self::GT		=> '%s > %s',
+        self::GE		=> '%s >= %s',
+        self::LT		=> '%s < %s',
+        self::LE		=> '%s <= %s',
+        self::IN		=> '%s IN (%s)',
+        self::NOTIN		=> '%s NOT IN (%s)',
+        self::LIKE		=> "%s LIKE '%%%s%%'",
+        self::NOTLIKE	=> "%s NOT LIKE %%%s%%'",
     );
     /* }}} */
 
-	/* {{{ 成员变量 */
+    /* {{{ 成员变量 */
 
-	/**
-	 * @配置属性
-	 */
-	protected $ini;
+    /**
+     * @配置属性
+     */
+    protected $ini;
 
-	/**
-	 * @事务
-	 */
-	protected $transact	= 0;
+    /**
+     * @事务
+     */
+    protected $transact	= 0;
 
-	/**
-	 * @连接句柄
-	 */
-	protected $link		= null;
+    /**
+     * @连接句柄
+     */
+    protected $link		= null;
 
-	/**
-	 * @数据资源
-	 */
-	protected $datares	= null;
+    /**
+     * @数据资源
+     */
+    protected $datares	= null;
 
-	/**
-	 * @当前操作表
-	 */
-	protected $table	= null;
-	/**
-	 * @WHERE条件
-	 */
-	protected $where	= array();
+    /**
+     * @当前操作表
+     */
+    protected $table	= null;
+    /**
+     * @WHERE条件
+     */
+    protected $where	= array();
 
-	/**
-	 * @ORDER
-	 */
-	protected $order	= array();
+    /**
+     * @ORDER
+     */
+    protected $order	= array();
 
-	/**
-	 * @LIMIT
-	 */
-	protected $limit	= array();
+    /**
+     * @LIMIT
+     */
+    protected $limit	= array();
 
-	/**
-	 * @GROUP
-	 */
-	protected $group	= array();
+    /**
+     * @GROUP
+     */
+    protected $group	= array();
 
-	/* }}} */
+    /* }}} */
 
-	/* {{{ public void __construct() */
+    /* {{{ public void __construct() */
     /**
      * 构造函数
      *
      * @access public
-	 * @return void
-	 */
-	public function __construct($ini)
-	{
-		$this->ini	= $ini;
+     * @return void
+     */
+    public function __construct($ini)
+    {
+        $this->ini	= $ini;
     }
     /* }}} */
 
-	/* {{{ public void __destruct() */
+    /* {{{ public void __destruct() */
     /**
      * 析构函数
      *
      * @access public
-	 * @return void
-	 */
-	public function __destruct()
-	{
-		if (!empty($this->link)) {
-			$this->_disconnect($this->link) && $this->link = null;
-		}
+     * @return void
+     */
+    public function __destruct()
+    {
+        if (!empty($this->link)) {
+            $this->_disconnect() && $this->link = null;
+        }
     }
     /* }}} */
 
-	/* {{{ public Object clear() */
+    /* {{{ public Object clear() */
     /**
      * 清理SQL属性
      *
      * @access public
-	 * @return Object $this
-	 */
-	public function clear()
-	{
-		$this->where	= array();
-		$this->order	= array();
-		$this->group	= array();
-		$this->limit	= array();
-		return $this;
+     * @return Object $this
+     */
+    public function clear()
+    {
+        $this->where	= array();
+        $this->order	= array();
+        $this->group	= array();
+        $this->limit	= array();
+        return $this;
     }
     /* }}} */
 
-	/* {{{ public Object table() */
+    /* {{{ public Object table() */
     /**
      * 设置当前操作表
      *
      * @access public
      * @param  String $table : 表名
-	 * @return Object $this
-	 */
-	public function table($table)
-	{
-		$this->table	= (string)$table;
-		return $this;
+     * @return Object $this
+     */
+    public function table($table)
+    {
+        $this->table	= (string)$table;
+        return $this;
     }
     /* }}} */
 
@@ -163,12 +163,12 @@ abstract class Db
      * @param  Boolean $comma : 是否加引号
      * @return Object $this
      */
-	public function where($name, $value, $mode = self::EQ, $comma = true)
-	{
-		$this->where[] = array(
-			trim($name), $value, $mode, (bool)$comma
-		);
-		return $this;
+    public function where($name, $value, $mode = self::EQ, $comma = true)
+    {
+        $this->where[] = array(
+            trim($name), $value, $mode, (bool)$comma
+        );
+        return $this;
     }
     /* }}} */
 
@@ -181,239 +181,339 @@ abstract class Db
      * @param  String $mode : ASC / DESC
      * @return Object $this
      */
-	public function order($name, $mode = 'ASC')
-	{
-		$this->order[trim($name)] = strtoupper(trim($mode));
-		return $this;
+    public function order($name, $mode = 'ASC')
+    {
+        $this->order[trim($name)] = strtoupper(trim($mode));
+        return $this;
     }
     /* }}} */
 
-	/* {{{ public Object group() */
+    /* {{{ public Object group() */
     /**
      * 设置类聚方式
      *
      * @access public
      * @param  String $column
-	 * @return Object $this
-	 */
-	public function group($column)
-	{
-		$this->group[trim($column)] = true;
-		return $this;
+     * @return Object $this
+     */
+    public function group($column)
+    {
+        $this->group[trim($column)] = true;
+        return $this;
     }
     /* }}} */
 
-	public function limit($count, $offset = 0)
-	{
-		$this->limit = array(max(0, (int)$count), max(0, (int)$offset));
-		return $this;
-	}
+    /* {{{ public Object limit() */
+    /**
+     * 设置条数限制条件
+     *
+     * @access public
+     * @param  Integer $count : 结果数
+     * @param  Integer $offset : 偏移量
+     * @return Object $this
+     */
+    public function limit($count, $offset = 0)
+    {
+        $this->limit = array(max(0, (int)$count), max(0, (int)$offset));
+        return $this;
+    }
+    /* }}} */
 
-	public function select()
-	{
-		$column	= func_get_args();
-		if (!isset($column[1])) {
-			$column	= (array)$column[0];
-		}
+    /* {{{ public Object select() */
+    /**
+     * 执行检索
+     *
+     * @access public
+     * @return Object $this
+     */
+    public function select()
+    {
+        $column	= func_get_args();
+        if (!isset($column[1])) {
+            $column	= (array)$column[0];
+        }
 
-		$this->datares	= $this->query(sprintf(
-			'SELECT %s FROM %s %s %s %s %s',
-			self::escape($column, false),
-			$this->table,
-			$this->_build_where(),
-			$this->_build_group(),
-			$this->_build_order(),
-			$this->_build_limit()
-		));
+        $this->datares	= $this->query(sprintf(
+            'SELECT %s FROM %s %s %s %s %s',
+            self::escape($column, false),
+            $this->table,
+            $this->_build_where(),
+            $this->_build_group(),
+            $this->_build_order(),
+            $this->_build_limit()
+        ));
 
-		return $this;
-	}
+        return $this;
+    }
+    /* }}} */
 
-	public function update($value)
-	{
-		return $this;
-	}
+    /* {{{ public Object update() */
+    /**
+     * 执行更新
+     *
+     * @access public
+     * @return Object $this
+     */
+    public function update($value)
+    {
+        return $this;
+    }
+    /* }}} */
 
-	public function insert($value)
-	{
-		$this->datares	= $this->query(sprintf(
-			'INSERT INTO %s (%s) VALUES (%s)',
-			$this->table,
-			self::escape(array_keys($value), false),
-			self::escape($value, true)
-		));
+    /* {{{ public Object insert() */
+    /**
+     * 执行插入
+     *
+     * @access public
+     * @param  Mixture $value
+     * @return Object $this
+     */
+    public function insert($value)
+    {
+        $this->datares	= $this->query(sprintf(
+            'INSERT INTO %s (%s) VALUES (%s)',
+            $this->table,
+            self::escape(array_keys($value), false),
+            self::escape($value, true)
+        ));
 
-		return $this;
-	}
+        return $this;
+    }
+    /* }}} */
 
-	public function delete()
-	{
-		$this->datares	= $this->query(sprintf(
-			'DELETE FROM %s %s %s %s',
-			$this->table,
-			$this->_build_where(),
-			$this->_build_order(),
-			$this->_build_limit()
-		));
+    /* {{{ public Object delete() */
+    /**
+     * 执行删除
+     *
+     * @access public
+     * @return Object $this
+     */
+    public function delete()
+    {
+        $this->datares	= $this->query(sprintf(
+            'DELETE FROM %s %s %s %s',
+            $this->table,
+            $this->_build_where(),
+            $this->_build_order(),
+            $this->_build_limit()
+        ));
 
-		return $this;
-	}
+        return $this;
+    }
+    /* }}} */
 
-	public function getAll()
-	{
-		if (empty($this->datares)) {
-			return null;
-		}
+    /* {{{ public Mixture getAll() */
+    /**
+     * 获取查询结果集
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function getAll()
+    {
+        if (empty($this->datares)) {
+            return null;
+        }
 
-		$arrRet	= array();
-		while ($row = $this->_fetch($this->datares)) {
-			$arrRet	= $row;
-		}
+        $arrRet	= array();
+        while ($row = $this->_fetch($this->datares)) {
+            $arrRet	= $row;
+        }
 
-		return $arrRet;
-	}
+        return $arrRet;
+    }
+    /* }}} */
 
-	public function getOne()
-	{
-		if (empty($this->datares)) {
-			return null;
-		}
+    /* {{{ public Mixture getOne() */
+    /**
+     * 获取第一个单元格的数据
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function getOne()
+    {
+        if (empty($this->datares)) {
+            return null;
+        }
 
-		return reset($this->_fetch($this->datares));
-	}
+        return reset($this->_fetch($this->datares));
+    }
+    /* }}} */
 
-	public function error()
-	{
-		if (empty($this->datares)) {
-			return null;
-		}
+    /* {{{ public Mixture error() */
+    /**
+     * 获取最后一次错误信息
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function error()
+    {
+        return $this->_error();
+    }
+    /* }}} */
 
-		return $this->_error($this->datares);
-	}
+    /* {{{ public Mixture query() */
+    /**
+     * 执行一条SQL
+     *
+     * @access public
+     * @param  String $sql
+     * @return Mixture
+     */
+    public function query($sql)
+    {
+        if (empty($this->link) && !$this->_connect()) {
+            return false;
+        }
 
-	public function query($sql)
-	{
-		if (empty($this->link) && !$this->_connect()) {
-			return false;
-		}
+        return $this->_query(self::sqlClean($sql));
+    }
+    /* }}} */
 
-		return $this->_query(self::sqlClean($sql));
-	}
+    public function begin()
+    {
+        if (!$this->transact) {
+            $this->_begin();
+            $this->transact++;
+        }
 
-	public function begin()
-	{
-		if (!$this->transact) {
-			$this->_begin();
-			$this->transact++;
-		}
-
-		return $this;
-	}
-
-	public function commit()
-	{
-		if ($this->transact) {
-			$this->_commit();
-			$this->transact	= 0;
-		}
-
-		return $this;
-	}
-
-	public function rollback()
-	{
-		if ($this->transact) {
-			$this->_rollback();
-			$this->transact	= 0;
-		}
-
-		return $this;
-	}
-
-	protected function _build_where()
-	{
-		$strRet	= '';
-		foreach ($this->where AS $where) {
-			list($col, $val, $eqs, $com) = $where;
-			if (empty($col) || !isset(self::$eqs[$eqs])) {
-				continue;
-			}
-
-			$com = ($eqs == self::LIKE || $eqs == self::NOTLIKE) ? false : $com;
-			$strRet .= sprintf(' AND ' . self::$eqs[$eqs], $col, self::escape($val, $com));
-		}
-
-		return $strRet ? sprintf('WHERE %s', substr($strRet, 5)) : '';
-	}
-
-	protected function _build_order()
-	{
-		$strRet	= '';
-		foreach ($this->order AS $name => $type) {
-			if (empty($name)) {
-				continue;
-			}
-			$strRet	.= sprintf(' %s %s', $name, $type == 'DESC' ? 'DESC' : 'ASC');
-		}
-
-		return empty($strRet) ? '' : 'ORDER BY ' . $strRet;
-	}
-
-	protected function _build_group()
-	{
-		if (empty($this->group)) {
-			return '';
-		}
-
-		return sprintf('GROUP BY %s', implode(',', array_keys($this->group)));
-	}
-
-	protected function _build_limit()
-	{
-		if (empty($this->limit)) {
-			return '';
-		}
-
-		$strRet	= reset($this->limit);	/* count  */
-		if (count($this->limit) > 1) {	/* offset */
-			$strRet = sprintf('%d, %d', next($this->limit), $strRet);
-		}
-
-		return sprintf('LIMIT %s', $strRet);
-	}
-
-	protected static function sqlClean($sql)
-	{
-		return trim(preg_replace('/\s{2,}/', ' ', $sql));
-	}
-
-	protected static function escape($value, $comma = true)
-	{
-		if (is_array($value)) {
-			$value	= array_unique(array_map(array(self, '_escape'), $value));
-			if ($comma) {
-				return sprintf("'%s'", implode("','", $value));
-			} else {
-				return implode(',', $value);
-			}
-		}
-
-		return sprintf($comma ? "'%s'" : '%s', self::_escape($value));
+        return $this;
     }
 
+    public function commit()
+    {
+        if ($this->transact) {
+            $this->_commit();
+            $this->transact	= 0;
+        }
+
+        return $this;
+    }
+
+    public function rollback()
+    {
+        if ($this->transact) {
+            $this->_rollback();
+            $this->transact	= 0;
+        }
+
+        return $this;
+    }
+
+    protected function _build_where()
+    {
+        $strRet	= '';
+        foreach ($this->where AS $where) {
+            list($col, $val, $eqs, $com) = $where;
+            if (empty($col) || !isset(self::$eqs[$eqs])) {
+                continue;
+            }
+
+            $com = ($eqs == self::LIKE || $eqs == self::NOTLIKE) ? false : $com;
+            $strRet .= sprintf(' AND ' . self::$eqs[$eqs], $col, self::escape($val, $com));
+        }
+
+        return $strRet ? sprintf('WHERE %s', substr($strRet, 5)) : '';
+    }
+
+    protected function _build_order()
+    {
+        $strRet	= '';
+        foreach ($this->order AS $name => $type) {
+            if (empty($name)) {
+                continue;
+            }
+            $strRet	.= sprintf(' %s %s', $name, $type == 'DESC' ? 'DESC' : 'ASC');
+        }
+
+        return empty($strRet) ? '' : 'ORDER BY ' . $strRet;
+    }
+
+    protected function _build_group()
+    {
+        if (empty($this->group)) {
+            return '';
+        }
+
+        return sprintf('GROUP BY %s', implode(',', array_keys($this->group)));
+    }
+
+    protected function _build_limit()
+    {
+        if (empty($this->limit)) {
+            return '';
+        }
+
+        $strRet	= reset($this->limit);	/* count  */
+        if (count($this->limit) > 1) {	/* offset */
+            $strRet = sprintf('%d, %d', next($this->limit), $strRet);
+        }
+
+        return sprintf('LIMIT %s', $strRet);
+    }
+
+    /* {{{ protected static String sqlClean() */
+    /**
+     * SQL语句清洗
+     *
+     * @access protected static
+     * @param  String $sql
+     * @return String
+     */
+    protected static function sqlClean($sql)
+    {
+        return trim(preg_replace('/\s{2,}/', ' ', $sql));
+    }
+    /* }}} */
+
+    /* {{{ protected static String escape() */
+    /**
+     * 安全过滤并打包
+     *
+     * @access protected static
+     * @param  Mixture $value
+     * @param  Boolean $comma (default true)
+     * @return String
+     */
+    protected static function escape($value, $comma = true)
+    {
+        if (is_array($value)) {
+            $value	= array_unique(array_map(array(self, '_escape'), $value));
+            if ($comma) {
+                return sprintf("'%s'", implode("','", $value));
+            } else {
+                return implode(',', $value);
+            }
+        }
+
+        return sprintf($comma ? "'%s'" : '%s', self::_escape($value));
+    }
+    /* }}} */
+
+    /* {{{ private static String _escape() */
+    /**
+     * 安全过滤函数
+     *
+     * @access private static
+     * @param  String $string
+     * @return String
+     */
     private static function _escape($string)
     {
         return addslashes($string);
     }
+    /* }}} */
 
-	abstract protected function _connect();
-	abstract protected function _disconnect($link);
-	abstract protected function _query($sql);
-	abstract protected function _begin();
-	abstract protected function _commit();
-	abstract protected function _rollback();
-	abstract protected function _fetch($res);
-	abstract protected function _error($res);
+    abstract protected function _connect();
+    abstract protected function _disconnect();
+    abstract protected function _query($sql);
+    abstract protected function _begin();
+    abstract protected function _commit();
+    abstract protected function _rollback();
+    abstract protected function _fetch($res);
+    abstract protected function _error($res);
 
 }
 
