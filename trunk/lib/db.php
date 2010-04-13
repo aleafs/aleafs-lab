@@ -124,6 +124,10 @@ abstract class Db
      */
     public function __destruct()
     {
+        if (!empty($this->datares)) {
+            $this->_free() && $this->datares = null;
+        }
+
         if (!empty($this->link)) {
             $this->_disconnect() && $this->link = null;
         }
@@ -282,6 +286,7 @@ abstract class Db
         }
 
         if (empty($values)) {
+            $this->_free();
             return $this;
         }
 
@@ -480,6 +485,23 @@ abstract class Db
     }
     /* }}} */
 
+    public function lastId()
+    {
+        return empty($this->link) ? 0 : (int)$this->_lastId();
+    }
+
+    public function numRows()
+    {
+        return empty($this->datares) ? 0 : (int)$this->_numRows();
+    }
+    /* }}} */
+
+    public function affectedRows()
+    {
+        return empty($this->link) ? 0 : (int)$this->_affectedRows();
+    }
+    /* }}} */
+
     /* {{{ protected String _build_where() */
     /**
      * 构造where子句
@@ -619,11 +641,15 @@ abstract class Db
     abstract protected function _connect();
     abstract protected function _disconnect();
     abstract protected function _query($sql);
+    abstract protected function _free();
     abstract protected function _begin();
     abstract protected function _commit();
     abstract protected function _rollback();
     abstract protected function _fetch($res);
     abstract protected function _error($res);
+    abstract protected function _lastId();
+    abstract protected function _numRows();
+    abstract protected function _affectedRows();
 
 }
 
