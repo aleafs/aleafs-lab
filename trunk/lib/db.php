@@ -262,10 +262,38 @@ abstract class Db
      * 执行更新
      *
      * @access public
+     * @param  Mixture $value : 键值数组
+     * @param  Mixture $comma : 是否加引号
      * @return Object $this
      */
-    public function update($value)
+    public function update($value, $comma = null)
     {
+        $values = '';
+        $comma  = (array)$comma;
+        foreach ((array)$value AS $key => $val) {
+            $key = trim($key);
+            if (empty($key)) {
+                continue;
+            }
+            $values .= sprintf(
+                ',%s=%s', $key,
+                self::escape($val, !isset($comma[$key]) || false !== $comma[$key])
+            );
+        }
+
+        if (empty($values)) {
+            return $this;
+        }
+
+        $this->datares  = $this->query(sprintf(
+            'UPDATE %s SET %s %s %s %s',
+            $this->table,
+            substr($values, 1),
+            $this->_build_where(),
+            $this->_build_order(),
+            $this->_build_limit()
+        ));
+
         return $this;
     }
     /* }}} */
@@ -398,6 +426,13 @@ abstract class Db
     }
     /* }}} */
 
+    /* {{{ public Object begin() */
+    /**
+     * 开启事务
+     *
+     * @access public
+     * @return Object $this
+     */
     public function begin()
     {
         if (!$this->transact) {
@@ -407,7 +442,15 @@ abstract class Db
 
         return $this;
     }
+    /* }}} */
 
+    /* {{{ public Object commit() */
+    /**
+     * 提交事务
+     *
+     * @access public
+     * @return Object $this
+     */
     public function commit()
     {
         if ($this->transact) {
@@ -417,7 +460,15 @@ abstract class Db
 
         return $this;
     }
+    /* }}} */
 
+    /* {{{ public Object rollback() */
+    /**
+     * 回滚事务
+     *
+     * @access public
+     * @return Object $this
+     */
     public function rollback()
     {
         if ($this->transact) {
@@ -427,7 +478,15 @@ abstract class Db
 
         return $this;
     }
+    /* }}} */
 
+    /* {{{ protected String _build_where() */
+    /**
+     * 构造where子句
+     *
+     * @access protected
+     * @return String
+     */
     protected function _build_where()
     {
         $strRet	= '';
@@ -443,7 +502,15 @@ abstract class Db
 
         return $strRet ? sprintf('WHERE %s', substr($strRet, 5)) : '';
     }
+    /* }}} */
 
+    /* {{{ protected String _build_order() */
+    /**
+     * 构造order子句
+     *
+     * @access protected
+     * @return String
+     */
     protected function _build_order()
     {
         $strRet	= '';
@@ -456,7 +523,15 @@ abstract class Db
 
         return empty($strRet) ? '' : 'ORDER BY ' . $strRet;
     }
+    /* }}} */
 
+    /* {{{ protected String _build_group() */
+    /**
+     * 构造group子句
+     *
+     * @access protected
+     * @return String
+     */
     protected function _build_group()
     {
         if (empty($this->group)) {
@@ -465,7 +540,15 @@ abstract class Db
 
         return sprintf('GROUP BY %s', implode(',', array_keys($this->group)));
     }
+    /* }}} */
 
+    /* {{{ protected String _build_limit() */
+    /**
+     * 构造limit子句
+     *
+     * @access protected
+     * @return String
+     */
     protected function _build_limit()
     {
         if (empty($this->limit)) {
@@ -479,6 +562,7 @@ abstract class Db
 
         return sprintf('LIMIT %s', $strRet);
     }
+    /* }}} */
 
     /* {{{ protected static String sqlClean() */
     /**
