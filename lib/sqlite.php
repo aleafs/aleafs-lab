@@ -68,6 +68,11 @@ class Sqlite extends Db
         return $this->query('COMMIT');
     }
 
+    protected function _free()
+    {
+        $this->datares  = null;
+    }
+
     protected function _rollback()
     {
         return $this->query('ROLLBACK');
@@ -91,9 +96,24 @@ class Sqlite extends Db
         );
     }
 
+    protected function _lastId()
+    {
+        return sqlite_last_insert_rowid($this->link);
+    }
+
     protected static function _escape($string)
     {
         return sqlite_escape_string($string);
+    }
+
+    protected function _numRows()
+    {
+        return sqlite_num_rows($this->datares);
+    }
+
+    protected function _affectedRows()
+    {
+        return sqlite_changes($this->link);
     }
 
 }
