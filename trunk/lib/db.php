@@ -485,17 +485,39 @@ abstract class Db
     }
     /* }}} */
 
+    /* {{{ public Integer lastId() */
+    /**
+     * 返回上一次子增列插入的值
+     *
+     * @access public
+     * @return Integer
+     */
     public function lastId()
     {
         return empty($this->link) ? 0 : (int)$this->_lastId();
     }
+    /* }}} */
 
+    /* {{{ public Integer numRows() */
+    /**
+     * 返回查询获得结果数
+     *
+     * @access public
+     * @return Integer
+     */
     public function numRows()
     {
         return empty($this->datares) ? 0 : (int)$this->_numRows();
     }
     /* }}} */
 
+    /* {{{ public Integer affectedRows() */
+    /**
+     * 返回更新受影响的行数
+     *
+     * @access public
+     * @return Integer
+     */
     public function affectedRows()
     {
         return empty($this->link) ? 0 : (int)$this->_affectedRows();
