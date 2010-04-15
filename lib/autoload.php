@@ -3,7 +3,7 @@
 // +------------------------------------------------------------------------+
 // | 文件自动加载控制    					    							|
 // +------------------------------------------------------------------------+
-// | Copyright (c) 2009 Baidu. Inc. All Rights Reserved						|
+// | Copygight (c) 2009 Baidu. Inc. All Rights Reserved						|
 // +------------------------------------------------------------------------+
 // | Author: zhangxc <zhangxuancheng@baidu.com>								|
 // +------------------------------------------------------------------------+
@@ -18,6 +18,10 @@ class AutoLoad
      * @路径解析规则
      */
     private static $rules	= array();
+
+    private static $order   = array();
+
+    private static $sorted  = false;
 
     /* }}} */
 
@@ -39,17 +43,28 @@ class AutoLoad
      * 注册路径解析规则
      *
      * @access public static
-     * @param  String $name
+     * @param  String $key
      * @param  String $dir
+     * @param  String $pre = null
      * @return void
      */
-    public static function register($name, $dir)
+    public static function register($key, $dir, $pre = null)
     {
         $dir = realpath($dir);
         if (empty($dir) || !is_dir($dir)) {
             return;
         }
-        self::$rules[self::normalize($name)] = $dir;
+
+        $key = self::normalize($key);
+        $pre = self::normalize($pre);
+        if (!empty($pre) && isset(self::$order[$pre])) {
+            $idx = (int)self::$order[$pre] - 1;
+        } else {
+            $idx = count(self::$order);
+        }
+        self::$rules[$key] = $dir;
+        self::$order[$key] = $idx;
+        self::$sorted   = false;
     }
     /* }}} */
 
@@ -88,8 +103,20 @@ class AutoLoad
             throw new \Exception('dd');
         }
 
+        if (!self::$sorted && asort(self::$order, SORT_NUMERIC)) {
+            $tmp = array();
+            reset(self::$order);
+            foreach (self::$order AS $key => $val) {
+                $tmp[$key] = self::$rules[$key];
+            }
+            self::$rules = $tmp;
+            self::$sorted = true;
+        }
+
         $path = strtolower(substr($class, 0, $index));
         $name = strtolower(substr($class, $index + 1));
+
+        reset(self::$rules);
         foreach (self::$rules AS $key => $dir) {
             if (0 !== strpos($path, $key)) {
                 continue;
