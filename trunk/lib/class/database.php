@@ -10,7 +10,7 @@
 //
 // $Id: db.php 19 2010-04-14 02:00:51Z zhangxc83 $
 
-namespace Aleafs\\Lib;
+namespace Aleafs\Lib;
 
 abstract class Database
 {
@@ -677,4 +677,3 @@ abstract class Database
 
 }
 
-AutoLoad::register('aleafs\\lib\\db', __DIR__ . '/db/', 'lib');
