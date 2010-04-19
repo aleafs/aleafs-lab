@@ -178,6 +178,3 @@ class AutoLoad
 
 }
 
-AutoLoad::init();
-AutoLoad::register('aleafs\\lib', __DIR__);
-
