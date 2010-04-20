@@ -18,6 +18,17 @@ class Session
 {
 
     /* {{{ 静态变量 */
+
+    /**
+     * @是否已经初始化
+     */
+    private static $started = false;
+
+    /**
+     * @用于析构的对象
+     */
+    private static $destruct = null;
+
     /**
      * @Session数组
      */
@@ -37,11 +48,6 @@ class Session
      * @Session ID
      */
     private static $sid = null;
-
-    /**
-     * @用于析构的对象
-     */
-    private static $obj = null;
 
     /* }}} */
 
@@ -70,7 +76,8 @@ class Session
             self::$data = json_decode($json, true);
         }
 
-        self::$obj = new SessionDestructor();
+        self::$destruct = new SessionDestructor();
+        self::$started  = true;
     }
     /* }}} */
 
@@ -86,6 +93,8 @@ class Session
      */
     public static function set($key, $val, $flush = false)
     {
+        self::_init();
+
         self::$data[trim($key)] = $val;
         if ($flush) {
             self::flush();
@@ -102,6 +111,8 @@ class Session
      */
     public static function destroy()
     {
+        self::_init();
+
         self::$data = array();
         Cookie::set(self::$name, '');
     }
@@ -116,6 +127,8 @@ class Session
      */
     public static function close()
     {
+        self::_init();
+
         return self::flush();
     }
     /* }}} */
@@ -130,6 +143,8 @@ class Session
      */
     public static function get($key)
     {
+        self::_init();
+
         $key = trim($key);
         if (!isset(self::$data[$key])) {
             return null;
@@ -139,14 +154,14 @@ class Session
     }
     /* }}} */
 
-    /* {{{ public static Boolean flush() */
+    /* {{{ private static Boolean flush() */
     /**
      * 写入session
      *
-     * @access public static
+     * @access private static
      * @return Boolean true or false
      */
-    public static function flush()
+    private static function flush()
     {
         $sign = crc32(json_encode(self::$data));
         if (self::$sign == $sign) {
@@ -157,6 +172,19 @@ class Session
         self::$sign = $sign;
 
         return true;
+    }
+    /* }}} */
+
+    /* {{{ private static Boolean _init() */
+    /**
+     * 初始化Session
+     *
+     * @access private static
+     * @return Boolean true or false
+     */
+    private static function _init()
+    {
+        return (!self::$started) && self::start();
     }
     /* }}} */
 
@@ -193,10 +221,8 @@ class SessionDestructor
 {
     public function __destruct()
     {
-        Session::flush();
+        Session::close();
     }
 }
 /* }}} */
-
-Session::start();
 
