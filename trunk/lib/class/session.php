@@ -12,8 +12,6 @@
 
 namespace Aleafs\Lib;
 
-use \Aleafs\Lib\Cookie;
-
 class Session
 {
 
@@ -22,12 +20,22 @@ class Session
     /**
      * @是否已经初始化
      */
-    private static $started = false;
+    private static $inited = false;
 
     /**
      * @用于析构的对象
      */
-    private static $destruct = null;
+    private static $killer = null;
+
+    /**
+     * @相关属性
+     */
+    private static $prop = array(
+        'session.name'  => 'PHPSESSID',
+        'cookie.domain' => null,
+        'cookie.path'   => '/',
+        'cookie.expire' => 0,
+    );
 
     /**
      * @Session数组
@@ -42,16 +50,16 @@ class Session
     /**
      * @Cookie名字
      */
-    private static $name = 'PHPSESSID';
+    private static $name = null;
 
     /**
      * @Session ID
      */
-    private static $sid = null;
+    private static $ssid = null;
 
     /* }}} */
 
-    /* {{{ public static void start() */
+    /* {{{ public static void init() */
     /**
      * 开始session
      *
@@ -59,25 +67,34 @@ class Session
      * @param  Mixture $ini (default null)
      * @return void
      */
-    public static function start($ini = null)
+    public static function init($ini = null)
     {
-        Cookie::init(array());
+        if (is_array($ini)) {
+            foreach ($ini AS $key => $val) {
+                if (!isset(self::$prop[$key])) {
+                    continue;
+                }
+                self::$prop[$key] = $val;
+            }
+        }
 
-        self::$sid = trim(Cookie::get(self::$name));
-        if (empty(self::$sid) || !self::check($sid)) {
-            self::$sid  = self::sessid();
-            Cookie::set(self::$name, self::$sid);
+        Cookie::init(self::$prop);
 
+        self::$name = self::$prop['session.name'];
+        self::$ssid = trim(Cookie::get(self::$name));
+        if (empty(self::$ssid) || !self::check($ssid)) {
             self::$sign = crc32('');
             self::$data = array();
+            self::$ssid = self::sessid();
+            Cookie::set(self::$name, self::$ssid);
         } else {
             $json = '';
             self::$sign = crc32($json);
             self::$data = json_decode($json, true);
         }
 
-        self::$destruct = new SessionDestructor();
-        self::$started  = true;
+        self::$killer   = new SessionKiller();
+        self::$inited   = true;
     }
     /* }}} */
 
@@ -93,7 +110,7 @@ class Session
      */
     public static function set($key, $val, $flush = false)
     {
-        self::_init();
+        self::checkInit();
 
         self::$data[trim($key)] = $val;
         if ($flush) {
@@ -111,7 +128,7 @@ class Session
      */
     public static function destroy()
     {
-        self::_init();
+        self::checkInit();
 
         self::$data = array();
         Cookie::set(self::$name, '');
@@ -127,8 +144,7 @@ class Session
      */
     public static function close()
     {
-        self::_init();
-
+        self::checkInit();
         return self::flush();
     }
     /* }}} */
@@ -143,7 +159,7 @@ class Session
      */
     public static function get($key)
     {
-        self::_init();
+        self::checkInit();
 
         $key = trim($key);
         if (!isset(self::$data[$key])) {
@@ -175,16 +191,16 @@ class Session
     }
     /* }}} */
 
-    /* {{{ private static Boolean _init() */
+    /* {{{ private static Boolean checkInit() */
     /**
      * 初始化Session
      *
      * @access private static
      * @return Boolean true or false
      */
-    private static function _init()
+    private static function checkInit()
     {
-        return (!self::$started) && self::start();
+        return (!self::$inited) && self::init();
     }
     /* }}} */
 
@@ -193,10 +209,10 @@ class Session
      * 校验sessid 是否合法
      *
      * @access private static
-     * @param  String $sid
+     * @param  String $ssid
      * @return Boolean true or false
      */
-    private static function check($sid)
+    private static function check($ssid)
     {
         return true;
     }
@@ -216,8 +232,8 @@ class Session
 
 }
 
-/* {{{ class SessionDestructor() */
-class SessionDestructor
+/* {{{ class SessionKiller() */
+class SessionKiller
 {
     public function __destruct()
     {

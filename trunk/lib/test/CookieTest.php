@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +--------------------------------------------------------------------+
-// | Unit Test Case Class												|
+// | CookieTestShell													|
 // +--------------------------------------------------------------------+
 // | Copyright (c) 2010 Taobao.com. All Rights Reserved					|
 // +--------------------------------------------------------------------+
@@ -12,15 +12,32 @@
 
 namespace Aleafs\Lib;
 
-require_once(__DIR__ . '/autoload.php');
-require_once('PHPUnit/Framework/TestCase.php');
+require_once(__DIR__ . '/../class/TestShell.php');
 
-AutoLoad::init();
-AutoLoad::register('aleafs\\lib', __DIR__);
-AutoLoad::register('aleafs\\lib\\db', __DIR__ . '/db/');
-
-class LibTestShell extends \PHPUnit_Framework_TestCase
+class CookieTest extends LibTestShell
 {
+
+	protected function setUp()
+	{
+		parent::setUp();
+	}
+
+	protected function tearDown()
+	{
+		parent::tearDown();
+	}
+
+    public function test_should_init_from_given_data()
+    {
+    }
+
+    public function test_should_init_from_cookie()
+    {
+    }
+
+    public function test_should_right_set_cookie()
+    {
+    }
 
 }
 

@@ -1,10 +1,9 @@
 <?php
 namespace Aleafs\Lib;
 
-require_once(__DIR__ . '/../class/autoload.php');
-require_once 'PHPUnit/Framework/TestCase.php';
+require_once(__DIR__ . '/../class/TestShell.php');
 
-class AutoLoadTest extends \PHPUnit_Framework_TestCase
+class AutoLoadTest extends LibTestShell
 {
 
 	protected function setUp()
