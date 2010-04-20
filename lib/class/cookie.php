@@ -30,7 +30,12 @@ class Cookie
     /**
      * @Cookie属性
      */
-    private static $prop = array();
+    private static $prop = array(
+        'domain' => null,
+        'path'   => '/',
+        'expire' => 0,
+        'secure' => false,
+    );
 
     /* }}} */
 
@@ -40,19 +45,25 @@ class Cookie
      *
      * @access public static
      * @paran  Mixture $ini (default null)
-     * @param  Mixture $val (default null)
+     * @param  Mixture $data (default null)
      * @return void
      */
-    public static function init($ini = null, $val = null)
+    public static function init($ini = null, $data = null)
     {
         if (is_array($ini)) {
-            self::$prop = array();
-            foreach (array('domain', 'path', 'expire') AS $key) {
-                self::$prop[$key] = isset($ini[$key]) ? $ini[$key] : '';
+            foreach ($ini AS $key => $val) {
+                $key = strtolower(trim($key));
+                if (0 === strpos($key, 'cookie.')) {
+                    $key = substr($key, 7);
+                }
+
+                if (isset(self::$prop[$key])) {
+                    self::$prop[$key] = $val;
+                }
             }
         }
 
-        self::$data = is_array($val) ? $val : $_COOKIE;
+        self::$data = is_array($data) ? $data : $_COOKIE;
     }
     /* }}} */
 
@@ -75,12 +86,14 @@ class Cookie
         } else {
             self::$data[$key] = $val;
         }
+
         return setcookie(
             $key, $val,
             self::$prop['expire'] > 0 ? time() + self::$prop['expire'] : 0,
             self::$prop['path'],
             self::$prop['domain'],
-            false, false
+            self::$prop['secure'],
+            false
         );
     }
     /* }}} */
