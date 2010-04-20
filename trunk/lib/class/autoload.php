@@ -25,6 +25,8 @@ class AutoLoad
 
     private static $sorted  = false;
 
+    private static $index   = 0;
+
     /* }}} */
 
     /* {{{ public static void init() */
@@ -59,11 +61,17 @@ class AutoLoad
 
         $key = self::normalize($key);
         $pre = self::normalize($pre);
-        if (!empty($pre) && isset(self::$order[$pre])) {
-            $idx = (int)self::$order[$pre] - 1;
-        } else {
-            $idx = count(self::$order);
+        $idx = 1000 * self::$index;
+        if (!empty($pre) && $idx > 0 && isset(self::$order[$pre])) {
+            /**
+             * AutoLoad::register('root', '...');
+             * AutoLoad::register('son1', '...', 'root');
+             * AutoLoad::register('son2', '...', 'root');
+             */
+            $idx = self::$order[$pre] - intval(1000 / $idx + 0.5);  /*< 稳定排序 */
         }
+
+        self::$index++;
         self::$rules[$key] = $dir;
         self::$order[$key] = $idx;
         self::$sorted   = false;
@@ -83,6 +91,7 @@ class AutoLoad
         $name = self::normalize($name);
         if (isset(self::$rules[$name])) {
             unset(self::$rules[$name]);
+            unset(self::$order[$name]);
         }
     }
     /* }}} */
@@ -113,7 +122,7 @@ class AutoLoad
     public static function callback($class)
     {
         $ordina	= $class;
-        $class	= str_replace('\\', '/', preg_replace('/[^\w\\\\]/is', '', $class));
+        $class	= preg_replace('/[\/\\\]{1,}/', '/', $class);
         $index	= strrpos($class, '/');
 
         if (false === $index) {
@@ -121,13 +130,7 @@ class AutoLoad
             throw new \Aleafs\Lib\Exception(sprintf('Unregistered namespace when class "%s" defined.', $class));
         }
 
-        if (!self::$sorted && asort(self::$order, SORT_NUMERIC)) {
-            $tmp = array();
-            reset(self::$order);
-            foreach (self::$order AS $key => $val) {
-                $tmp[$key] = self::$rules[$key];
-            }
-            self::$rules = $tmp;
+        if (!self::$sorted && array_multisort(self::$order, self::$rules, SORT_ASC, SORT_NUMERIC)) {
             self::$sorted = true;
         }
 
@@ -171,8 +174,8 @@ class AutoLoad
      */
     private static function normalize($name)
     {
-        $name = preg_replace('/[^\w\\\\]/is', '', $name);
-        return strtolower(rtrim(str_replace('\\', '/', $name), '/'));
+        $name = preg_replace('/[\/\\\]{1,}/', '/', preg_replace('/\s+/', '/', $name));
+        return strtolower(trim($name, '/'));
     }
     /* }}} */
 

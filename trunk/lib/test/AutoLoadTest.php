@@ -7,33 +7,86 @@ require_once 'PHPUnit/Framework/TestCase.php';
 class AutoLoadTest extends \PHPUnit_Framework_TestCase
 {
 
-    protected function setUp()
+	protected function setUp()
 	{
-        AutoLoad::init();
+		AutoLoad::init();
 		AutoLoad::removeAllRules();
-		AutoLoad::register('aleafs\\lib', __DIR__ . '/../class');
-        parent::setUp();
-    }
+		parent::setUp();
+	}
 
-    protected function tearDown()
-    {
-        parent::tearDown();
-    }
+	protected function tearDown()
+	{
+		parent::tearDown();
+	}
 
-    public function test_should_class_loader_worked_fine()
-    {
-    }
+	public function test_should_class_loader_worked_fine()
+	{
+		AutoLoad::register('com', __DIR__ . '/autoload/com');
+		AutoLoad::register('com\\\\aleafs', __DIR__ . '/autoload/com');
 
-    public function test_should_throw_file_not_found_when_cant_find_class_file()
-    {
-    }
+		$case1	= new \Com\Aleafs\AutoLoadTestClass();
+		$this->assertEquals(1, \Com\Aleafs\AutoLoadTestClass::$requireTime, 'Class Load Failed.');
 
-    public function test_should_throw_class_not_found_when_rule_not_defined()
-    {
-    }
+		$case2	= new \Com\Aleafs\AutoLoadTestClass();
+		$this->assertEquals(1, \Com\Aleafs\AutoLoadTestClass::$requireTime, 'Class Load Duplicate.');
+		$this->assertContains(__DIR__ . '/autoload/com/aleafs/autoloadtestclass.php', $case2->path(), 'Class Load Error Rules.');
+	}
 
-    public function test_should_throw_class_not_found_when_class_not_in_file()
-    {
-    }
+	public function test_should_class_loader_by_order_worked_fine()
+	{
+		AutoLoad::register('com', __DIR__ . '/autoload/com');
+		AutoLoad::register('com\\\\aleafs1', __DIR__ . '/autoload/com', 'com');
+		AutoLoad::register('com\\\\aleafs2', __DIR__ . '/autoload/com', 'com');
+		AutoLoad::unregister('com/aleafs2');
+		AutoLoad::register('com\\\\aleafs', __DIR__ . '/autoload/com', 'com');
+
+		$case = new \Com\Aleafs\AutoLoadOrderTestClass();
+		$this->assertEquals(__DIR__ . '/autoload/com/autoloadordertestclass.php', $case->path(), 'Class Load by Order Error.');
+	}
+
+	public function test_should_throw_file_not_found_when_cant_find_class_file()
+	{
+		AutoLoad::register('com', __DIR__ . '/autoload/com');
+		try {
+			$case1 = new \Com\I\Am\Not\Exists();
+		} catch (\Exception $e) {
+			$this->assertTrue($e instanceof \Aleafs\Lib\Exception, 'Exception Type doesn\'t match,');
+			$this->assertContains(
+				sprintf('File "%s/autoload/com/i/am/not/exists.php', __DIR__),
+				$e->getMessage(),
+				'Exception Message doesn\'t match.'
+			);
+		}
+	}
+
+	public function test_should_throw_class_not_found_when_rule_not_defined()
+	{
+		AutoLoad::register('com', __DIR__ . '/autoload/com');
+		try {
+			$case1 = new \I\Am\Not\Exists();
+		} catch (\Exception $e) {
+			$this->assertTrue($e instanceof \Aleafs\Lib\Exception, 'Exception Type doesn\'t match,');
+			$this->assertContains(
+				'Class "I\Am\Not\Exists" Not Found',
+				$e->getMessage(),
+				'Exception Message doesn\'t match.'
+			);
+		}
+	}
+
+	public function test_should_throw_class_not_found_when_class_not_in_file()
+	{
+		AutoLoad::register('com', __DIR__ . '/autoload/com');
+		try {
+			$case1 = new \Com\Aleafs\AutoLoadTestCaseClassNameNotMatched();
+		} catch (\Exception $e) {
+			$this->assertTrue($e instanceof \Aleafs\Lib\Exception, 'Exception Type doesn\'t match,');
+			$this->assertContains(
+				sprintf('Class "Com\Aleafs\AutoLoadTestCaseClassNameNotMatched" Not Found in "%s/autoload/com/aleafs/autoloadtestcaseclassnamenotmatched.php', __DIR__),
+				$e->getMessage(),
+				'Exception Message doesn\'t match.'
+			);
+		}
+	}
 }
 

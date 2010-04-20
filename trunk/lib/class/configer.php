@@ -166,7 +166,8 @@ class Configer
         }
 
         $url = parse_url($url);
-        $cls = sprintf('%s\%s', __CLASS__, ucfirst(strtolower($url['scheme'])));
+        $cls = empty($url['scheme']) ? array_pop(explode('.', trim($url['path'], "\x00..\x20."))) : $url['scheme']
+        $cls = sprintf('%s\%s', __CLASS__, ucfirst(strtolower($cls)));
         $obj = new $cls($url);
 
         return $obj->parse();
