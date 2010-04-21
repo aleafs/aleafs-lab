@@ -60,7 +60,7 @@ class Context
             }
         }
 
-        return $bolInt ? sprintf('%u', ip2long(self::$userip)) : $userip;
+        return $bolInt ? sprintf('%u', ip2long(self::$userip)) : self::$userip;
     }
     /* }}} */
 
