@@ -237,9 +237,11 @@ class Log
         $err = error_reporting();
         error_reporting($err ^ E_WARNING);
 
-        $dir = dirname($this->file);
-        if (!is_dir($dir)) {
-            mkdir($dir, 0644, true);
+        if (!is_file($this->file)) {
+            $dir = dirname($this->file);
+            if (!is_dir($dir)) {
+                mkdir($dir, 0744, true);
+            }
         }
         $len = file_put_contents($this->file, $this->buffer, FILE_APPEND);
         error_reporting($err);

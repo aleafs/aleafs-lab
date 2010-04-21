@@ -22,6 +22,8 @@ class Sqlite extends Database
 
     private $mode;
 
+    private $msg;
+
     public function __construct($file, $mode = 0666)
     {
         $this->file = $file;
@@ -41,7 +43,19 @@ class Sqlite extends Database
 
     protected function _connect()
     {
-        $this->link = sqlite_open($this->file, $this>mode, $error);
+        $err = error_reporting();
+        error_reporting($err ^ E_WARNING);
+
+        if (!is_file($this->file)) {
+            $dir = dirname($this->file);
+            if (!is_dir($dir)) {
+                mkdir($dir, 0744, true);
+            }
+        }
+        $this->link = sqlite_open($this->file, $this->mode, $this->msg);
+
+        error_reporting($err);
+
         if (!$this->link) {
             $this->link = null;
             return false;
@@ -89,6 +103,14 @@ class Sqlite extends Database
 
     protected function _error()
     {
+        if (empty($this->link)) {
+           if (empty($this->msg)) {
+               return false;
+           }
+
+           return array('code' => 1, 'message' => $this->msg);
+        }
+
         $code = sqlite_last_error($this->link);
         if (!$code) {
             return false;
@@ -105,7 +127,7 @@ class Sqlite extends Database
         return sqlite_last_insert_rowid($this->link);
     }
 
-    protected static function _escape($string)
+    private function _escape($string)
     {
         return sqlite_escape_string($string);
     }

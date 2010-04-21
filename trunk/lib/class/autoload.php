@@ -59,22 +59,27 @@ class AutoLoad
             return;
         }
 
+        /**
+         * 有unset动作，所以得用这个变量来标记曾经有过多少个元素
+         * 避免register / unregister 导致排序不稳定
+         */
+        self::$index++;
+
         $key = self::normalize($key);
         $pre = self::normalize($pre);
         $idx = 1000 * self::$index;
-        if (!empty($pre) && $idx > 0 && isset(self::$order[$pre])) {
+        if (!empty($pre) && isset(self::$order[$pre])) {
             /**
              * AutoLoad::register('root', '...');
              * AutoLoad::register('son1', '...', 'root');
              * AutoLoad::register('son2', '...', 'root');
              */
-            $idx = self::$order[$pre] - intval(1000 / $idx + 0.5);  /*< 稳定排序 */
+            $idx = self::$order[$pre] - intval(1000 / self::$index + 0.5);  /*< 稳定排序 */
+            self::$sorted = false;
         }
 
-        self::$index++;
         self::$rules[$key] = $dir;
         self::$order[$key] = $idx;
-        self::$sorted   = false;
     }
     /* }}} */
 
@@ -107,6 +112,7 @@ class AutoLoad
     {
         self::$rules    = array();
         self::$order    = array();
+        self::$index    = 0;
         self::$sorted   = false;
     }
     /* }}} */
