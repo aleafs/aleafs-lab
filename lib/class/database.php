@@ -47,7 +47,7 @@ abstract class Database
         self::IN		=> '%s IN (%s)',
         self::NOTIN		=> '%s NOT IN (%s)',
         self::LIKE		=> "%s LIKE '%%%s%%'",
-        self::NOTLIKE	=> "%s NOT LIKE %%%s%%'",
+        self::NOTLIKE	=> "%s NOT LIKE '%%%s%%'",
     );
     /* }}} */
 
@@ -228,9 +228,12 @@ abstract class Database
      * @param  Integer $offset : 偏移量
      * @return Object $this
      */
-    public function limit($count, $offset = 0)
+    public function limit($count, $offset = null)
     {
-        $this->limit = array(max(0, (int)$count), max(0, (int)$offset));
+        $this->limit = array(max(0, (int)$count));
+        if (null !== $offset) {
+            $this->limit[] = max(0, (int)$offset);
+        }
         return $this;
     }
     /* }}} */
@@ -283,7 +286,7 @@ abstract class Database
             }
             $values .= sprintf(
                 ',%s=%s', $key,
-                self::escape($val, !isset($comma[$key]) || false !== $comma[$key])
+                $this->escape($val, !isset($comma[$key]) || false !== $comma[$key])
             );
         }
 
@@ -319,7 +322,7 @@ abstract class Database
             'INSERT INTO %s (%s) VALUES (%s)',
             $this->table,
             implode(',', array_keys($value)),
-            self::escape($value, true)
+            $this->escape($value, true)
         ));
 
         return $this;
@@ -543,7 +546,7 @@ abstract class Database
             }
 
             $com = ($eqs == self::LIKE || $eqs == self::NOTLIKE) ? false : $com;
-            $strRet .= sprintf(' AND ' . self::$eqs[$eqs], $col, self::escape($val, $com));
+            $strRet .= sprintf(' AND ' . self::$eqs[$eqs], $col, $this->escape($val, $com));
         }
 
         return $strRet ? sprintf('WHERE %s', substr($strRet, 5)) : '';
@@ -624,7 +627,7 @@ abstract class Database
     }
     /* }}} */
 
-    /* {{{ protected static String escape() */
+    /* {{{ private String escape() */
     /**
      * 安全过滤并打包
      *
@@ -633,10 +636,10 @@ abstract class Database
      * @param  Boolean $comma (default true)
      * @return String
      */
-    protected static function escape($value, $comma = true)
+    private function escape($value, $comma = true)
     {
         if (is_array($value)) {
-            $value	= array_unique(array_map(array(self, '_escape'), $value));
+            $value	= array_unique(array_map(array(&$this, '_escape'), $value));
             if ($comma) {
                 return sprintf("'%s'", implode("','", $value));
             } else {
@@ -644,11 +647,11 @@ abstract class Database
             }
         }
 
-        return sprintf($comma ? "'%s'" : '%s', self::_escape($value));
+        return sprintf($comma ? "'%s'" : '%s', $this->_escape($value));
     }
     /* }}} */
 
-    /* {{{ private static String _escape() */
+    /* {{{ private String _escape() */
     /**
      * 安全过滤函数
      *
@@ -656,7 +659,7 @@ abstract class Database
      * @param  String $string
      * @return String
      */
-    private static function _escape($string)
+    private function _escape($string)
     {
         return addslashes($string);
     }
@@ -670,7 +673,7 @@ abstract class Database
     abstract protected function _commit();
     abstract protected function _rollback();
     abstract protected function _fetch($res);
-    abstract protected function _error($res);
+    abstract protected function _error();
     abstract protected function _lastId();
     abstract protected function _numRows();
     abstract protected function _affectedRows();
