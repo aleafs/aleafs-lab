@@ -73,7 +73,7 @@ class Sqlite extends Database
 
     protected function _query($sql)
     {
-        return sqlite_query($this->link, $sql);
+        return sqlite_query($this->link, $sql, $this->msg);
     }
 
     protected function _begin()

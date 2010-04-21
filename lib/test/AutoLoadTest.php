@@ -28,7 +28,11 @@ class AutoLoadTest extends LibTestShell
 
 		$case2	= new \Com\Aleafs\AutoLoadTestClass();
 		$this->assertEquals(1, \Com\Aleafs\AutoLoadTestClass::$requireTime, 'Class Load Duplicate.');
-		$this->assertContains(__DIR__ . '/autoload/com/aleafs/autoloadtestclass.php', $case2->path(), 'Class Load Error Rules.');
+		$this->assertContains(
+			strtr(__DIR__ . '/autoload/com/aleafs/autoloadtestclass.php', '\\', '/'),
+			strtr($case2->path(), '\\', '/'),
+			'Class Load Error Rules.'
+		);
 	}
 
 	public function test_should_class_loader_by_order_worked_fine()
@@ -40,7 +44,11 @@ class AutoLoadTest extends LibTestShell
 		AutoLoad::register('com\\\\aleafs', __DIR__ . '/autoload/com', 'com');
 
 		$case = new \Com\Aleafs\AutoLoadOrderTestClass();
-		$this->assertEquals(__DIR__ . '/autoload/com/autoloadordertestclass.php', $case->path(), 'Class Load by Order Error.');
+		$this->assertEquals(
+			strtr(__DIR__ . '/autoload/com/autoloadordertestclass.php', '\\', '/'),
+			strtr($case->path(), '\\', '/'),
+			'Class Load by Order Error.'
+		);
 	}
 
 	public function test_should_throw_file_not_found_when_cant_find_class_file()
@@ -51,8 +59,8 @@ class AutoLoadTest extends LibTestShell
 		} catch (\Exception $e) {
 			$this->assertTrue($e instanceof \Aleafs\Lib\Exception, 'Exception Type doesn\'t match,');
 			$this->assertContains(
-				sprintf('File "%s/autoload/com/i/am/not/exists.php', __DIR__),
-				$e->getMessage(),
+				sprintf('File "%s/autoload/com/i/am/not/exists.php', strtr(__DIR__, '\\', '/')),
+				strtr($e->getMessage(), '\\', '/'),
 				'Exception Message doesn\'t match.'
 			);
 		}
@@ -80,9 +88,11 @@ class AutoLoadTest extends LibTestShell
 			$case1 = new \Com\Aleafs\AutoLoadTestCaseClassNameNotMatched();
 		} catch (\Exception $e) {
 			$this->assertTrue($e instanceof \Aleafs\Lib\Exception, 'Exception Type doesn\'t match,');
-			$this->assertContains(
-				sprintf('Class "Com\Aleafs\AutoLoadTestCaseClassNameNotMatched" Not Found in "%s/autoload/com/aleafs/autoloadtestcaseclassnamenotmatched.php', __DIR__),
-				$e->getMessage(),
+			$this->assertTrue(
+				(bool)preg_match(
+					'/^Class "(.+?)" NOT FOUND IN "(.+?)"/is',
+					$e->getMessage()
+				), 
 				'Exception Message doesn\'t match.'
 			);
 		}
