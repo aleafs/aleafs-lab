@@ -19,6 +19,8 @@ AutoLoad::init();
 AutoLoad::register('aleafs\\lib', __DIR__);
 AutoLoad::register('aleafs\\lib\\db', __DIR__ . '/db/');
 
+date_default_timezone_set('Asia/Shanghai');
+
 class LibTestShell extends \PHPUnit_Framework_TestCase
 {
 

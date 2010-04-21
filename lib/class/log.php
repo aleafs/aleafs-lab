@@ -19,10 +19,8 @@ class Log
 
     const LOG_DEBUG     = 1;
     const LOG_NOTICE    = 2;
-    const LOG_TRACE     = 4;
     const LOG_WARN      = 8;
     const LOG_ERROR     = 16;
-    const LOG_FATAL     = 32;
 
     /* }}} */
 
@@ -40,7 +38,7 @@ class Log
 
     private $level  = 0;          /**<  日志级别      */
 
-    private $ioTime = 0;          /**<  磁盘IO次数      */
+    private $iotime = 0;          /**<  磁盘IO次数      */
 
     private $buffer = '';         /**<  数据缓冲区      */
 
@@ -60,6 +58,7 @@ class Log
     {
         $this->url  = trim($url);
         $this->file = null;
+        $this->init();
     }
     /* }}} */
 
@@ -72,7 +71,9 @@ class Log
      */
     public function __destruct()
     {
-        $this->flush();
+        echo "..__destruct..\n";
+        var_dump($this->buffer);
+        return $this->flush();
     }
     /* }}} */
 
@@ -108,24 +109,6 @@ class Log
     {
         if ($this->level & self::LOG_NOTICE) {
             return $this->insert('NOTICE', $name, $data, $token);
-        }
-    }
-    /* }}} */
-
-    /* {{{ public void trace() */
-    /**
-     * 写Trace日志
-     *
-     * @access private
-     * @param  String $name
-     * @param  String $data
-     * @param  String $token
-     * @return void
-     */
-    public function trace($name, $data, $token = null)
-    {
-        if ($this->level & self::LOG_TRACE) {
-            return $this->insert('TRACE', $name, $data, $token);
         }
     }
     /* }}} */
@@ -166,21 +149,20 @@ class Log
     }
     /* }}} */
 
-    /* {{{ public void fatal() */
+    /* {{{ public Mixture __get() */
     /**
-     * 写Fatal日志
+     * 魔术方法__get
      *
-     * @access private
-     * @param  String $name
-     * @param  String $data
-     * @param  String $token
-     * @return void
+     * @access public
+     * @return Mixture
      */
-    public function fatal($name, $data, $token = null)
+    public function __get($key)
     {
-        if ($this->level & self::LOG_FATAL) {
-            return $this->insert('FATAL', $name, $data, $token);
+        if (!isset($this->$key)) {
+            return null;
         }
+
+        return $this->$key;
     }
     /* }}} */
 
@@ -197,17 +179,16 @@ class Log
      */
     private function insert($char, $name, $data, $token)
     {
-        if (empty($this->file) && !$this->init()) {
+        if (empty($this->file)) {
             return false;
         }
 
         $name = empty($name) ? 'UNKOWN' : $name;
         $data = empty($data) ? '-' : $data;
         $this->buffer .= sprintf(
-            "%s: [%s] %s %s %s %s %s\n",
+            "%s: [%s] %s %s %s %s\n",
             $char, date('Y-m-d\ H:i:s'),
             Context::userip(),
-            Context::trackid() ? Context::trackid() : '*',
             strtoupper($name),
             empty($token) ? '-' : $token,
             is_scalar($data) ? $data : json_encode($data)
@@ -247,8 +228,8 @@ class Log
         error_reporting($err);
 
         $max = strlen($this->buffer);
-        $this->buffer = substr($this->buffer, (int)$len);
-        $this->ioTime++;
+        $this->buffer = (string)substr($this->buffer, (int)$len);
+        $this->iotime++;
 
         if (false === $len || $len < $max) {
             return false;
@@ -268,11 +249,15 @@ class Log
     private function init()
     {
         $url = parse_url($this->url);
-        if (preg_match('/^[^\w]buffer=(\d+)/is', $url['query'], $match)) {
+        if (preg_match('/[\?&]?buffer=(\d+)/is', $url['query'], $match)) {
             $this->cache = (int)$match[1];
         }
 
         $this->file     = $url['path'];
+        if (0 === strpos($this->file, '/')) {
+            $this->file = substr($this->file, 1);
+        }
+
         $this->level    = 0;
         $tmp = array_flip(explode('.', strtolower($url['host'])));
         if (isset($tmp['debug'])) {
@@ -281,17 +266,11 @@ class Log
         if (isset($tmp['notice'])) {
             $this->level += self::LOG_NOTICE;
         }
-        if (isset($tmp['trace'])) {
-            $this->level += self::LOG_TRACE;
-        }
         if (isset($tmp['warn'])) {
             $this->level += self::LOG_WARN;
         }
         if (isset($tmp['error'])) {
             $this->level += self::LOG_ERROR;
-        }
-        if (isset($tmp['fatal'])) {
-            $this->level += self::LOG_FATAL;
         }
 
         if (empty(self::$symbol) && $this->level > 0) {
