@@ -44,6 +44,8 @@ class Log
 
     private $cache  = 4096;       /**<  最大缓冲量      */
 
+    private $circuit = false;
+
     /* }}} */
 
     /* {{{ public void __construct() */
@@ -71,9 +73,7 @@ class Log
      */
     public function __destruct()
     {
-        echo "..__destruct..\n";
-        var_dump($this->buffer);
-        return $this->flush();
+        $this->flush(true);
     }
     /* }}} */
 
@@ -209,9 +209,9 @@ class Log
      * @access private
      * @return Boolean true or false
      */
-    private function flush()
+    private function flush($try = false)
     {
-        if (empty($this->buffer)) {
+        if (empty($this->buffer) || ($try !== true && $this->circuit)) {
             return true;
         }
 
@@ -232,6 +232,7 @@ class Log
         $this->iotime++;
 
         if (false === $len || $len < $max) {
+            $this->circuit = true;
             return false;
         }
 
@@ -249,11 +250,11 @@ class Log
     private function init()
     {
         $url = parse_url($this->url);
-        if (preg_match('/[\?&]?buffer=(\d+)/is', $url['query'], $match)) {
+        if (isset($url['query']) && preg_match('/[\?&]?buffer=(\d+)/is', $url['query'], $match)) {
             $this->cache = (int)$match[1];
         }
 
-        $this->file     = $url['path'];
+        $this->file     = isset($url['path']) ? $url['path'] : '';
         if (0 === strpos($this->file, '/')) {
             $this->file = substr($this->file, 1);
         }
