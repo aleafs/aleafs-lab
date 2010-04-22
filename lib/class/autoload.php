@@ -180,7 +180,7 @@ class AutoLoad
      */
     private static function normalize($name)
     {
-        $name = preg_replace('/[\/\\\]{1,}/', '/', preg_replace('/\s+/', '/', $name));
+        $name = preg_replace('/[\/\\\]+/', '/', preg_replace('/\s+/', '/', $name));
         return strtolower(trim($name, '/'));
     }
     /* }}} */

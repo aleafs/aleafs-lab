@@ -153,7 +153,7 @@ class SqliteTest extends LibTestShell
             $this->dao->clear()->insert(array('sign' => 'begin'))->affectedRows(),
             1, 'Affected Rows MUST BE 1 before commit.'
         );
-        //TODO: 这里应该用另外一个连接来检查
+
         $this->dao->commit();
         $this->assertEquals(
             $this->dao->clear()->select('COUNT(*)')->getOne(),
