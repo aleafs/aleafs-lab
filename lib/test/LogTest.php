@@ -178,15 +178,21 @@ class LogTest extends LibTestShell
             ),
             1, 'Buffer Control Error.'
         );
+    }
+
+    public function test_should_flush_data_when_destruct()
+    {
+        $log = new Log(sprintf(
+            'log://debug.warn.notice.ERROR.blablalla/%s/log_for_test.log', __DIR__
+        ));
+
+        $this->file = $log->file;
 
         $log->debug('DESTRUCT', null);
 
-        echo "\n::TEST DESTRUCT::\n";
         $log = 'sf';
-        unset($log);
 
         clearstatcache();
-//var_dump(file_get_contents($this->file));
         $this->assertEquals(
             preg_match(
                 '/^DEBUG: \[.+?\] .+? DESTRUCT/',

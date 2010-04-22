@@ -40,15 +40,18 @@ class Context
     public static function userip($bolInt = false)
     {
         if (null === self::$userip) {
-            $arrKey	= array(
+            $key	= array(
                 'HTTP_X_FORWARDED_FOR',
                 'HTTP_CLIENT_IP',
                 'REMOTE_ADDR',
             );
 
             self::$userip = '127.0.0.1';
-            foreach ($arrKey AS $strKey) {
-                $strVal	= trim($_SERVER[trim($strKey)]);
+            foreach ($key AS $idx) {
+                if (!isset($_SERVER[$idx])) {
+                    continue;
+                }
+                $strVal	= trim($_SERVER[$idx]);
                 if (false !== stripos($strVal, 'unknown')) {
                     $strVal	= str_ireplace('unknown', '', $strVal);
                 }
