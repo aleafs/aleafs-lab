@@ -1,5 +1,5 @@
-<project name="unittest" basedir="." default="-unittest"
-	description="Targets for unittest">
+<?xml version="1.0" ?>
+<project name="unittest" basedir="." default="-unittest" description="Targets for unittest">
 	<target name="-cleanup" description="Delete all old reports for unit test.">
 		<delete dir="build/unit_test" verbose="false" quiet="true"
 			includeemptydirs="true" />
@@ -18,11 +18,7 @@
 			<fileset dir="./">
 				<exclude name="test/**" />
 				<exclude name="build/**" />
-				<exclude name="config/**" />
-				<exclude name="classes/core/**/*.php" />
-				<exclude name="classes/webui/Acl.php" />
-				<exclude name="classes/proxy/Controller.php" />
-				<include name="classes/**/*.php" />
+				<include name="class/**/*.php" />
 			</fileset>
 		</coverage-setup>
 
@@ -35,8 +31,10 @@
 			</batchtest>
 			<formatter type="xml" todir="build/unit_test" outfile="test.unit.report.xml" />
 		</phpunit>
+
 		<phpunitreport infile="build/unit_test/test.unit.report.xml"
 			format="noframes" todir="build/unit_test" />
+
 		<coverage-report outfile="build/code_coverage/coverage.xml">
 			<report todir="build/code_coverage" />
 		</coverage-report>
