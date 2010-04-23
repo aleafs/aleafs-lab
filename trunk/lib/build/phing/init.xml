@@ -10,30 +10,6 @@
 		<php expression="realpath(&quot;${env.PWD}&quot;)" returnProperty="dir.root" />
 		<property name="run.mode" value="dev" />
 
-		<property name="log.test.proxy.url" value="log://info.notice.warning.error${user.home}/proxy-test.log" override="${properties.reset}" />
-		<property name="log.test.webui.url" value="log://info.notice.warning.error${user.home}/webui-test.log" override="${properties.reset}" />
-		<property name="url.test.webui.prefix" value="/${env.USER}/webui" override="${properties.reset}" />
-		<property name="url.test.proxy.prefix" value="/${env.USER}/proxy" override="${properties.reset}" />
-		<property name="http.test.host" value="localhost" override="${properties.reset}" />
-		<property name="http.test.prefix" value="/${env.USER}/glider" override="${properties.reset}" />
-		<property name="taobao.cookie.test.url" value="http://member.config-vip.taobao.com/member/AgentCookieForDc.htm" override="${properties.reset}" />
-		<property name="taobao.cookie.test.key" value="Htxgd2wp6Xw(oxai" override="${properties.reset}" />
-		<property name="session.test.dir" value="/home/${env.USER}/www/sess_test/" override="${properties.reset}" />
-		<property name="session.test.url.prefix" value="http://localhost/${env.USER}/sess_test/" override="${properties.reset}" />		
-		<property name="session.test.cookie.domain" value=".taobao.ali.com" override="${properties.reset}" />
-		<property name="session.test.cookie.path" value="/" override="${properties.reset}" />
-		<property name="session.test.cookie.name" value="sid_${env.USER}" override="${properties.reset}" />	
-
-		<property name="session.test.http.prefix" value="/${env.USER}" override="${properties.reset}" />
-
-
-		<property name="memcache.test.session.logurl" value="log://info.notice.warning.error${user.home}/memcache-session-test.log" override="${properties.reset}" />
-		<property name="memcache.test.session.prefix" value="#test.${env.USER}#" override="${properties.reset}" />
-		<property name="memcache.test.session.server" value="localhost:11211" override="${properties.reset}" />
-
-			
-			
-
 		<echo message="" />
 		<echo message="" />
 		<echo message="****************************************************************" />
@@ -45,126 +21,22 @@
 		<echo message="" />
 		<phingcall target="-test" />
 
-		<property name="log.dev.proxy.url" value="log://info.notice.warning.error${user.home}/proxy-dev.log" override="${properties.reset}" />
-		<property name="log.dev.webui.url" value="log://info.notice.warning.error${user.home}/webui-dev.log" override="${properties.reset}" />
-		<property name="url.dev.webui.prefix" value="/${env.USER}/web" override="${properties.reset}" />
-		<property name="url.dev.proxy.prefix" value="/${env.USER}/proxy" override="${properties.reset}" />
-		<property name="http.dev.host" value="localhost" override="${properties.reset}" />
-		<property name="http.dev.prefix" value="/${env.USER}/glider" override="${properties.reset}" />
-		<property name="taobao.cookie.dev.url" value="http://member.config-vip.taobao.com/member/AgentCookieForDc.htm" override="${properties.reset}" />
-		<property name="taobao.cookie.dev.key" value="Htxgd2wp6Xw(oxai" override="${properties.reset}" />
-		<property name="session.dev.cookie.domain" value=".taobao.ali.com" override="${properties.reset}" />
-		<property name="session.dev.cookie.path" value="/" override="${properties.reset}" />
-		<property name="session.dev.cookie.name" value="sid_${env.USER}" override="${properties.reset}" />
-		<property name="memcache.dev.session.logurl" value="log://info.notice.warning.error${user.home}/memcache-session-dev.log" override="${properties.reset}" />
-		<property name="memcache.dev.session.prefix" value="#dev.${env.USER}#" override="${properties.reset}" />
-		<property name="memcache.dev.session.server" value="localhost:11211" override="${properties.reset}" />
-
-
-		<echo message="" />
-		<echo message="" />
-		<echo message="****************************************************************" />
-		<echo message="*" />
-		<echo message="*    Please input settings for DEVELOPMENT ENVIRONMENT" />
-		<echo message="*" />
-		<echo message="****************************************************************" />
-		<echo message="" />
-		<echo message="" />
-
-		<phingcall target="-dev" />
-
 		<phingcall target="-copyfile" />
 	</target>
 	<target name="-test">
-		<phingcall target="-one-mode">
-			<property name="name.webui.log" value="log.test.webui.url" />
-			<property name="name.proxy.log" value="log.test.proxy.url" />
-			<property name="name.webui.prefix" value="url.test.webui.prefix" />
-			<property name="name.proxy.prefix" value="url.test.proxy.prefix" />
-			<property name="name.http.host" value="http.test.host" />
-			<property name="name.http.prefix" value="http.test.prefix" />
-			<property name="name.taobao.cookie.url" value="taobao.cookie.test.url" />
-			<property name="name.taobao.cookie.key" value="taobao.cookie.test.key" />
-			<property name="name.session.cookie.domain" value="session.test.cookie.domain" />
-			<property name="name.session.cookie.path" value="session.test.cookie.path" />
-			<property name="name.session.cookie.name" value="session.test.cookie.name" />	
-			<property name="name.memcache.session.server" value="memcache.test.session.server" />	
-			<property name="name.memcache.session.logurl" value="memcache.test.session.logurl" />	
-			<property name="name.memcache.session.prefix" value="memcache.test.session.prefix" />			
-			<property name="modetext" value=" test" />
-		</phingcall>
-		
-		<input propertyname="session.test.http.prefix" defaultValue="${session.test.http.prefix}"
-			promptChar=":">session${modetext} http url prefix</input>
+
 	</target>
+
 	<target name="-dev">
 		<phingcall target="-one-mode">
-			<property name="name.webui.log" value="log.dev.webui.url" />
-			<property name="name.proxy.log" value="log.dev.proxy.url" />
-			<property name="name.webui.prefix" value="url.dev.webui.prefix" />
-			<property name="name.proxy.prefix" value="url.dev.proxy.prefix" />
-			<property name="name.http.host" value="http.dev.host" />
-			<property name="name.http.prefix" value="http.dev.prefix" />
-			<property name="name.taobao.cookie.url" value="taobao.cookie.dev.url" />
-			<property name="name.taobao.cookie.key" value="taobao.cookie.dev.key" />
-			<property name="name.session.cookie.domain" value="session.dev.cookie.domain" />
-			<property name="name.session.cookie.path" value="session.dev.cookie.path" />
-			<property name="name.session.cookie.name" value="session.dev.cookie.name" />	
-			<property name="name.memcache.session.server" value="memcache.dev.session.server" />	
-			<property name="name.memcache.session.logurl" value="memcache.dev.session.logurl" />	
-			<property name="name.memcache.session.prefix" value="memcache.dev.session.prefix" />						
-			<property name="modetext" value=" dev" />
+			<property name="name.run.mode" value="run.mode" />
 		</phingcall>
 	</target>
+
 	<target name="-one-mode">
-		<phingcall target="-log">
-			<property name="propname" value="${name.webui.log}" />
-			<property name="logtext" value="webui${modetext}" />
-		</phingcall>
-
-		<phingcall target="-log">
-			<property name="propname" value="${name.proxy.log}" />
-			<property name="logtext" value="proxy${modetext}" />
-		</phingcall>
-
-		<input propertyname="${name.webui.prefix}" defaultValue="${${name.webui.prefix}}"
-			promptChar=":">webui${modetext} url prefix</input>
-		<input propertyname="${name.proxy.prefix}" defaultValue="${${name.proxy.prefix}}"
-			promptChar=":">webui${modetext} url prefix</input>
-
-		<input propertyname="${name.http.host}" defaultValue="${${name.http.host}}"
-			promptChar=":">glider${modetext} server host</input>
-		<input propertyname="${name.http.prefix}" defaultValue="${${name.http.prefix}}"
-			promptChar=":">glider${modetext} url prefix</input>
-
-
-		<input propertyname="${name.taobao.cookie.url}" defaultValue="${${name.taobao.cookie.url}}"
-			promptChar=":">taobao cookie warp${modetext} auth url</input>
-		<input propertyname="${name.taobao.cookie.key}" defaultValue="${${name.taobao.cookie.key}}"
-			promptChar=":">taobao cookie warp${modetext} auth key</input>
-		<input propertyname="${name.memcache.session.server}" defaultValue="${${name.memcache.session.server}}"
-			promptChar=":">session${modetext} memcache server</input>
-		<input propertyname="${name.memcache.session.prefix}" defaultValue="${${name.memcache.session.prefix}}"
-			promptChar=":">session${modetext} memcache key prefix</input>
-		
-		<phingcall target="-log">
-			<property name="propname" value="${name.memcache.session.logurl}" />
-			<property name="logtext" value="session memcache${modetext}" />
-		</phingcall>
+		<input propertyname="${name.run.mode}" defaultValue="${${name.run.mode}}"
+			promptChar=":">Run mode ${run.mode} </input>
 	</target>
-
-
-	<target name="-log">
-		<!-- parse log.url -->
-		<property name="url" value="${${propname}}" override="true" />
-		<php expression="parse_url(&quot;${url}&quot;, PHP_URL_HOST)" returnProperty="level" />
-		<php expression="parse_url(&quot;${url}&quot;, PHP_URL_PATH)" returnProperty="path" />
-		<input propertyname="level" defaultValue="${level}" promptChar=":">${logtext} log level</input>
-		<input propertyname="path" defaultValue="${path}" promptChar=":">${logtext} log path</input>
-		<property name="${${propname}}" override="true" value="log://${level}${path}" />
-	</target>
-
-
 
 	<target name="-copyfile">
 		<copy file="build/tpl/default.properties" tofile="./${prop.file}" overwrite="true">
@@ -172,40 +44,6 @@
 				<replacetokens begintoken="##" endtoken="##">
 					<token key="dir.root" value="${dir.root}/" />
 					<token key="run.mode" value="${run.mode}" />
-					<token key="url.dev.webui.prefix" value="${url.dev.webui.prefix}" />
-					<token key="url.dev.proxy.prefix" value="${url.dev.proxy.prefix}" />
-					<token key="url.test.webui.prefix" value="${url.test.webui.prefix}" />
-					<token key="url.test.proxy.prefix" value="${url.test.proxy.prefix}" />
-					<token key="taobao.cookie.test.url" value="${taobao.cookie.test.url}" />
-					<token key="taobao.cookie.test.key" value="${taobao.cookie.test.key}" />
-					<token key="log.dev.proxy.url" value="${log.dev.proxy.url}" />
-					<token key="log.dev.webui.url" value="${log.dev.webui.url}" />
-					<token key="log.test.proxy.url" value="${log.test.proxy.url}" />
-					<token key="log.test.webui.url" value="${log.test.webui.url}" />
-					<token key="http.dev.host" value="${http.dev.host}" />
-					<token key="http.dev.prefix" value="${http.dev.prefix}" />
-					<token key="http.test.host" value="${http.test.host}" />
-					<token key="http.test.prefix" value="${http.test.prefix}" />
-					<token key="taobao.cookie.dev.url" value="${taobao.cookie.dev.url}" />
-					<token key="taobao.cookie.dev.key" value="${taobao.cookie.dev.key}" />
-					<token key="session.test.dir" value="${session.test.dir}" />
-					<token key="session.test.url.prefix" value="${session.test.url.prefix}" />
-					
-					<token key="session.test.cookie.domain" value="${session.test.cookie.domain}" />
-					<token key="session.test.cookie.path" value="${session.test.cookie.path}" />
-					<token key="session.test.cookie.name" value="${session.test.cookie.name}" />
-					<token key="session.test.http.prefix" value="${session.test.http.prefix}" />
-					
-					
-					<token key="session.dev.cookie.domain" value="${session.dev.cookie.domain}" />
-					<token key="session.dev.cookie.path" value="${session.dev.cookie.path}" />
-					<token key="session.dev.cookie.name" value="${session.dev.cookie.name}" />
-					<token key="memcache.test.session.logurl" value="${memcache.test.session.logurl}" />
-					<token key="memcache.test.session.prefix" value="${memcache.test.session.prefix}" />
-					<token key="memcache.test.session.server" value="${memcache.test.session.server}" />
-					<token key="memcache.dev.session.logurl" value="${memcache.dev.session.logurl}" />
-					<token key="memcache.dev.session.prefix" value="${memcache.dev.session.prefix}" />
-					<token key="memcache.dev.session.server" value="${memcache.dev.session.server}" />
 				</replacetokens>
 			</filterchain>
 		</copy>
