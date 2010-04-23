@@ -1,0 +1,118 @@
+<project name="unittest" basedir="." default="-unittest" description="Make rpm file for code release">
+
+	<target name="-release" description="Make rpm file for code release">
+		<!-- Load our configuration -->
+		<property file="release.properties" override="true" />
+
+		<!-- release info settings -->
+		<input propertyname="release.version" defaultValue="2.0.0" promptChar=":">Release version</input>
+		<input propertyname="release.times" defaultValue="1"  promptChar=":">Release times</input>
+		<!-- svn tag settings -->
+		<input propertyname="release.svn.tag" defaultValue="trunk" promptChar=":">SVN tag name</input>
+		<if>
+			<equals arg1="${release.svn.tag}" arg2="trunk" />
+			<then>
+				<property name="release.svn.url" value="${svn.url}/trunk" />
+			</then>
+			<else>
+				<property name="release.svn.url" value="${svn.url}/tags/${release.svn.tag}" />
+			</else>
+		</if>
+		<!-- release dir settings -->
+		<input propertyname="release.dir" defaultValue="${dir.root}" promptChar=":">Release destination directory</input>
+
+		<phingcall target="-confirm" />
+		<phingcall target="-cleanup" />
+		<phingcall target="-checkout" />
+
+		<property name="config.dir" value="build/rpm/src/" override="true" />
+		<phing phingfile="build/phing/makeconf.xml" inheritRefs="true" inheritAll="true" target="-dev" haltonfailure="true" />
+
+		<phingcall target="-makespec" />
+		<phingcall target="-rpmbuild" />
+
+		<delete dir="build/src" verbose="false" quiet="true" includeemptydirs="true" />
+
+		<echo message="" />
+		<echo message="" />
+		<echo message="****************************************************************" />
+		<echo message="*" />
+		<echo message="*    All Done" />
+		<echo message="*" />
+		<echo message="*    RPM File: ${env.PWD}/build/rpm/noarch/taobao_data_glider-${release.version}-${release.times}.noarch.rpm" />
+
+		<echo message="*" />
+		<echo message="****************************************************************" />
+		<echo message="" />
+		<echo message="" />
+
+	</target>
+	<target name="-confirm" description="Confirm for rpming&#39;s begin">
+		<echo message="" />
+		<echo message="" />
+		<echo message="****************************************************************" />
+		<echo message="*" />
+		<echo message="*    SVN checkout url: ${release.svn.url}" />
+		<echo message="*" />
+		<echo message="*    Release version: ${release.version}" />
+		<echo message="*" />
+		<echo message="*    Release times: ${release.times}" />
+		<echo message="*" />
+		<echo message="*    Release destination directory: ${release.dir}" />
+		<echo message="*" />
+		<echo message="****************************************************************" />
+		<echo message="" />
+		<echo message="" />
+		<input propertyname="release.confirm" promptChar="?">All settings is correctly (y/n)</input>
+		<if>
+			<equals arg1="${release.confirm}" arg2="y" />
+			<then>
+			</then>
+			<else>
+				<fail message="Release is canceled!" />
+			</else>
+		</if>
+	</target>
+
+	<target name="-cleanup" description="Cleanup all old files.">
+		<delete dir="build/src" verbose="false" quiet="true" includeemptydirs="true" />
+		<delete dir="build/rpm/src" verbose="false" quiet="true" includeemptydirs="true" />
+		<delete dir="build/rpm/noarch" verbose="false" quiet="true" includeemptydirs="true" />
+	</target>
+
+	<target name="-checkout" description="Checkout all codes from subversion">
+		<svncheckout svnpath="/usr/bin/svn" nocache="true"
+			repositoryurl="${release.svn.url}" todir="build/src"/>
+		<mkdir dir="build/rpm/src" />
+		<copy todir="build/rpm/src" overwrite="true" includeemptydirs="true">
+			<fileset dir="build/src">
+				<include name="classes/**" />
+				<include name="config/**" />
+				<include name="webroot/**" />
+				<include name="resources/**" />
+				<include name="changelog" />
+				<include name="releasenotes" />
+				<exclude name="**/.svn/**" />
+			</fileset>
+		</copy>
+	</target>
+	<target name="-makespec" description="Make spec file for rpm.">
+		<copy file="build/tpl/taobao_edp_datacube_glider.spec" todir="build/rpm"
+			overwrite="true">
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="release.version" value="${release.version}" />
+					<token key="release.times" value="${release.times}" />
+					<token key="release.dir" value="${release.dir}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+	</target>
+	<target name="-rpmbuild" description="Make rpm file">
+		<exec command="rpmbuild -bb build/rpm/taobao_edp_datacube_glider.spec" checkreturn="true" />
+	</target>
+
+	<target name="-init" description="Prepare release properties file.">
+
+	</target>
+</project>
