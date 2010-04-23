@@ -28,6 +28,7 @@ class FactoryTest extends LibTestShell
 		parent::tearDown();
     }
 
+    /* {{{ public void test_should_throw_exception_when_unregister() */
     public function test_should_throw_exception_when_unregister()
     {
         Factory::register('Aleafs\Lib/Log', 'empty', 'log://warn.error/no.log?buffer=98');
@@ -43,14 +44,24 @@ class FactoryTest extends LibTestShell
             );
         }
     }
+    /* }}} */
 
+    /* {{{ public void test_should_return_right_object() */
     public function test_should_return_right_object()
     {
-        AutoLoad::register('aleafs\lib\db', __DIR__ . '/../class/db');
-        Factory::register('aleafs\lib\db\sqlite', 'default', __DIR__ . '/factory_test.sqlite', 0766);
-        $dao = Factory::getObject('\Aleafs/Lib/Db/Sqlite', 'default');
-        $this->assertTrue($dao instanceof \Aleafs\Lib\Db\Sqlite);
+        AutoLoad::register('factory',   __DIR__ . '/factory');
+        Factory::register('factory\person', 'lucy', 'Kent', 28);
+
+        $obj = Factory::getObject('Factory\Person', 'lucy');
+        $this->assertTrue($obj instanceof \Factory\Person, 'Object is not a Factory\Persion.');
+
+        $this->assertEquals(28, $obj->age, 'Lucy\'s age is not 28');
+        $this->assertEquals('Kent', $obj->name, 'Lucy\'s name is not Kent.');
+
+        $obj->setAge(27);
+        $this->assertEquals(27, Factory::getObject('Factory\Person', 'lucy')->age, 'Lucy\'s age is not 27, but I have modified it.');
     }
+    /* }}} */
 
 }
 
