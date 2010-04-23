@@ -1,0 +1,148 @@
+<project name="makeconf" basedir="." default="-makeconf"
+	description="make all config files">
+	<target name="-cleanup" description="delete old config files.">
+		<phingcall target="-cleanup-dev" />
+		<phingcall target="-cleanup-unittest" />
+	</target>
+
+	<target name="-makeconf" description="Make all config files">
+		<phingcall target="-cleanup" />
+		<phingcall target="-dev" />
+		<phingcall target="-unittest" />
+	</target>
+	<target name="-cleanup-dev" description="Delete all config files.">
+		<delete file="config/session.ini" verbose="false" quiet="true" />
+	</target>
+
+	<target name="-cleanup-unittest" description="Delete all config files.">
+		<delete file="test/unit/ini/glider.ini" verbose="false" quiet="true" />
+		<delete file="test/unit/ini/proxy.ini" verbose="false" quiet="true" />
+		<delete file="test/unit/ini/cookie.ini" verbose="false" quiet="true" />
+		<delete file="test/unit/ini/db_cfg.ini" verbose="false" quiet="true" />
+		<delete file="${session.test.dir}/test_proxy_controller_invoke_session.php" verbose="false" quiet="true" />
+		<delete file="${session.test.dir}/test_acl_invoke_session.php" verbose="false" quiet="true" />
+		<delete file="${session.test.dir}/test_session_and_cookie.php" verbose="false" quiet="true" />
+		<delete file="test/unit/ini/session_test.ini" verbose="false" quiet="true" />
+		<delete file="test/unit/ini/memcache_session.ini" verbose="false" quiet="true" />
+	</target>
+
+	<target name="-dev" description="Make configure files for development">
+		<phingcall target="-cleanup-dev" />
+		<property name="config.dir" value="" override="false" />
+		<copy file="build/tpl/unittest/session.ini" todir="${config.dir}config/"
+			overwrite="true" >
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="session.dev.cookie.domain" value="${session.dev.cookie.domain}" />
+					<token key="session.dev.cookie.path" value="${session.dev.cookie.path}" />
+					<token key="session.dev.cookie.name" value="${session.dev.cookie.name}" />
+					<token key="dir.root" value="${dir.root}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<copy file="build/tpl/unittest/memcache_session.ini" todir="${config.dir}config/"
+			overwrite="true" >
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="memcache.session.logurl" value="${memcache.dev.session.logurl}" />
+					<token key="memcache.session.prefix" value="${memcache.dev.session.prefix}" />
+					<token key="memcache.session.server" value="${memcache.dev.session.server}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+	</target>
+
+	<target name="-unittest" description="Make configure files for unit test.">
+
+		<phingcall target="-cleanup-unittest" />
+
+		<copy file="build/tpl/unittest/proxy.ini" todir="test/unit/ini/"
+			overwrite="true" >
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="dir.root" value="${dir.root}" />
+					<token key="log.test.proxy.url" value="${log.test.proxy.url}" />
+					<token key="url.test.proxy.prefix" value="${url.test.proxy.prefix}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<copy file="build/tpl/unittest/glider.ini" todir="test/unit/ini/"
+			overwrite="true" >
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="http.test.host" value="${http.test.host}" />
+					<token key="http.test.prefix" value="${http.test.prefix}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<copy file="build/tpl/unittest/cookie.ini" todir="test/unit/ini/" overwrite="true" >
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="taobao.cookie.warp.agent" value="${taobao.cookie.warp.agent}" />
+					<token key="taobao.cookie.warp.key" value="${taobao.cookie.warp.key}" />
+					<token key="taobao.cookie.warp.cookie_domain" value="${taobao.cookie.warp.cookie_domain}" />
+					<token key="taobao.cookie.warp.cookie_path" value="${taobao.cookie.warp.cookie_path}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<copy file="build/tpl/unittest/db_cfg.ini" todir="test/unit/ini/" overwrite="true" >
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="orc.test.url" value="oci://gold_dev:gold_dev@db.dev.dbc.taobao.net:1521/dev-dbc?ZHS16GBK" />
+					<token key="orc.test.log" value="log://info.notice.warning.error${user.home}/oci.log?disableBuffer" />
+					<token key="orc.test.persist" value="" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+
+		<copy file="build/tpl/unittest/test_proxy_controller_invoke_session.php" todir="${session.test.dir}" overwrite="true" >
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="cubex.root" value="${dir.root}" />
+				</replacetokens>
+			</filterchain>
+		</copy>	
+
+		<copy file="build/tpl/unittest/test_acl_invoke_session.php" todir="${session.test.dir}" overwrite="true" >
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="cubex.root" value="${dir.root}" />
+				</replacetokens>
+			</filterchain>
+		</copy>	
+
+		<copy file="build/tpl/unittest/test_session_and_cookie.php" todir="${session.test.dir}" overwrite="true" >
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="cubex.root" value="${dir.root}" />
+				</replacetokens>
+			</filterchain>
+		</copy>	
+		<copy file="build/tpl/unittest/session_test.ini" todir="test/unit/ini/" overwrite="true" >
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="dir.root" value="${dir.root}" />
+					<token key="session.test.cookie.domain" value="${session.test.cookie.domain}" />
+					<token key="session.test.cookie.path" value="${session.test.cookie.path}" />
+					<token key="session.test.cookie.name" value="${session.test.cookie.name}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<copy file="build/tpl/unittest/memcache_session.ini" todir="test/unit/ini/" overwrite="true" >
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="memcache.session.logurl" value="${memcache.test.session.logurl}" />
+					<token key="memcache.session.prefix" value="${memcache.test.session.prefix}" />
+					<token key="memcache.session.server" value="${memcache.test.session.server}" />
+				</replacetokens>
+			</filterchain>
+		</copy>		
+		<copy file="build/tpl/unittest/http.ini" todir="test/unit/sess_test/" overwrite="true" >
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="session.test.http.prefix" value="${session.test.http.prefix}" />
+				</replacetokens>
+			</filterchain>
+		</copy>	
+	</target>
+</project>
