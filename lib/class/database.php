@@ -131,7 +131,9 @@ abstract class Database
         }
 
         if (!empty($this->link)) {
-            $this->_disconnect() && $this->link = null;
+            $this->rollback();
+            $this->_disconnect();
+            $this->link = null;
         }
     }
     /* }}} */
