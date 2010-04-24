@@ -44,8 +44,6 @@ class ConnPool
 
         if (function_exists('apc_add')) {
             $this->cache = new Cache\Apc($token);
-        } elseif (function_exists('shmop_open')) {
-            $this->cache = new Cache\Shmop($token);
         } else {
             $this->cache = null;
         }
@@ -73,7 +71,8 @@ class ConnPool
                 $this->filterOffs(array_merge(
                     (array)$this->cache->get('offs'),
                     $this->offs
-                ))
+                )),
+                intval(1.2 * $this->live)
             );
         }
 
