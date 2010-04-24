@@ -120,6 +120,59 @@ class ConnPool
     }
     /* }}} */
 
+    /* {{{ public Object setOffline() */
+    /**
+     * 标记一台服务器为不可用
+     *
+     * @access public
+     * @param  Mixture $host (default null)
+     * @return Object $this
+     */
+    public function setOffline($host = null)
+    {
+        $sign = (null === $host) ? $this->last : self::sign($host);
+        if (isset($this->host[$sign])) {
+            $this->offs[$sign] = time() + $this->live;
+        }
+
+        return $this;
+    }
+    /* }}} */
+
+    /* {{{ public Object cleanAll() */
+    /**
+     * 清理所有的对象属性
+     *
+     * @access public
+     * @return void
+     */
+    public function cleanAll()
+    {
+        $this->host = array();
+        $this->offs = array();
+        $this->last = null;
+
+        if (!empty($this->cache)) {
+            $this->cache->cleanAllCache();
+        }
+
+        return $this;
+    }
+    /* }}} */
+
+    /* {{{ public Boolean useCache() */
+    /**
+     * 是否使用缓存
+     *
+     * @access public
+     * @return Boolean true or false
+     */
+    public function useCache()
+    {
+        return empty($this->cache) ? false : true;
+    }
+    /* }}} */
+
     /* {{{ public Mixture getHost() */
     /**
      * 随机获取一台可用服务器
@@ -138,25 +191,6 @@ class ConnPool
         $server['times']++;
 
         return $server['host'];
-    }
-    /* }}} */
-
-    /* {{{ public Object setOffline() */
-    /**
-     * 标记一台服务器为不可用
-     *
-     * @access public
-     * @param  Mixture $host (default null)
-     * @return Object $this
-     */
-    public function setOffline($host = null)
-    {
-        $sign = (null === $host) ? $this->last : self::sign($host);
-        if (isset($this->host[$sign])) {
-            $this->offs[$sign] = time() + $this->live;
-        }
-
-        return $this;
     }
     /* }}} */
 
