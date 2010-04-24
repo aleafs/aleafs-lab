@@ -19,17 +19,16 @@ class ConnPoolTest extends LibTestShell
     protected function setUp()
     {
         parent::setUp();
+        $this->pool = new ConnPool(__CLASS__);
     }
 
     protected function tearDown()
     {
+        unset($this->pool->cleanAll());
         parent::tearDown();
     }
 
     /* {{{ public function test_should_right_select_by_random() */
-    /**
-     * @return  
-     */
     public function test_should_random_select_works_fine()
     {
         $hosts  = array(
@@ -41,17 +40,16 @@ class ConnPoolTest extends LibTestShell
             '127.0.0.1:1239' => 1,
         );
 
-        $pool   = new ConnPool(__METHOD__);
         foreach ($hosts AS $host => $weight) {
-            $pool->register($host, $weight);
+            $this->pool->register($host, $weight);
         }
-        $pool->register('I\m not exists', 1000);
+        $this->pool->register('I\m not exists', 1000);
 
         $result = array();
         for ($i = 0; $i < 10000; $i++) {
-            $host = $pool->getHost();
+            $host = $this->pool->getHost();
             if (!preg_match('/^[\d\.]+:\d+$/is', $host)) {         /**<  模拟连接      */
-                $pool->setOffline();
+                $this->pool->setOffline();
             }
             $result[$host]++;
         }
@@ -71,8 +69,7 @@ class ConnPoolTest extends LibTestShell
     /* {{{ public function test_should_throw_exception_when_all_offline() */
     public function test_should_throw_exception_when_all_offline()
     {
-        $pool = new ConnPool(__METHOD__);
-        $pool->register('localhost', 1)
+        $this->pool->register('localhost', 1)
             ->register('www.baidu.com', 1)
             ->register('www.google.com', 1)
             ->unregister('localhost')
@@ -80,7 +77,7 @@ class ConnPoolTest extends LibTestShell
             ->setOffline('www.google.com');
 
         try {
-            $pool->getHost();
+            $this->pool->getHost();
         } catch (\Exception $e) {
             $this->assertTrue($e instanceof \Aleafs\Lib\Exception);
             $this->assertContains(
@@ -89,6 +86,42 @@ class ConnPoolTest extends LibTestShell
                 'Exception Message Error.'
             );
         }
+    }
+    /* }}} */
+
+    /* {{{ public function test_should_live_time_works_fine() */
+    public function test_should_live_time_works_fine()
+    {
+        $pool = new ConnPool(__CLASS__, 2);
+        if (!$pool->useCache()) {
+            return;
+        }
+
+        $pool->register('www.baidu.com', 1)->setOffline('www.baidu.com');
+        unset($pool);
+
+        $pool = new ConnPool(__CLASS__);
+        $pool->register('www.baidu.com', 1)->register('www.google.com', 1);
+
+        for ($i = 0; $i < 10; $i++) {
+            $this->assertTrue(
+                $pool->getHost() != 'www.baidu.com',
+                'Offline host should NOT appear!'
+            );
+        }
+        unset($pool);
+
+        sleep(2);
+        $pool = new ConnPool(__CLASS__);
+        $pool->register('www.baidu.com', 1)->register('www.google.com', 1);
+
+        $return = array();
+        for ($i = 0; $i < 1000; $i++) {
+            $return[$pool->getHost()]++;
+        }
+
+        $this->assertTrue(485 <= $return['www.baidu.com'] <= 515);
+        $this->assertTrue(485 <= $return['www.google.com'] <= 515);
     }
     /* }}} */
 
