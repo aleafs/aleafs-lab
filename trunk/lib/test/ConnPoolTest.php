@@ -24,7 +24,11 @@ class ConnPoolTest extends LibTestShell
 
     protected function tearDown()
     {
-        unset($this->pool->cleanAll());
+        if (!empty($this->pool)) {
+            $this->pool->cleanAll();
+            unset($this->pool);
+        }
+
         parent::tearDown();
     }
 
@@ -120,8 +124,14 @@ class ConnPoolTest extends LibTestShell
             $return[$pool->getHost()]++;
         }
 
-        $this->assertTrue(485 <= $return['www.baidu.com'] <= 515);
-        $this->assertTrue(485 <= $return['www.google.com'] <= 515);
+        $this->assertTrue(
+            485 <= $return['www.baidu.com'] && 
+            $return['www.baidu.com'] <= 515
+        );
+        $this->assertTrue(
+            485 <= $return['www.google.com'] &&
+            $return['www.google.com'] <= 515
+        );
     }
     /* }}} */
 
