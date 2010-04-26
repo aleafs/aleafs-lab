@@ -15,14 +15,16 @@ namespace Aleafs\Lib;
 require_once(__DIR__ . '/autoload.php');
 require_once('PHPUnit/Framework/TestCase.php');
 
-AutoLoad::init();
-AutoLoad::register('aleafs\\lib', __DIR__);
-AutoLoad::register('aleafs\\lib\\db', __DIR__ . '/db/');
-
 date_default_timezone_set('Asia/Shanghai');
 
 class LibTestShell extends \PHPUnit_Framework_TestCase
 {
+
+	protected function setUp()
+	{
+		parent::setUp();
+		AutoLoad::init();
+    }
 
 }
 

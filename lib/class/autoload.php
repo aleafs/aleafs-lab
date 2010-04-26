@@ -38,6 +38,11 @@ class AutoLoad
      */
     public static function init()
     {
+        self::register('aleafs\\lib\\db',       __DIR__ . '/db/');
+        self::register('aleafs\\lib\\cache',    __DIR__ . '/cache/');
+        self::register('aleafs\\lib\\render',   __DIR__ . '/render/');
+        self::register('aleafs\\lib',           __DIR__);
+
         spl_autoload_register(array(__CLASS__, 'callback'));
     }
     /* }}} */

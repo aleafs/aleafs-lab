@@ -55,14 +55,19 @@ class ConnPoolTest extends LibTestShell
             if (!preg_match('/^[\d\.]+:\d+$/is', $host)) {         /**<  模拟连接      */
                 $this->pool->setOffline();
             }
-            $result[$host]++;
+
+            if (!isset($result[$host])) {
+                $result[$host] = 1;
+            } else {
+                $result[$host]++;
+            }
         }
         $this->assertTrue($result['I\m not exists'] < 5, 'setOffline Doesn\t work.');
 
         $total  = 10000 / array_sum(array_values($hosts));
         foreach ($hosts AS $host => $weight) {
             $this->assertTrue(
-                ($result[$host] >= 0.85 * $weight * $total) && ($result[$host] <= 1.15 * $weight * $total),
+                ($result[$host] >= 0.8 * $weight * $total) && ($result[$host] <= 1.2 * $weight * $total),
                 sprintf('Host "%s" random selector error.', $host)
             );
         }
@@ -121,16 +126,21 @@ class ConnPoolTest extends LibTestShell
 
         $return = array();
         for ($i = 0; $i < 1000; $i++) {
-            $return[$pool->getHost()]++;
+            $host = $pool->getHost();
+            if (!isset($return[$host])) {
+                $return[$host] = 1;
+            } else {
+                $return[$host]++;
+            }
         }
 
         $this->assertTrue(
-            485 <= $return['www.baidu.com'] && 
-            $return['www.baidu.com'] <= 515
+            400 <= $return['www.baidu.com'] && 
+            $return['www.baidu.com'] <= 600
         );
         $this->assertTrue(
-            485 <= $return['www.google.com'] &&
-            $return['www.google.com'] <= 515
+            400 <= $return['www.google.com'] &&
+            $return['www.google.com'] <= 600
         );
     }
     /* }}} */

@@ -25,7 +25,7 @@
 		<phpunit printsummary="false" failureproperty="failure.unittest"
 			errorproperty="error.unittest" codecoverage="true">
 			<batchtest>
-				<fileset dir="test/unit/">
+				<fileset dir="test/">
 					<include name="**/*Test.php" />
 				</fileset>
 			</batchtest>
@@ -38,6 +38,7 @@
 		<coverage-report outfile="build/code_coverage/coverage.xml">
 			<report todir="build/code_coverage" />
 		</coverage-report>
+
 		<if>
 			<equals arg1="${failure.unittest}" arg2="1" />
 			<then>
