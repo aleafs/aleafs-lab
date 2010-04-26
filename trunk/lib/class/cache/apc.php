@@ -46,6 +46,8 @@ class Apc
     {
         $this->prefix	= preg_replace('/[\s:]+/', '', $prefix);
         $this->compress	= $compress && function_exists('gzcompress') ? true : false;
+
+        ini_set('apc.slam_defense', 0);
     }
     /* }}} */
 
@@ -61,7 +63,7 @@ class Apc
     public function set($key, $value = null, $expire = null)
     {
         return apc_store(
-            $this->fix($key),
+            $this->name($key),
             $this->pack($value),
             empty($expire) ? self::EXPIRE_TIME : (int)$expire
         );
@@ -78,7 +80,7 @@ class Apc
      */
     public function get($key)
     {
-        $data = apc_fetch($this->fix($key));
+        $data = apc_fetch($this->name($key));
         if ($data === false) {
             return null;
         } else {
@@ -97,7 +99,7 @@ class Apc
      */
     public function delete($key)
     {
-        return apc_delete($this->fix($key));
+        return apc_delete($this->name($key));
     }
     /* }}} */
 
@@ -114,7 +116,7 @@ class Apc
     }
     /* }}} */
 
-    /* {{{ private String fix() */
+    /* {{{ private String name() */
     /**
      * 修正数据前缀
      *
@@ -122,7 +124,7 @@ class Apc
      * @param  String $key
      * @return String
      */
-    private function fix($key)
+    private function name($key)
     {
         return sprintf('%s::%s', $this->prefix, $key);
     }

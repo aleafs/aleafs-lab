@@ -8,9 +8,8 @@ class AutoLoadTest extends LibTestShell
 
 	protected function setUp()
 	{
-		AutoLoad::init();
-		AutoLoad::removeAllRules();
 		parent::setUp();
+		AutoLoad::removeAllRules();
 	}
 
 	protected function tearDown()

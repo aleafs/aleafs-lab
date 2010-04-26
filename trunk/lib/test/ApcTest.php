@@ -33,7 +33,7 @@ class ApcTest extends LibTestShell
     public function test_should_apc_without_compress_works_fine()
     {
         $val = array('a' => 'b', 'c' => array('d' => 'e'));
-        $apc = new Apc(__CLASS__);
+        $apc = new Apc(__METHOD__);
         $this->assertEquals(null, $apc->get('key1'), 'Apc should be empty.');
 
         $apc->set('key1', $val, 1);
@@ -41,7 +41,7 @@ class ApcTest extends LibTestShell
 
         $this->assertEquals($val, $apc->get('key1'), 'Apc set / get Error.');
 
-        sleep(1);
+        sleep(2);
         $this->assertEquals(null, $apc->get('key1'), 'Apc should has been expired.');
         $this->assertEquals($val, $apc->get('key2'), 'Apc set / get Error.');
 
@@ -55,7 +55,7 @@ class ApcTest extends LibTestShell
     public function test_should_apc_with_compress_works_fine()
     {
         $val = array('a' => 'b', 'c' => array('d' => 'e'));
-        $apc = new Apc(__CLASS__, true);
+        $apc = new Apc(__METHOD__, true);
         $this->assertEquals(null, $apc->get('key1'), 'Apc should be empty.');
 
         $apc->set('key1', $val, 1);
