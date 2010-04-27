@@ -69,7 +69,7 @@ class Apc
                 'ttl'   => time() + $expire,
                 'val'   => $value,
             )),
-            floor(1.2 * $expire)
+            $expire
         );
     }
     /* }}} */
@@ -82,15 +82,16 @@ class Apc
      * @param  String $key
      * @return Mixture
      */
-    public function get($key)
+    public function get($key, $ttl = null)
     {
         $data = apc_fetch($this->name($key));
         if (false === $data) {
             return null;
         }
 
+        $ttl  = empty($ttl) ? time() : (int)$ttl;
         $data = $this->unpack($data);
-        if ($data['ttl'] < time()) {
+        if ($data['ttl'] < $ttl) {
             $this->delete($key);
             return null;
         }
