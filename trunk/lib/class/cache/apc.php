@@ -31,8 +31,6 @@ class Apc
 
     private $compress	= false;
 
-    private $timenow    = 0;
-
     /* }}} */
 
     /* {{{ public void __construct() */
@@ -48,7 +46,6 @@ class Apc
     {
         $this->prefix	= preg_replace('/[\s:]+/', '', $prefix);
         $this->compress	= $compress && function_exists('gzcompress') ? true : false;
-        $this->timenow  = time();
 
         ini_set('apc.slam_defense', 0);
     }
@@ -66,10 +63,10 @@ class Apc
     public function set($key, $value = null, $expire = null)
     {
         $expire = empty($expire) ? self::EXPIRE_TIME : (int)$expire;
-        return @apc_store(
+        return apc_store(
             $this->name($key),
             $this->pack(array(
-                'ttl'   => $this->timenow + $expire,
+                'ttl'   => time() + $expire,
                 'val'   => $value,
             )),
             floor(1.2 * $expire)
@@ -92,13 +89,13 @@ class Apc
             return null;
         }
 
-        list($ttl, $val) = $this->unpack($data);
-        if ($ttl <= $this->timenow) {
+        $data = $this->unpack($data);
+        if ($data['ttl'] < time()) {
             $this->delete($key);
             return null;
         }
 
-        return $val;
+        return $data['val'];
     }
     /* }}} */
 
