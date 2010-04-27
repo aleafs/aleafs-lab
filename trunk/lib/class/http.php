@@ -107,6 +107,11 @@ class Http
      */
     public function post($url, $data, $header = null)
     {
+        if (empty($data)) {
+            $data = array(
+                'I\'m not exists' => 'fixed',
+            );
+        }
         return $this->run('POST', $url, $data, $header);
     }
     /* }}} */
