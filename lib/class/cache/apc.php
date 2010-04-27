@@ -47,7 +47,7 @@ class Apc
         $this->prefix	= preg_replace('/[\s:]+/', '', $prefix);
         $this->compress	= $compress && function_exists('gzcompress') ? true : false;
 
-        ini_set('apc.slam_defense', 0);
+        //ini_set('apc.slam_defense', 'Off'); PHP_INI_SYSTEM
     }
     /* }}} */
 
