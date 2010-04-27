@@ -27,5 +27,9 @@ class SessionTest extends LibTestShell
         parent::tearDown();
     }
 
+    public function test_should_session_read_write_ok()
+    {
+    }
+
 }
 

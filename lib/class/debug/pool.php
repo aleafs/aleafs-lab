@@ -8,11 +8,11 @@
 // | Author: pengchun <pengchun@taobao.com>								|
 // +--------------------------------------------------------------------+
 //
-// $Id$
+// $Id: var.php 48 2010-04-26 15:58:11Z zhangxc83 $
 
 namespace Aleafs\Lib\Debug;
 
-class Var
+class Pool
 {
 
     /* {{{ 静态变量 */
@@ -66,6 +66,19 @@ class Var
     }
     /* }}} */
 
+    /* {{{ public static void clean() */
+    /**
+     * 清理所有debug数据
+     *
+     * @access public static
+     * @return void
+     */
+    public static function clean() 
+    {
+        self::$debug = array();
+    }
+    /* }}} */
+
     /* {{{ public static String dump() */
     /**
      * 打出debug数据
@@ -85,19 +98,6 @@ class Var
         }
 
         return var_export(self::$debug[$key], true);
-    }
-    /* }}} */
-
-    /* {{{ public static void clean() */
-    /**
-     * 清理所有debug数据
-     *
-     * @access public static
-     * @return void
-     */
-    public static function clean() 
-    {
-        self::$debug = array();
     }
     /* }}} */
 
