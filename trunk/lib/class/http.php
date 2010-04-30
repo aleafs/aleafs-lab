@@ -23,16 +23,17 @@ class Http
 
     /* {{{ 静态变量 */
 
-    private static $ini = array(
+    private static $default = array(
+        'server'    => array(),
         'prefix'    => '',
         'timeout'   => array(
-            'connect'   => 0,
-            'write'     => 0,
-            'read'      => 0,
+            'connect'   => 300,
+            'write'     => 100,
+            'read'      => 500,
         ),
         'retry'     => array(
             'timeout1'  => 10,
-            'timeout2'  => 10,
+            'timeout2'  => 20,
         ),
     );
 
@@ -42,11 +43,9 @@ class Http
 
     private $host   = null;       /**<  服务器池     */
 
-    private $prefix = null;       /**<  URL前缀      */
-
     private $header = null;
 
-    private $option = null;
+    private $ini    = null;
 
     private $curl   = null;
 
@@ -58,12 +57,16 @@ class Http
      *
      * @access public
      * @param  String $ini
+     * @param  String $key (default null)
      * @return void
      */
-    public function __construct($ini)
+    public function __construct($ini, $key = null)
     {
-        $this->prefix = trim($ini['prefix'], '/');
-        $this->host = new ConnPool(__CLASS__);
+        $this->ini  = array_merge_recursive(self::$default, (array)$ini);
+        $this->host = new ConnPool(__CLASS__ . '/' . !is_scalar($key) ? md5(json_encode($ini)) : $key);
+        foreach ($this->ini['server'] AS $host) {
+            $this->host->register($host);
+        }
     }
     /* }}} */
 
@@ -133,8 +136,8 @@ class Http
             CURLOPT_RETURNTRANSFER  => true,
             CURLOPT_HEADER          => true,
             CURLOPT_BUFFERSIZE      => 8192,
-            CURLOPT_CONNECTTIMEOUT  => $this->option['timeout']['connect'],
-            CURLOPT_TIMEOUT         => (int)(1.2 * (array_sum($this->option['timeout']))),
+            CURLOPT_CONNECTTIMEOUT  => $this->ini['timeout']['connect'],
+            CURLOPT_TIMEOUT         => (int)(1.2 * (array_sum($this->ini['timeout']))),
             CURLOPT_ENCODING        => 'gzip,deflate',
             CURLOPT_USERAGENT       => self::HTTP_USER_AGENT,
         );
@@ -174,7 +177,7 @@ class Http
             );
         }
 
-        $retry = array_unshift($this->option['retry'], 0);
+        $retry = array_unshift($this->ini['retry'], 0);
         foreach ($retry AS $time) {
             $this->lastUrl = $this->fixUrl($url);
             curl_setopt($this->curl, CURLOPT_URL, $this->lastUrl);
@@ -205,7 +208,7 @@ class Http
         return sprintf(
             'http://%s/%s/%s',
             $this->host->getHost(),
-            $this->prefix,
+            trim($this->ini['prefix'], '/'),
             ltrim($url, '/')
         );
     }
