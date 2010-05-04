@@ -30,14 +30,14 @@ class Html
         'tpl_path'  => null,
         'obj_path'  => null,
         'theme'     => 'default',
-        'expire'    => 0, 
+        'expire'    => 0,
     );
 
     /* }}} */
 
     /* {{{ 成员变量 */
     /**
-     * @绑定的数据 
+     * @绑定的数据
      */
     private $data	= array();
 
@@ -149,6 +149,49 @@ class Html
      */
     private static function compile($tplSrc, $tplObj)
     {
+    }
+    /* }}} */
+
+    /* {{{ private static Boolean lock() */
+    /**
+     * 文件锁定
+     *
+     * @access private static
+     * @param  String  $file : 文件名 (refferrence)
+     * @param  Integer $time : 锁失效时间 (s)
+     * @return Boolean true or false
+     */
+    private static function lock(&$file, $time)
+    {
+        $file = realpath($file);
+        if (!is_file($file)) {
+            return true;
+        }
+
+        $file.= '.lock';
+        $time = max(0, (int)$time);
+        $time = empty($time) ? 0 : time() - (int)$time;
+        if (!is_file($file) || ($time > 0 && (filemtime($file) + $time) <= time())) {
+            return touch($file) ? true : false;
+        }
+
+        $sum  = 0;
+        $step = 2000;         /**<  2ms      */
+        $max  = $time * 1000000;
+        for ($i = 0;;$i++) {
+            $add = $i * $step;
+            usleep($add);
+            if (!is_file($file)) {
+                return true;
+            }
+
+            $sum += $add;
+            if ($sum >= $max) {
+                break;
+            }
+        }
+
+        return false;
     }
     /* }}} */
 
