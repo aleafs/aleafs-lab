@@ -24,6 +24,8 @@ class Http
     /* {{{ 静态变量 */
 
     private static $default = array(
+        'logurl'    => null,
+        'logtime'   => false,
         'server'    => array(),
         'prefix'    => '',
         'timeout'   => array(
@@ -49,6 +51,10 @@ class Http
 
     private $curl   = null;
 
+    private $log    = null;
+
+    private $timer  = null;
+
     /* }}} */
 
     /* {{{ public void __construct() */
@@ -65,7 +71,12 @@ class Http
         $this->ini  = array_merge_recursive(self::$default, (array)$ini);
         $this->host = new ConnPool(__CLASS__ . '/' . !is_scalar($key) ? md5(json_encode($ini)) : $key);
         foreach ($this->ini['server'] AS $host) {
-            $this->host->register($host);
+            list($host, $weight) = self::parseHost($host);
+            $this->host->register($host, $weight);
+        }
+
+        if (!empty($this->ini['logurl'])) {
+            $this->log  = new Log($this->ini['logurl']);
         }
     }
     /* }}} */
@@ -89,7 +100,7 @@ class Http
      *
      * @access public
      * @param  String $url
-     * @param  Mixture $header (default null)
+      @param  Mixture $header (default null)
      * @return Mixture
      */
     public function get($url, $header = null)
@@ -119,7 +130,42 @@ class Http
     }
     /* }}} */
 
-    /* {{{ private void init() */
+    /* {{{ private void   beginTimer() */
+    /**
+     * 启动计时器
+     *
+     * @access private
+     * @return void
+     */
+    private function beginTimer()
+    {
+        if (!empty($this->ini['logtime'])) {
+            $this->timer = microtime(true);
+        }
+    }
+    /* }}} */
+
+    /* {{{ private Float  getElapsed() */
+    /**
+     * 获取计时器
+     *
+     * @access private
+     * @return Number or Null
+     */
+    private function getElapsed()
+    {
+        if (empty($this->timer)) {
+            return null;
+        }
+
+        $elapse = microtime(true) - $this->timer;
+        $this->timer = null;
+
+        return number_format($elapse, 6);
+    }
+    /* }}} */
+
+    /* {{{ private void   init() */
     /**
      * 初始化CURL对象
      *
@@ -162,7 +208,8 @@ class Http
             $this->init();
         }
 
-        switch (trim($method)) {
+        $method = strtoupper(trim($method));
+        switch ($method) {
         case 'POST':
             curl_setopt($this->curl, CURLOPT_POST, true);
             break;
@@ -178,10 +225,21 @@ class Http
         }
 
         $retry = array_unshift($this->ini['retry'], 0);
+        $this->beginTimer();
         foreach ($retry AS $time) {
             $this->lastUrl = $this->fixUrl($url);
             curl_setopt($this->curl, CURLOPT_URL, $this->lastUrl);
             if (false !== ($ret = curl_exec($this->curl))) {
+                $elapse = $this->getElapsed();
+                if (!empty($this->log)) {
+                    $this->log->debug('HTTP_RUN', array(
+                        'sleep' => $time,
+                        'time'  => $elapse,
+                        'method'=> $method,
+                        'url'   => $url,
+                        'data'  => $data,
+                    ));
+                }
                 return $this->split($ret);
             }
             usleep($time * 1000);
@@ -226,6 +284,29 @@ class Http
     {
         list($this->header, $body) = explode("\r\n\r\n", trim($ret));
         return $body;
+    }
+    /* }}} */
+
+    /* {{{ private static Array parseHost() */
+    /**
+     * 解析服务器地址
+     *
+     * @access private static
+     * @param  String $host
+     * @return Array
+     */
+    private static function parseHost($host)
+    {
+        $var = explode('?', $host);
+        if (!isset($var[1])) {
+            $weight = 1;
+        } else {
+            parse_str($var[1], $query);
+            $query  = array_change_key_case($query, CASE_LOWER);
+            $weight = isset($query['weight']) ? max(1, (int)$query['weight']) : 1;
+        }
+
+        return array(reset($var), $weight);
     }
     /* }}} */
 
