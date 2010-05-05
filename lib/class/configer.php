@@ -12,6 +12,8 @@
 
 namespace Aleafs\Lib;
 
+AutoLoad::register('aleafs\lib\configer', __DIR__ . '/config');
+
 class Configer
 {
 
@@ -63,10 +65,10 @@ class Configer
             if (!isset(self::$rules[$key])) {
                 throw new Exception(sprintf('Undefined config object named as "%s"', $key));
             }
-            self::$objs = new self(self::$rules[$key]);
+            self::$objs[$key] = new self(self::$rules[$key]);
         }
 
-        return self::$objs;
+        return self::$objs[$key];
     }
     /* }}} */
 
@@ -106,7 +108,7 @@ class Configer
     public static function unregister($key)
     {
         $key = strtolower(trim($key));
-        if (isset(self::$ruls[$key])) {
+        if (isset(self::$rules[$key])) {
             unset(self::$rules[$key]);
         }
         if (isset(self::$objs[$key])) {
@@ -133,6 +135,7 @@ class Configer
             $this->loaded = true;
         }
         $key = strtolower(trim($key));
+        var_dump($this->option);
 
         return isset($this->option[$key]) ? $this->option[$key] : $default;
     }
@@ -148,6 +151,20 @@ class Configer
     public static function makeSureRemoveAll()
     {
         self::$rules = array() && self::$objs = array();
+    }
+    /* }}} */
+
+    /* {{{ private void __construct() */
+    /**
+     * 构造函数
+     *
+     * @access private
+     * @param  String $url
+     * @return void
+     */
+    private function __construct($url)
+    {
+        $this->url = $url;
     }
     /* }}} */
 

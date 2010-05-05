@@ -24,7 +24,10 @@ class Ini
 
     public function parse()
     {
-        return parse_ini_file($this->url['path'], true);
+        $var = parse_ini_file($this->url['path'], true);
+        $ret = $var;
+
+        return $ret;
     }
 
 }
