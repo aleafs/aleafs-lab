@@ -12,8 +12,6 @@
 
 namespace Aleafs\Lib;
 
-AutoLoad::register('aleafs\lib\configer', __DIR__ . '/config');
-
 class Configer
 {
 
@@ -135,7 +133,6 @@ class Configer
             $this->loaded = true;
         }
         $key = strtolower(trim($key));
-        var_dump($this->option);
 
         return isset($this->option[$key]) ? $this->option[$key] : $default;
     }
