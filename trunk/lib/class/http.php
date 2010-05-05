@@ -224,7 +224,8 @@ class Http
             );
         }
 
-        $retry = array_unshift($this->ini['retry'], 0);
+        $retry = $this->ini['retry'];
+        array_unshift($retry, 0);
         $this->beginTimer();
         foreach ($retry AS $time) {
             $this->lastUrl = $this->fixUrl($url);
