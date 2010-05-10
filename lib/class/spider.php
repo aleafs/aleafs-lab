@@ -31,9 +31,18 @@ class Spider
 	public function __destruct()
 	{
 		foreach ($this->request AS $curl) {
-		
+			if (!$curl) {
+				continue;
+			}
+
+			curl_multi_remove_handle($curl);
+			curl_close($curl);
 		}
-	
+
+		if ($this->handle) {
+			curl_multi_close($this->handle);
+			$this->handle	= null;
+		}
 	}
 
 	public function register($ch)
@@ -62,7 +71,7 @@ class Spider
 		}
 
 		while ($this->running && (in_array($this->status, array(CURLM_OK, CURLM_CALL_MULTI_PERFORM)))) {
-		
+
 		}
 	}
 
