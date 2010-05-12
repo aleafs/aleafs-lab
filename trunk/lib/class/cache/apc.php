@@ -127,6 +127,30 @@ class Apc
     }
     /* }}} */
 
+    /* {{{ public Mixture shell() */
+    /**
+     * Cache获取shell接口
+     *
+     * @access public
+     * @param  Mixture $callback
+     * @param  String  $key
+     * @param  Mixture $expire
+     * @return Mixture
+     */
+    public function shell($callback, $key, $expire)
+    {
+        $data = $this->get($key);
+        if (empty($data)) {
+            $data = call_user_func($callback);
+            if (!empty($data)) {
+                $this->set($key, $data, $expire);
+            }
+        }
+
+        return $data;
+    }
+    /* }}} */
+
     /* {{{ private String name() */
     /**
      * 修正数据前缀

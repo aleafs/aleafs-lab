@@ -65,5 +65,11 @@ class ApcTest extends LibTestShell
     }
     /* }}} */
 
+    /* {{{ public void test_should_cache_shell_works_fine() */
+    public function test_should_cache_shell_works_fine()
+    {
+    }
+    /* }}} */
+
 }
 
