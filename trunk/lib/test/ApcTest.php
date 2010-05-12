@@ -18,6 +18,8 @@ require_once(__DIR__ . '/../class/TestShell.php');
 class ApcTest extends LibTestShell
 {
 
+    private $shell  = 0;
+
     protected function setUp()
     {
         parent::setUp();
@@ -68,6 +70,25 @@ class ApcTest extends LibTestShell
     /* {{{ public void test_should_cache_shell_works_fine() */
     public function test_should_cache_shell_works_fine()
     {
+        $apc = new Apc(__METHOD__);
+        $this->shell = 0;
+
+        $this->assertEquals(md5(1), $apc->shell(array(&$this, 'loadShellData'), 1));
+        $this->assertEquals(1, $this->shell);
+
+        $this->assertEquals(md5(1), $apc->shell(array(&$this, 'loadShellData'), 1));
+        $this->assertEquals(1, $this->shell);
+
+        $this->assertEquals(md5(3), $apc->shell(array(&$this, 'loadShellData'), 3));
+        $this->assertEquals(2, $this->shell);
+    }
+    /* }}} */
+
+    /* {{{ public Mixture loadShellData() */
+    public function loadShellData($key)
+    {
+        $this->shell++;
+        return md5($key);
     }
     /* }}} */
 

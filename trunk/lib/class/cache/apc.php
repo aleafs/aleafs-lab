@@ -134,14 +134,14 @@ class Apc
      * @access public
      * @param  Mixture $callback
      * @param  String  $key
-     * @param  Mixture $expire
+     * @param  Mixture $expire : default null
      * @return Mixture
      */
-    public function shell($callback, $key, $expire)
+    public function shell($callback, $key, $expire = null)
     {
         $data = $this->get($key);
         if (empty($data)) {
-            $data = call_user_func($callback);
+            $data = call_user_func($callback, $key);
             if (!empty($data)) {
                 $this->set($key, $data, $expire);
             }
