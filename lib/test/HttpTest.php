@@ -11,6 +11,7 @@
 // $Id$
 
 namespace Aleafs\Lib;
+
 require_once(__DIR__ . '/../class/TestShell.php');
 
 class HttpTest extends LibTestShell

@@ -24,6 +24,8 @@ class Html
 
     const FILE_MAX_LOCK_TM  = 2;          /**<  最长加锁时间      */
 
+    const COMPILE_LOOP_DEEP = 5;
+
     /* }}} */
 
     /* {{{ 静态变量 */
@@ -117,6 +119,22 @@ class Html
      */
     public function render($tplName, $tplDir)
     {
+        extract($this->data);
+        include($this->template($tplName, $tplDir));
+    }
+    /* }}} */
+
+    /* {{{ private String template() */
+    /**
+     * 获取编译后的模板文件名
+     *
+     * @access private
+     * @param  String $tplFile
+     * @param  String $tplDir
+     * @return String
+     */
+    private function template($tplName, $tplDir)
+    {
         $tplObj = sprintf(
             '%s/%s/%s/%s.php',
             self::$ini['obj_path'],
@@ -125,7 +143,7 @@ class Html
         );
 
         if (empty(self::$ini['expire']) && is_file($tplObj)) {
-            return $this->output($tplObj);
+            return $tplObj;
         }
 
         $themes = array_unique(array(
@@ -155,7 +173,10 @@ class Html
             ));
         }
 
-        if (!is_file($tplObj) || filemtime($tplObj) < filemtime($tplSrc)) {
+        $objTime = filemtime($tplObj);
+        if (!is_file($tplObj) || $objTime < filemtime($tplSrc) 
+            || $objTime + 60 * self::$ini['expire'] < time()
+        ) {
             $data = array_filter(array_map('trim', (array)file($tplSrc)));
             if (0 != strcasecmp(array_pop($data), self::TPL_COMPLETE_CHAR)) {
                 throw new Exception(sprintf(
@@ -167,22 +188,7 @@ class Html
             $this->compile(implode("\n", $data), $tplObj);
         }
 
-        return $this->output($tplObj);
-    }
-    /* }}} */
-
-    /* {{{ private Boolean output() */
-    /**
-     * 输出模板内容
-     *
-     * @access private
-     * @param String $file : 编译后的模板文件
-     * @return Boolean true or false 
-     */
-    private function output($file)
-    {
-        extract($this->data);
-        include($file);
+        return $tplObj;
     }
     /* }}} */
 
@@ -205,7 +211,7 @@ class Html
 
         $content = preg_replace(
             '/\s*\{element\s+(.+?)\}\s*/is',
-            "\n<?php include(template('\\1', '_element', '$strTpl'));?>\n",
+            "\n<?php include(\$this->render('\\1', '_element'));?>\n",
             $content
         );
 
@@ -213,20 +219,20 @@ class Html
         $content = preg_replace('/\s*\{lang\s+(.+?)\}\s*/is', "\n<?php __('\\1'); ?>\n", $content);
         $content = preg_replace(
             '/\s*\{elseif\s+(.+?)\}\s*/ies',
-            "self::stripvtags('\n<?php } elseif(\\1) { ?>\n','')",
+            "self::stripvtags('\n<?php } elseif (\\1) { ?>\n','')",
             $content
         );
         $content = preg_replace('/\s*\{else\}\s*/is', "\n<? } else { ?>\n", $content);
 
-        for($i = 0; $i < $this->_intComDepth; $i++) {
+        for($i = 0; $i < self::COMPILE_LOOP_DEEP; $i++) {
             $content = preg_replace(
                 "/\s*\{loop\s+(\S+)\s+(\S+)\}\s*(.+?)\s*\{\/loop\}\s*/ies",
-                "self::stripvtags('\n<?php if(is_array(\\1)) { foreach(\\1 AS \\2) { ?>','\n\\3\n<?php } } ?>\n')",
+                "self::stripvtags('\n<?php foreach ((array)\\1 AS \\2) { ?>','\n\\3\n<?php } ?>\n')",
                 $content
             );
             $content = preg_replace(
                 "/\s*\{loop\s+(\S+)\s+(\S+)\s+(\S+)\}\s*(.+?)\s*\{\/loop\}\s*/ies",
-                "self::stripvtags('\n<?php if(is_array(\\1)) { foreach(\\1 AS \\2 => \\3) { ?>','\n\\4\n<?php } } ?>\n')",
+                "self::stripvtags('\n<?php foreach ((array)\\1 AS \\2 => \\3) { ?>','\n\\4\n<?php } ?>\n')",
                 $content
             );
             $content = preg_replace(
