@@ -65,16 +65,16 @@ class Html
     }
     /* }}} */
 
-    /* {{{ public void __construct() */
+    /* {{{ public Object __construct() */
     /**
      * 构造函数
      *
      * @access public
-     * @return void
+     * @return Object $this
      */
     public function __construct()
     {
-        $this->cleanAllParams();
+        return $this->clean();
     }
     /* }}} */
 
@@ -94,33 +94,45 @@ class Html
     }
     /* }}} */
 
-    /* {{{ public Object cleanAllParams() */
+    /* {{{ public Object clean() */
     /**
      * 清理所有绑定的参数
      *
      * @access public
      * @return Object $this
      */
-    public function cleanAllParams()
+    public function clean()
     {
         $this->data	= array();
         return $this;
     }
     /* }}} */
 
-    /* {{{ public void render() */
+    /* {{{ public Mixture render() */
     /**
      * 渲染并输出
      *
      * @access public
      * @param  String $tplFile
      * @param  String $tplDir
-     * @return void
+     * @param  Boolean $flush : true
+     * @return Mixture
      */
-    public function render($tplName, $tplDir)
+    public function render($tplName, $tplDir, $flush = true)
     {
         extract($this->data);
+
+        ob_start();
         include($this->template($tplName, $tplDir));
+        $data = ob_get_contents();
+        ob_end_clean();
+
+        if (false !== $flush) {
+            echo $data;
+            flush();
+        }
+
+        return $data;
     }
     /* }}} */
 
@@ -175,7 +187,7 @@ class Html
 
         $objTime = filemtime($tplObj);
         if (!is_file($tplObj) || $objTime < filemtime($tplSrc) 
-            || $objTime + 60 * self::$ini['expire'] < time()
+            || $objTime + self::$ini['expire'] < time()
         ) {
             $data = array_filter(array_map('trim', (array)file($tplSrc)));
             if (0 != strcasecmp(array_pop($data), self::TPL_COMPLETE_CHAR)) {
@@ -211,7 +223,7 @@ class Html
 
         $content = preg_replace(
             '/\s*\{element\s+(.+?)\}\s*/is',
-            "\n<?php include(\$this->render('\\1', '_element'));?>\n",
+            "\n<?php include(\$this->template('\\1', '_element'));?>\n",
             $content
         );
 
@@ -266,6 +278,37 @@ class Html
     }
     /* }}} */
 
+    /* {{{ private static String  realpath() */
+    /**
+     * 计算文件的完整路径名
+     *
+     * @access private static
+     * @param  String $file
+     * @return Boolean true or false
+     */
+    private static function realpath($file)
+    {
+        if (!is_scalar($file) || trim($file) == '') {
+            return false;
+        }
+
+        if (false !== ($temp = realpath($file))) {
+            return $temp;
+        }
+
+        $temp = explode(DIRECTORY_SEPARATOR, $file);
+        $keys = array_keys($temp, '..');
+        foreach ($keys AS $pos => $key) {
+            array_splice($temp, $key - ($pos * 2 + 1), 2);
+        }
+
+        return strtr(
+            implode(DIRECTORY_SEPARATOR, $temp),
+            array('./' => '', '.\\' => '', )
+        );
+    }
+    /* }}} */
+
     /* {{{ private static Boolean lock() */
     /**
      * 文件锁定
@@ -277,12 +320,16 @@ class Html
      */
     private static function lock(&$file, $time)
     {
-        $file = realpath($file);
-        if (!is_file($file)) {
-            return true;
+        if (false === ($temp = self::realpath($file))) {
+            return false;
         }
 
-        $file.= '.lock';
+        $file = $temp . '.lock';
+        $path = dirname($file);
+        if (!is_dir($path) && !mkdir($path, 0744, true)) {
+            return false;
+        }
+
         $time = max(0, (int)$time);
         $time = empty($time) ? 0 : time() - (int)$time;
         if (!is_file($file) || ($time > 0 && (filemtime($file) + $time) <= time())) {
