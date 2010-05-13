@@ -25,6 +25,7 @@ class HttpTest extends LibTestShell
     protected function tearDown()
     {
         parent::tearDown();
+        usleep(1050000);          /**<  避免apc写入时出现warning      */
     }
 
     public function test_should_get_and_post_work_fine()
