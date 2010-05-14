@@ -10,6 +10,7 @@
 //
 // $Id$
 
+namespace Aleafs\Lib;
 use \Aleafs\Lib\Render\Html;
 
 require_once(__DIR__ . '/../class/TestShell.php');
@@ -27,7 +28,7 @@ class HtmlTest extends LibTestShell
      */
     private static function cleanDir($dir)
     {
-        $d = dir($dir);
+        $d = @dir($dir);
         if (!$d) {
             return false;
         }
@@ -76,10 +77,26 @@ class HtmlTest extends LibTestShell
         $html   = new Html();
         $html->assign('scalar', 'I\m a scalar variabe.');
         $html->assign('array', array(1, 2, 3));
-        $html->render('index', 'user');
+        $html->render('index', 'user', false);
 
         $this->assertTrue(is_file(__DIR__ . '/html/obj/default/user/index.php'));
         $this->assertTrue(is_file(__DIR__ . '/html/obj/default/_element/footer.php'));
+
+        try {
+            $html->render('not_complete', 'user', false);
+            $this->assertTrue(false, 'Exception should be throw here.');
+        } catch (\Exception $e) {
+            $this->assertContains('uncompleted', $e->getMessage());
+        }
+
+        Html::init(array(
+            'tpl_path'  => __DIR__ . '/html/tpl',
+            'obj_path'  => __DIR__ . '/html/obj',
+            'theme'     => 'theme_2',
+            'expire'    => 0,
+        ));
+        $html->render('login', 'user', false);
+        $this->assertTrue(is_file(__DIR__ . '/html/obj/theme_2/_element/footer.php'));
     }
 
 }
