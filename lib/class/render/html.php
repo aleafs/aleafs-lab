@@ -11,6 +11,7 @@
 // $Id: html.php 2010-04-23  aleafs Exp $
 
 namespace Aleafs\Lib\Render;
+use \Aleafs\Lib\Exception;
 
 class Html
 {
@@ -185,10 +186,8 @@ class Html
             ));
         }
 
-        $objTime = filemtime($tplObj);
-        if (!is_file($tplObj) || $objTime < filemtime($tplSrc) 
-            || $objTime + self::$ini['expire'] < time()
-        ) {
+        $objTime = is_file($tplObj) ? filemtime($tplObj) : 0;
+        if ($objTime < filemtime($tplSrc) || $objTime + self::$ini['expire'] < time()) {
             $data = array_filter(array_map('trim', (array)file($tplSrc)));
             if (0 != strcasecmp(array_pop($data), self::TPL_COMPLETE_CHAR)) {
                 throw new Exception(sprintf(
@@ -258,23 +257,23 @@ class Html
         $content = preg_replace('/\<\?\=(\$.+?)\?\>/s', self::addquote('<?php echo \\1;?>'), $content);
 
         $lock = $tplObj;
-        if (self::lock($lock, self::FILE_MAX_LOCK_TM)) {
-            $len1 = strlen($content);
-            $len2 = file_put_contents($lock, $content, LOCK_EX);
-            if ($len1 != $len2 || !rename($lock, $tplObj)) {
-                self::unlock($lock);
-                throw new Exception(sprintf(
-                    'Template file "%s" flush error, size : %d, write : %d',
-                    $tplObj, $len1, $len2
-                ));
-            }
-            self::unlock($lock);
+        if (!self::lock($lock, self::FILE_MAX_LOCK_TM)) {
+            throw new Exception(sprintf(
+                'Template file "%s" lock error, expire : %ds',
+                $tplObj, self::FILE_MAX_LOCK_TM
+            ));
         }
 
-        throw new Exception(sprintf(
-            'Template file "%s" lock error, expire : %ds',
-            $tplObj, self::FILE_MAX_LOCK_TM
-        ));
+        $len1 = strlen($content);
+        $len2 = file_put_contents($lock, $content, LOCK_EX);
+        if ($len1 != $len2 || !rename($lock, $tplObj)) {
+            self::unlock($lock);
+            throw new Exception(sprintf(
+                'Template file "%s" flush error, size : %d, write : %d',
+                $tplObj, $len1, $len2
+            ));
+        }
+        self::unlock($lock);
     }
     /* }}} */
 
