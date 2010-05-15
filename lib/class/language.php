@@ -55,10 +55,14 @@ class Language
             }
 
             return self::$reader[$domain]->gettext($string);
+        } else {
+            $reader = self::$reader;
         }
 
-        foreach (self::$reader AS $reader) {
-        
+        foreach ($reader AS $mo) {
+            if (false !== ($result = $mo->translate($string))) {
+                return $result;
+            }
         }
 
         return $string;
