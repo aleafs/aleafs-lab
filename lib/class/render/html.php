@@ -11,6 +11,8 @@
 // $Id: html.php 2010-04-23  aleafs Exp $
 
 namespace Aleafs\Lib\Render;
+
+use \Aleafs\Lib\Language;
 use \Aleafs\Lib\Exception;
 
 class Html
@@ -45,6 +47,11 @@ class Html
      * @绑定的数据
      */
     private $data	= array();
+
+    /**
+     * @文件编译次数
+     */
+    public $complie = array();
 
     /* }}} */
 
@@ -197,9 +204,27 @@ class Html
             }
 
             $this->compile(implode("\n", $data), $tplObj);
+
+            $index  = sprintf('%s/%s', $tplDir, $tplName);
+            $this->compile[$index] = isset($this->compile) ? $this->compile + 1 : 1;
         }
 
         return $tplObj;
+    }
+    /* }}} */
+
+    /* {{{ private static String lang() */
+    /**
+     * 语言包进行翻译
+     *
+     * @access private static
+     * @param  String $string
+     * @param  String $domain : default null
+     * @return String
+     */
+    private static function lang($string, $domain = null)
+    {
+        return Language::translate($string, $domain);
     }
     /* }}} */
 
@@ -226,8 +251,16 @@ class Html
             $content
         );
 
-        $content = preg_replace('/\s*\{lang\s+(.+?)\s+(.+?)\}\s*/is', "\n<?php __('\\1', '\\2'); ?>\n", $content);
-        $content = preg_replace('/\s*\{lang\s+(.+?)\}\s*/is', "\n<?php __('\\1'); ?>\n", $content);
+        $content = preg_replace(
+            '/\s*\{lang\s+(.+?)\s+(.+?)\}\s*/is',
+            "\n<?php echo self::lang('\\1', '\\2'); ?>\n",
+            $content
+        );
+        $content = preg_replace(
+            '/\s*\{lang\s+(.+?)\}\s*/is',
+            "\n<?php echo self::lang('\\1'); ?>\n",
+            $content
+        );
         $content = preg_replace(
             '/\s*\{elseif\s+(.+?)\}\s*/ies',
             "self::stripvtags('\n<?php } elseif (\\1) { ?>\n','')",
