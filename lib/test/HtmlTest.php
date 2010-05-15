@@ -97,6 +97,14 @@ class HtmlTest extends LibTestShell
         ));
         $html->render('login', 'user', false);
         $this->assertTrue(is_file(__DIR__ . '/html/obj/theme_2/_element/footer.php'));
+
+        /* 文件不存在 */
+        try {
+            $this->render('not_exists', 'user', false);
+            $this->assertTrue(false, 'No template file exception should be throw out.');
+        } catch (\Exception $e) {
+            $this->assertContains('No such template source file', $e->getMessage());
+        }
     }
 
 }
