@@ -138,7 +138,7 @@ class Language
     {
         if (!empty(self::$cache)) {
             return self::$cache->shell(
-                array(__CLASS__, '_gettext'),
+                function() use ($string, $domain) {return Language::_gettext($string, $domain);},
                 json_encode(array('d' => $domain, 's' => $string)),
                 self::CACHE_EXPIRE
             );
