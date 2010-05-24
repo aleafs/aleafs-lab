@@ -102,6 +102,16 @@ class Mo
     }
     /* }}} */
 
+    public function getAll()
+    {
+        $data = array();
+        for ($i = 0; $i < $this->header['count']; $i++) {
+            $data[$this->_get_original($i)] = $this->_get_translate($i);
+        }
+
+        return $data;
+    }
+
     /* {{{ private Boolean _load() */
     /**
      * 加载mo文件
@@ -116,7 +126,7 @@ class Mo
             return false;
         }
 
-        $unpack = sprintf('%s%d', $this->header['pack'], $this->header['count']);
+        $unpack = sprintf('%s%d', $this->header['pack'], 2 * $this->header['count']);
         $intAll = 8 * $this->header['count'];
 
         $this->original = unpack($unpack, $this->_read($this->header['off_o'], $intAll));
@@ -247,8 +257,8 @@ class Mo
     {
         $index *= 2;
         return $this->_read(
-            $this->header['tab_o'][$index + 2],
-            $this->header['tab_o'][$index + 1]
+            $this->original[$index + 2],
+            $this->original[$index + 1]
         );
     }
     /* }}} */
@@ -265,8 +275,8 @@ class Mo
     {
         $index *= 2;
         return $this->_read(
-            $this->header['tab_t'][$index + 2],
-            $this->header['tab_t'][$index + 1]
+            $this->translate[$index + 2],
+            $this->translate[$index + 1]
         );
     }
     /* }}} */
