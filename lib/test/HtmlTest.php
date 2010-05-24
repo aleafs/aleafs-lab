@@ -100,7 +100,7 @@ class HtmlTest extends LibTestShell
 
         /* 文件不存在 */
         try {
-            $this->render('not_exists', 'user', false);
+            $html->render('not_exists', 'user', false);
             $this->assertTrue(false, 'No template file exception should be throw out.');
         } catch (\Exception $e) {
             $this->assertContains('No such template source file', $e->getMessage());

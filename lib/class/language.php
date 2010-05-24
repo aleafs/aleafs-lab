@@ -18,6 +18,14 @@ use \Aleafs\Lib\Stream\Mo;
 class Language
 {
 
+    /* {{{ 静态常量 */
+
+    const CACHE_PREFIX  = '#LANG#';
+
+    const CACHE_EXPIRE  = null;
+
+    /* }}} */
+
     /* {{{ 静态变量 */
 
     /**
@@ -31,6 +39,11 @@ class Language
     private static $reader  = array();
 
     /**
+     * @调试状态
+     */
+    private static $status  = array();
+
+    /**
      * @语言
      */
     private static $lang    = 'zh_cn';
@@ -40,13 +53,10 @@ class Language
      */
     private static $cache   = null;
 
-    /* }}} */
-
-    /* {{{ 静态常量 */
-
-    const CACHE_PREFIX  = '#LANG#';
-
-    const CACHE_EXPIRE  = null;
+    /**
+     * @后注册的优先级高
+     */
+    private static $sorted  = false;
 
     /* }}} */
 
@@ -84,10 +94,8 @@ class Language
      */
     public static function register($domain, $mofile)
     {
-        // 后注册的优先
-        self::$rules = array(
-            self::normailize($domain) => realpath($mofile)
-        ) + self::$rules;
+        self::$rules[self::normailize($domain)] = realpath($mofile);
+        self::$sorted = false;
     }
     /* }}} */
 
@@ -108,10 +116,10 @@ class Language
         }
 
         $domain = self::normailize($domain);
+        if (isset(self::$reader[$domain])) {
+            unset(self::$reader[$domain]);
+        }
         if (isset(self::$rules[$domain])) {
-            if (isset(self::$reader[$domain])) {
-                unset(self::$reader[$domain]);
-            }
             unset(self::$rules[$domain]);
         }
     }
@@ -159,6 +167,10 @@ class Language
 
             $rules  = array(self::$rules[$domain]);
         } else {
+            if (!self::$sorted) {
+                self::$rules  = array_reverse(self::$rules, true);
+                self::$sorted = true;
+            }
             $rules  = self::$rules;
         }
 
@@ -170,12 +182,50 @@ class Language
                 }
                 self::$reader[$key] = new Mo($file);
             }
+
+            if (isset(self::$status[$key])) {
+                self::$status[$key]['read']++;
+            } else {
+                self::$status[$key] = array(
+                    'read'  => 1,
+                );
+            }
+
             if (false !== ($result = self::$reader[$key]->gettext($string))) {
                 return $result;
             }
         }
 
         return $string;
+    }
+    /* }}} */
+
+    /* {{{ public static Mixture debug() */
+    /**
+     * 获取调试信息
+     *
+     * @access public static
+     * @param  Mixture $domain : default null
+     * @return Mixture
+     */
+    public static function debug($domain = null)
+    {
+        if (null !== $domain) {
+            $domain = self::normailize($domain);
+            if (empty(self::$reader[$domain])) {
+                return null;
+            }
+
+            return self::$reader[$domain]->debugInfo();
+        }
+
+        $debug = array();
+        reset(self::$reader);
+        foreach (self::$reader AS $domain => $reader) {
+            $debug[$domain] = $reader->debugInfo();
+        }
+
+        return $debug;
     }
     /* }}} */
 

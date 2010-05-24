@@ -206,7 +206,7 @@ class Html
             $this->compile(implode("\n", $data), $tplObj);
 
             $index  = sprintf('%s/%s', $tplDir, $tplName);
-            $this->compile[$index] = isset($this->compile) ? $this->compile + 1 : 1;
+            $this->compile[$index] = isset($this->compile[$index]) ? $this->compile[$index] + 1 : 1;
         }
 
         return $tplObj;
