@@ -104,17 +104,11 @@ class Language
      * 注销语言包
      *
      * @access public static
-     * @param  String $domain : default null
+     * @param  String $domain
      * @return void
      */
-    public static function unregister($domain = null)
+    public static function unregister($domain)
     {
-        if (empty($domain)) {
-            self::$reader   = array();
-            self::$rules    = array();
-            return;
-        }
-
         $domain = self::normailize($domain);
         if (isset(self::$reader[$domain])) {
             unset(self::$reader[$domain]);
@@ -122,6 +116,20 @@ class Language
         if (isset(self::$rules[$domain])) {
             unset(self::$rules[$domain]);
         }
+    }
+    /* }}} */
+
+    /* {{{ public static void cleanAllRules() */
+    /**
+     * 清理所有已经注册的语言包
+     *
+     * @access public static
+     * @return void
+     */
+    public static function cleanAllRules()
+    {
+        self::$reader   = array();
+        self::$rules    = array();
     }
     /* }}} */
 
@@ -138,10 +146,12 @@ class Language
     {
         if (!empty(self::$cache)) {
             return self::$cache->shell(
-                function() use ($string, $domain) {return Language::_gettext($string, $domain);},
-                json_encode(array('d' => $domain, 's' => $string)),
-                self::CACHE_EXPIRE
-            );
+                function() use ($string, $domain) {
+                    return Language::_gettext($string, $domain);
+                },
+                    json_encode(array('d' => $domain, 's' => $string)),
+                    self::CACHE_EXPIRE
+                );
         }
 
         return self::_gettext($string, $domain);
@@ -165,7 +175,7 @@ class Language
                 return $string;
             }
 
-            $rules  = array(self::$rules[$domain]);
+            $rules  = array($domain => self::$rules[$domain]);
         } else {
             if (!self::$sorted) {
                 self::$rules  = array_reverse(self::$rules, true);
@@ -280,7 +290,7 @@ class Language
             return $mofile[$domain];
         }
 
-        if (isset($mofile[self::$lang])) {
+        if (empty($domain) && isset($mofile[self::$lang])) {
             return $mofile[self::$lang];
         }
 

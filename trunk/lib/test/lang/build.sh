@@ -2,6 +2,8 @@
 
 for pofile in `ls *.po` ;
 do
-	basename=${pofile/\.po/}
-	msgfmt --statistics --verbose -o "${basename}.mo" ${pofile}
+	base=${pofile/\.po/}
+	sed -e "s/##filename##/${base}.mo/g" ${pofile} > "${pofile}.tmp"
+	msgfmt --statistics --verbose -o "${base}.mo" "${pofile}.tmp" && rm -f "${pofile}.tmp"
 done
+

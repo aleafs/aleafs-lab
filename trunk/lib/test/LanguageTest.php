@@ -23,10 +23,7 @@ class LanguageTest extends LibTestShell
     {
         parent::setUp();
 
-        /**
-         * 清理掉所有的语言包
-         */
-        Language::unregister(null);
+        Language::cleanAllRules();
         Apc::cleanAllCache();
     }
 
@@ -52,13 +49,20 @@ class LanguageTest extends LibTestShell
             Language::translate('i\'m a utf-8 chinese')
         );
         $this->assertEquals($debug, Language::debug(''));
+        $this->assertEquals(
+            $debug['mofile'],
+            __DIR__ . '/lang/zh_CN.mo'
+        );
     }
 
-    public function _test_should_multi_lang_works_fine()
+    public function test_should_multi_lang_works_fine()
     {
         Language::init('zh_cn', true);
-        Language::register('',      __DIR__ . '/lang');
-        Language::register('wap',   __DIR__ . '/lang');
+        Language::register('',      __DIR__ . '/lang');       /**<  zh_cn.mo      */
+        Language::register('wAp',   __DIR__ . '/lang');       /**<  wap.zh_cn.mo      */
+        Language::register('test',  __DIR__ . '/lang');       /**<  test.mo      */
+        Language::register('file',  __DIR__ . '/lang/test_file.mo');
+        Language::register('none',  __DIR__ . '/lang');       /**<  none.en_us.mo      */
 
         $this->assertEquals(
             '我是UTF-8中文',
@@ -75,7 +79,24 @@ class LanguageTest extends LibTestShell
             Language::translate('i\'m a utf-8 chinese')
         );
 
+        /**
+         * @最后一个
+         */
+        $this->assertEquals(
+            '我是文件 : test_file.mo',
+            Language::translate('who are you')
+        );
+
         $debug  = Language::debug();
+        print_r($debug);
+
+        /**
+         * @未找到的
+         */
+        $this->assertEquals(
+            'File "none.en_us.mo" is mo file',
+            Language::translate('File "none.en_us.mo" is mo file')
+        );
     }
 
 }
