@@ -14,6 +14,9 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-Basepath: ./\n"
 
-msgid "i'm a utf-8 chinese"
-msgstr "(wap)我是UTF-8中文"
+msgid "who are you"
+msgstr "我是文件 : ##filename##"
+
+msgid "File \"##filename##\" is mo file"
+msgstr "文件 \"##filename##\" 是一个mo文件"
 
