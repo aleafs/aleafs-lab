@@ -88,7 +88,6 @@ class LanguageTest extends LibTestShell
         );
 
         $debug  = Language::debug();
-        print_r($debug);
 
         /**
          * @未找到的

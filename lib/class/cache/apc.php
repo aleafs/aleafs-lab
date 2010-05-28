@@ -57,10 +57,10 @@ class Apc
      *
      * @access public
      * @param  String $key
-     * @param  Mixture $value (default null)
+     * @param  Mixture $value
      * @param  Integer $expire (default null)
      */
-    public function set($key, $value = null, $expire = null)
+    public function set($key, $value, $expire = null)
     {
         $expire = empty($expire) ? self::EXPIRE_TIME : (int)$expire;
         return apc_store(

@@ -76,7 +76,7 @@ class Http
         }
 
         if (!empty($this->ini['logurl'])) {
-            $this->log  = new Log($this->ini['logurl']);
+            $this->log  = Factory::getLog($this->ini['logurl']);
         }
     }
     /* }}} */
