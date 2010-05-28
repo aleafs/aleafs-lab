@@ -21,6 +21,8 @@ class Factory
 
     private static $obj	= array();        /**<  对象池      */
 
+    private static $log = array();
+
     /* }}} */
 
     /* {{{ public static void register()
@@ -102,6 +104,24 @@ class Factory
         }
 
         return self::$obj[$index];
+    }
+    /* }}} */
+
+    /* {{{ public static Object getLog() */
+    /**
+     * 获取日志对象
+     *
+     * @access public static
+     * @param  String $url
+     * @return Object
+     */
+    public static function &getLog(String $url)
+    {
+        if (empty(self::$log[$url])) {
+            self::$log[$url] = new Log($url);
+        }
+
+        return self::$log[$url];
     }
     /* }}} */
 
