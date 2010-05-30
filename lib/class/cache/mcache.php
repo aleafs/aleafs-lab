@@ -82,7 +82,22 @@ class Mcache
             $this->cas[$key] = null;
         }
 
-        $ret = $this->obj->get($key, null, $this->cas[$key]);
+        if (false === ($ret = $this->obj->get($key, null, $this->cas[$key]))) {
+            if (!empty($this->log)) {
+                $err = $this->obj->getResultCode();
+                if (Memcached::RES_NOTFOUND == $err) {
+                    $this->log->warn('MCACHE_NOTFOUND', array());
+                } else {
+                    $this->log->error();
+                }
+            }
+
+            return null;
+        }
+
+        if (!empty($this->log)) {
+
+        }
 
         return $ret;
     }
