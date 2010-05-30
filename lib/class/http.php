@@ -11,6 +11,8 @@
 // $Id$
 
 namespace Aleafs\Lib;
+use \Aleafs\Lib\LiveBox;
+use \Aleafs\Lib\Exception;
 
 class Http
 {
@@ -69,7 +71,7 @@ class Http
     public function __construct($ini, $key = null)
     {
         $this->ini  = array_merge_recursive(self::$default, (array)$ini);
-        $this->host = new ConnPool(__CLASS__ . '/' . !is_scalar($key) ? md5(json_encode($ini)) : $key);
+        $this->host = new LiveBox(__CLASS__ . '/' . !is_scalar($key) ? md5(json_encode($ini)) : $key);
         foreach ($this->ini['server'] AS $host) {
             list($host, $weight) = self::parseHost($host);
             $this->host->register($host, $weight);
@@ -77,6 +79,22 @@ class Http
 
         if (!empty($this->ini['logurl'])) {
             $this->log  = Factory::getLog($this->ini['logurl']);
+        }
+    }
+    /* }}} */
+
+    /* {{{ public void __destruct() */
+    /**
+     * 析构函数
+     *
+     * @access public
+     * @return void
+     */
+    public function __destruct()
+    {
+        if (!empty($this->curl)) {
+            curl_close($this->curl);
+            $this->curl = null;
         }
     }
     /* }}} */
@@ -100,7 +118,7 @@ class Http
      *
      * @access public
      * @param  String $url
-      @param  Mixture $header (default null)
+     @param  Mixture $header (default null)
      * @return Mixture
      */
     public function get($url, $header = null)
@@ -204,9 +222,10 @@ class Http
      */
     private function run($method, $url, $data = null, $header = null)
     {
-        if (empty($this->curl)) {
-            $this->init();
+        if (!empty($this->curl)) {
+            curl_close($this->curl);
         }
+        $this->init();
 
         $method = strtoupper(trim($method));
         switch ($method) {
@@ -266,7 +285,7 @@ class Http
     {
         return sprintf(
             'http://%s/%s/%s',
-            $this->host->getHost(),
+            $this->host->fetch(),
             trim($this->ini['prefix'], '/'),
             ltrim($url, '/')
         );

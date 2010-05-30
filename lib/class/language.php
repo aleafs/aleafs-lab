@@ -149,9 +149,9 @@ class Language
                 function() use ($string, $domain) {
                     return Language::_gettext($string, $domain);
                 },
-                    json_encode(array('d' => $domain, 's' => $string)),
-                    self::CACHE_EXPIRE
-                );
+                json_encode(array('d' => $domain, 's' => $string)),
+                self::CACHE_EXPIRE
+            );
         }
 
         return self::_gettext($string, $domain);

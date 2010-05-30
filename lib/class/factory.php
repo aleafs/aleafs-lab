@@ -17,6 +17,8 @@ class Factory
 
     /* {{{ 静态变量 */
 
+    private static $alias   = array();        /**<  别名      */
+
     private static $reg	= array();        /**<  属性池      */
 
     private static $obj	= array();        /**<  对象池      */
@@ -24,6 +26,12 @@ class Factory
     private static $log = array();
 
     /* }}} */
+
+    public static function alias($class, $name, $arg = null)
+    {
+        $arg = func_get_args();
+        self::$alias[self::objIndex($class, $name)] = array_slice($arg, 2);
+    }
 
     /* {{{ public static void register()
      * @access public static
