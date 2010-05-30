@@ -235,8 +235,7 @@ class File
                 }
             }
         }
-
-        return true;
+        return rmdir($dir);
     }
     /* }}} */
 
