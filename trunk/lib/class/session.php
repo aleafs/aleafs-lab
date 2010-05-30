@@ -69,6 +69,11 @@ class Session
      */
     private static $ssid = null;
 
+    /**
+     * @CACHE
+     */
+    private static $cache;
+
     /* }}} */
 
     /* {{{ public static void init() */
@@ -88,6 +93,9 @@ class Session
             self::$prop[$key] = $val;
         }
 
+        // TODO: 初始化cache
+        self::$cache = new Cache\File('session');
+
         self::$name = self::$prop['session.name'];
         self::$ssid = trim(Cookie::get(self::$name));
         if (empty(self::$ssid) || !self::cookieExpire($ssid)) {
@@ -100,8 +108,7 @@ class Session
                 self::$prop['cookie.expire'] > 0 ? time() + self::$prop['cookie.expire'] : 0
             );
         } else {
-            // TODO: read data
-            $json = '';
+            $json = self::$cache->get(self::$ssid);
             self::$data = json_decode($json, true);
             if (self::sessionExpire()) {
                 self::$data = array();
@@ -144,9 +151,9 @@ class Session
     public static function destroy()
     {
         self::checkInit();
-        self::$data = array();
-        //TODO: storage delete
 
+        self::$data = array();
+        self::$cache->delete(self::$ssid);
         Cookie::set(
             self::$name, '',
             self::$prop['cookie.domain'],
@@ -205,7 +212,7 @@ class Session
             $time - self::$data[self::TS] >= self::$prop['touch.delay'] ||
             rand(1, 100) <= self::$prop['touch.ratio'])
         {
-            self::$data[self::TS] = $time + self::$prop['session.expire'];
+            self::$data[self::TS] = $time + self::$prop['session.expire']
         }
 
         $sign = crc32(json_encode(self::$data));
@@ -213,7 +220,7 @@ class Session
             return true;
         }
 
-        //TODO: write to storage
+        self::$cache->set(self::$ssid, self::$data, self::$prop['session.expire']);
         self::$sign = $sign;
 
         return true;

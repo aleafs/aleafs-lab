@@ -1,5 +1,5 @@
 <?php
-namespace Edp\Core;
+namespace Aleafs\Lib;
 
 class Spider
 {
