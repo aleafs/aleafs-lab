@@ -212,7 +212,7 @@ class Session
             $time - self::$data[self::TS] >= self::$prop['touch.delay'] ||
             rand(1, 100) <= self::$prop['touch.ratio'])
         {
-            self::$data[self::TS] = $time + self::$prop['session.expire']
+            self::$data[self::TS] = $time + self::$prop['session.expire'];
         }
 
         $sign = crc32(json_encode(self::$data));

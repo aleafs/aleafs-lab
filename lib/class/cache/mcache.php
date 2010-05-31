@@ -8,7 +8,7 @@
 // | Author: aleafs <zhangxc83@sohu.com>								|
 // +--------------------------------------------------------------------+
 //
-// $Id: apc.php 63 2010-05-12 07:40:08Z zhangxc83 $
+// $Id: mcache.php 63 2010-05-12 07:40:08Z zhangxc83 $
 
 namespace Aleafs\Lib\Cache;
 
@@ -47,6 +47,8 @@ class Mcache
 
     private $cas    = array();
 
+    private $timer  = null;
+
     /* }}} */
 
     /* {{{ public void __construct() */
@@ -82,22 +84,9 @@ class Mcache
             $this->cas[$key] = null;
         }
 
-        if (false === ($ret = $this->obj->get($key, null, $this->cas[$key]))) {
-            if (!empty($this->log)) {
-                $err = $this->obj->getResultCode();
-                if (Memcached::RES_NOTFOUND == $err) {
-                    $this->log->warn('MCACHE_NOTFOUND', array());
-                } else {
-                    $this->log->error();
-                }
-            }
-
-            return null;
-        }
-
-        if (!empty($this->log)) {
-
-        }
+        $this->beginTimer();
+        $ret = $this->obj->get($key, null, $this->cas[$key]);
+        $this->writeLog('GET', $key, $this->getElapsed());
 
         return $ret;
     }
@@ -115,13 +104,15 @@ class Mcache
     public function set($key, $value, $expire = null)
     {
         $expire = empty($expire) ? $this->ini['expire'] : $expire;
+        $this->beginTimer();
         if (empty($this->cas[$key])) {
             $ret = $this->obj->add($key, $value, $expire);
         } else {
             $ret = $this->obj->cas($this->cas[$key], $key, $value, $expire);
         }
+        $this->writeLog('SET', $key, $this->getElapsed());
 
-        return $ret;
+        return $ret ? true : false;
     }
     /* }}} */
 
@@ -135,7 +126,11 @@ class Mcache
      */
     public function delete($key)
     {
+        $this->beginTimer();
         $ret = $this->obj->delete($key);
+        $this->writeLog('DEL', $key, $this->getElapsed());
+
+        return $ret ? true : false;
     }
     /* }}} */
 
@@ -206,6 +201,91 @@ class Mcache
             list($host, $port) = explode(':', $item);
             $this->obj->addServer($host, $port, 1);
         }
+    }
+    /* }}} */
+
+    /* {{{ private void beginTimer() */
+    /**
+     * 开始计时
+     *
+     * @access private
+     * @return void
+     */
+    private function beginTimer()
+    {
+        if (!empty($this->ini['logtime'])) {
+            $this->timer    = microtime(true);
+        }
+    }
+    /* }}} */
+
+    /* {{{ private String getElapsed() */
+    /**
+     * 获取计时时间
+     *
+     * @access private
+     * @return String
+     */
+    private function getElapsed()
+    {
+        if (empty($this->timer)) {
+            return null;
+        }
+
+        $elapse = microtime(true) - $this->timer;
+        $this->timer    = null;
+
+        return number_format($elapse, 6);
+    }
+    /* }}} */
+
+    /* {{{ private Boolean writeLog() */
+    /**
+     * 写入操作日志
+     *
+     * @access private
+     * @param  String $log
+     * @param  String $key
+     * @param  Number $time : default null
+     * @return Boolean true or false
+     */
+    private function writeLog($log, $key, $time = null)
+    {
+        if (empty($this->log)) {
+            return false;
+        }
+
+        $log = 'MCACHE_' . strtoupper(trim($log));
+        switch ($err = $this->obj->getResultCode()) {
+        case Memcached::RES_SUCCESS:
+            $this->log->debug($log . '_OK', array(
+                'prefix'    => $this->ini['prefix'],
+                'key'       => $key,
+                'elapsed'   => $time,
+            ));
+            break;
+
+        case Memcached::RES_NOTFOUND:
+        case Memcached::RES_DATA_EXISTS:
+            $this->log->notice($log . '_FAIL', array(
+                'prefix'    => $this->ini['prefix'],
+                'key'       => $key,
+                'code'      => $err,
+                'message'   => $this->obj->getResultMessage(),
+            ));
+            break;
+
+        default:
+            $this->log->warn($log . '_ERROR', array(
+                'prefix'    => $this->ini['prefix'],
+                'key'       => $key,
+                'code'      => $err,
+                'message'   => $this->obj->getResultMessage(),
+            ));
+            break;
+        }
+
+        return true;
     }
     /* }}} */
 
