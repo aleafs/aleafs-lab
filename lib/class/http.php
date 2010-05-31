@@ -70,7 +70,7 @@ class Http
      */
     public function __construct($ini, $key = null)
     {
-        $this->ini  = array_merge_recursive(self::$default, (array)$ini);
+        $this->ini  = array_merge(self::$default, (array)$ini);
         $this->host = new LiveBox(__CLASS__ . '/' . !is_scalar($key) ? md5(json_encode($ini)) : $key);
         foreach ($this->ini['server'] AS $host) {
             list($host, $weight) = self::parseHost($host);
