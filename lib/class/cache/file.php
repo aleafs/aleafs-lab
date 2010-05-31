@@ -41,7 +41,7 @@ class File
      * @param  String $prefix
      * @return void
      */
-    public function __construct(String $prefix, $path = null, $mode = 0744)
+    public function __construct($prefix, $path = null, $mode = 0744)
     {
         $this->prefix   = (string)$prefix;
         $this->mode     = $mode;
@@ -184,7 +184,7 @@ class File
         if ($create && !is_file($ret)) {
             $dir = dirname($ret);
             if (!is_dir($dir) && !mkdir($dir, $this->mode, true)) {
-                throw new Exception('Derectory "%s" not exists, and created failed.');
+                throw new Exception(sprintf('Derectory "%s" not exists, and created failed.', $dir));
             }
         }
 
@@ -202,7 +202,7 @@ class File
      */
     private static function hash($key)
     {
-        return implode('/', array_chunk(bin2hex($key), 3));
+        return implode('/', str_split(bin2hex($key), 3));
     }
     /* }}} */
 
