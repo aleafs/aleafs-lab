@@ -54,6 +54,9 @@ class FileCacheTest extends \Aleafs\Lib\LibTestShell
 	public function test_should_exception_throw_out_when_write_error()
 	{
 		$cache	= new File('readonly', __DIR__ . '/filecache');
+		$cache->cleanAllCache();
+
+		@mkdir(__DIR__ . '/filecache/readonly', 0444, true);
 
 		$error	= error_reporting();
 		error_reporting($error - E_WARNING);
@@ -67,6 +70,8 @@ class FileCacheTest extends \Aleafs\Lib\LibTestShell
 				$e->getMessage()
 			);
 		}
+
+		@chmod(__DIR__ . '/filecache/readonly', 0744);
 		error_reporting($error);
 	}
 
