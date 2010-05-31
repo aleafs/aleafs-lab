@@ -49,6 +49,8 @@ class Mcache
 
     private $timer  = null;
 
+    private $bufferWrite    = true;
+
     /* }}} */
 
     /* {{{ public void __construct() */
@@ -61,12 +63,32 @@ class Mcache
      */
     public function __construct(Array $ini)
     {
-        $this->ini  = array_merge_recursive(self::$default, $ini);
+        $this->ini  = array_merge(self::$default, (array)$ini);
         if (!empty($this->ini['logurl'])) {
             $this->log  = Factory::getLog($this->ini['logurl']);
         }
 
         $this->initMcache();
+    }
+    /* }}} */
+
+    /* {{{ public void setBufferWrite() */
+    /**
+     * 设置是否缓冲写入
+     *
+     * @access public
+     * @param  Boolean $buffer
+     * @return void
+     */
+    public function setBufferWrite($buffer)
+    {
+        $this->bufferWrite  = (bool)$buffer;
+        if (!empty($this->obj)) {
+            $this->obj->setOption(
+                \Memcached::OPT_BUFFER_WRITES,
+                $this->bufferWrite
+            );
+        }
     }
     /* }}} */
 
@@ -80,13 +102,32 @@ class Mcache
      */
     public function get($key)
     {
-        if (!isset($this->cas[$key])) {
-            $this->cas[$key] = null;
+        if (!is_array($key)) {
+            $key = (string)$key;
+            if (!isset($this->cas[$key])) {
+                $this->cas[$key] = null;
+            }
+
+            $this->beginTimer();
+            $ret = $this->obj->get($key, null, $this->cas[$key]);
+            $this->writeLog('GET', $key, $this->getElapsed());
+
+            return (false !== $ret) ? $ret : null;
         }
 
+        $cas = null;
         $this->beginTimer();
-        $ret = $this->obj->get($key, null, $this->cas[$key]);
-        $this->writeLog('GET', $key, $this->getElapsed());
+        $tmp = $this->obj->getMulti($key, $cas, null);
+        $this->writeLog('MULTI_GET', $key, $this->getElapsed());
+
+        $ret = array_fill_keys($key, null);
+        if (!empty($ret)) {
+            $ret = array_merge($ret, (array)$tmp);
+        }
+
+        if (!empty($cas)) {
+            $this->cas = array_merge($this->cas, $cas);
+        }
 
         return $ret;
     }
@@ -116,6 +157,25 @@ class Mcache
     }
     /* }}} */
 
+    /* {{{ public Boolean multiSet() */
+    /**
+     * 以关联数据设置多条数据
+     *
+     * @access public
+     * @param  Array $data
+     * @param  Integer $expire
+     * @return Boolean true or false
+     */
+    public function multiSet(Array $data, $expire = null)
+    {
+        $this->beginTimer();
+        $ret = $this->obj->setMulti($data, empty($expire) ? $this->ini['expire'] : $expire);
+        $this->writeLog('MULTI_SET', $data, $this->getElapsed());
+
+        return $ret ? true : false;
+    }
+    /* }}} */
+
     /* {{{ public Boolean delete() */
     /**
      * 删除缓存数据
@@ -129,6 +189,9 @@ class Mcache
         $this->beginTimer();
         $ret = $this->obj->delete($key);
         $this->writeLog('DEL', $key, $this->getElapsed());
+        if ($ret && isset($this->cas[$key])) {
+            unset($this->cas[$key]);
+        }
 
         return $ret ? true : false;
     }
@@ -146,6 +209,24 @@ class Mcache
      */
     public function shell($callback, $key, $expire = null)
     {
+        $ret = $this->get($key);
+        if (is_array($ret)) {
+            $diff   = array_keys(array_diff_key(
+                array_flip($key),
+                array_filter($ret)      /*  <去掉null值 */
+            ));
+            if (!empty($diff) && $app = call_user_func($callback, $diff)) {
+                $ret = array_merge($ret, (array)$app);
+                $this->multiSet($app, $expire);
+            }
+        } elseif (empty($ret)) {
+            $ret = call_user_func($callback, $key);
+            if (!empty($ret)) {
+                $this->set($key, $ret, $expire);
+            }
+        }
+
+        return $ret;
     }
     /* }}} */
 
@@ -181,21 +262,21 @@ class Mcache
         }
 
         $this->obj  = new \Memcached();
-        $this->obj->setOption(Memcached::OPT_COMPRESSION,   true);
-        $this->obj->setOption(Memcached::OPT_SERIALIZER,    Memcached::SERIALIZER_IGBINARY);
-        $this->obj->setOption(Memcached::OPT_PREFIX_KEY,    $this->ini['prefix']);
-        $this->obj->setOption(Memcached::OPT_HASH,          Memcached::HASH_MD5);
-        $this->obj->setOption(Memcached::OPT_DISTRIBUTION,  Memcached::DISTRIBUTION_CONSISTENT);
-        $this->obj->setOption(Memcached::OPT_BUFFER_WRITES, true);
+        $this->obj->setOption(\Memcached::OPT_COMPRESSION,   true);
+        $this->obj->setOption(\Memcached::OPT_SERIALIZER,    \Memcached::SERIALIZER_IGBINARY);
+        $this->obj->setOption(\Memcached::OPT_PREFIX_KEY,    $this->ini['prefix']);
+        $this->obj->setOption(\Memcached::OPT_HASH,          \Memcached::HASH_MD5);
+        $this->obj->setOption(\Memcached::OPT_DISTRIBUTION,  \Memcached::DISTRIBUTION_CONSISTENT);
+        $this->obj->setOption(\Memcached::OPT_BUFFER_WRITES, $this->bufferWrite);
 
-        $this->obj->setOption(Memcached::OPT_CONNECT_TIMEOUT,   $this->ini['timeout']['connect']);
-        $this->obj->setOption(Memcached::OPT_SEND_TIMEOUT,      $this->ini['timeout']['write']);
-        $this->obj->setOption(Memcached::OPT_POLL_TIMEOUT,      $this->ini['timeout']['read']);
+        $this->obj->setOption(\Memcached::OPT_CONNECT_TIMEOUT,   $this->ini['timeout']['connect']);
+        $this->obj->setOption(\Memcached::OPT_SEND_TIMEOUT,      $this->ini['timeout']['write']);
+        $this->obj->setOption(\Memcached::OPT_POLL_TIMEOUT,      $this->ini['timeout']['read']);
 
         /**
          * @以下参数请勿修改，可能有bug
          */
-        $this->obj->setOption(Memcached::OPT_BINARY_PROTOCOL,   false);
+        $this->obj->setOption(\Memcached::OPT_BINARY_PROTOCOL,   false);
 
         foreach ($this->ini['server'] AS $item) {
             list($host, $port) = explode(':', $item);
@@ -257,7 +338,7 @@ class Mcache
 
         $log = 'MCACHE_' . strtoupper(trim($log));
         switch ($err = $this->obj->getResultCode()) {
-        case Memcached::RES_SUCCESS:
+        case \Memcached::RES_SUCCESS:
             $this->log->debug($log . '_OK', array(
                 'prefix'    => $this->ini['prefix'],
                 'key'       => $key,
@@ -265,8 +346,8 @@ class Mcache
             ));
             break;
 
-        case Memcached::RES_NOTFOUND:
-        case Memcached::RES_DATA_EXISTS:
+        case \Memcached::RES_NOTFOUND:
+        case \Memcached::RES_DATA_EXISTS:
             $this->log->notice($log . '_FAIL', array(
                 'prefix'    => $this->ini['prefix'],
                 'key'       => $key,
