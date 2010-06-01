@@ -10,12 +10,11 @@
 //
 // $Id$
 
-namespace Aleafs\Lib;
-use Aleafs\Lib\Log;
+use \Aleafs\Lib\Log;
 
 require_once(__DIR__ . '/../class/TestShell.php');
 
-class LogTest extends LibTestShell
+class LogTest extends \Aleafs\Lib\LibTestShell
 {
 
     private $file;
@@ -64,7 +63,7 @@ class LogTest extends LibTestShell
         clearstatcache();
         $this->assertEquals(
             preg_match(
-                '/^DEBUG: \[.+?\] .+? TEST_DEBUG - only for test/',
+                "/^DEBUG:\t\[.+?\]\t.+?\tTEST_DEBUG\t-\tonly for test/",
                 self::getLastLine($log->file)
             ),
             1, 'Debug Log Content Error.'
@@ -90,7 +89,7 @@ class LogTest extends LibTestShell
         clearstatcache();
         $this->assertEquals(
             preg_match(
-                sprintf('/^NOTICE: \[.+?\] .+? TEST_NOTICE token %s/', json_encode($data)),
+                sprintf("/^NOTICE:\t\[.+?\]\t.+?\tTEST_NOTICE\ttoken\t%s/", json_encode($data)),
                 self::getLastLine($log->file)
             ),
             1, 'Notice Log Content Error.'
@@ -117,7 +116,7 @@ class LogTest extends LibTestShell
         clearstatcache();
         $this->assertEquals(
             preg_match(
-                sprintf('/^WARN: \[.+?\] .+? TEST_WARN token %s/', json_encode($data)),
+                sprintf("/^WARN:\t\[.+?\]\t.+?\tTEST_WARN\ttoken\t%s/", json_encode($data)),
                 self::getLastLine($log->file)
             ),
             1, 'Warn Log Content Error.'
@@ -143,7 +142,7 @@ class LogTest extends LibTestShell
         clearstatcache();
         $this->assertEquals(
             preg_match(
-                sprintf('/^ERROR: \[.+?\] .+? TEST_ERROR token %s/', json_encode($data)),
+                sprintf("/^ERROR:\t\[.+?\]\t.+?\tTEST_ERROR\ttoken\t%s/", json_encode($data)),
                 self::getLastLine($log->file)
             ),
             1, 'Error Log Content Error.'
@@ -173,7 +172,7 @@ class LogTest extends LibTestShell
         $this->assertEquals(1, $log->iotime, 'Log I/OTIME ERROR.');
         $this->assertEquals(
             preg_match(
-                '/^DEBUG: \[.+?\] .+? BUFFER - a{1,}$/',
+                "/^DEBUG:\t\[.+?\]\t.+?\tBUFFER\t-\ta{1,}$/",
                 self::getLastLine($log->file)
             ),
             1, 'Buffer Control Error.'
@@ -195,7 +194,7 @@ class LogTest extends LibTestShell
         clearstatcache();
         $this->assertEquals(
             preg_match(
-                '/^DEBUG: \[.+?\] .+? DESTRUCT/',
+                "/^DEBUG:\t\[.+?\]\t.+?\tDESTRUCT/",
                 self::getLastLine($this->file)
             ),
             1, 'Data lost when log destruct.'
