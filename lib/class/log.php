@@ -186,8 +186,8 @@ class Log
         $name = empty($name) ? 'UNKOWN' : $name;
         $data = empty($data) ? '-' : $data;
         $this->buffer .= sprintf(
-            "%s: [%s] %s %s %s %s\n",
-            $char, date('Y-m-d\ H:i:s'),
+            "%s:\t[%s]\t%s\t%s\t%s\t%s\n",
+            $char, date('Y-m-d H:i:s'),
             Context::userip(),
             strtoupper($name),
             empty($token) ? '-' : $token,

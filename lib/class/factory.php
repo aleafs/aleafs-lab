@@ -123,7 +123,7 @@ class Factory
      * @param  String $url
      * @return Object
      */
-    public static function &getLog(\String $url)
+    public static function &getLog($url)
     {
         if (empty(self::$log[$url])) {
             self::$log[$url] = new Log($url);
