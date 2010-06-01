@@ -18,6 +18,8 @@
 			<fileset dir="./">
 				<exclude name="test/**" />
 				<exclude name="build/**" />
+				<exclude name="class/exception.php" />
+				<exclude name="class/spider.php" />
 				<include name="class/**/*.php" />
 			</fileset>
 		</coverage-setup>
