@@ -153,13 +153,11 @@ class Mcache
         }
         $this->writeLog('SET', $key, $this->getElapsed());
 
-        if (false == $ret && $this->bufferWrite &&
-            \Memcached::RES_NOTSTORED == $this->obj->getResultCode())
-        {
+        if (false != $ret || \Memcached::RES_NOTSTORED == $this->obj->getResultCode()) {
             return true;
         }
 
-        return $ret ? true : false;
+        return false;
     }
     /* }}} */
 
@@ -343,12 +341,7 @@ class Mcache
         }
 
         $log = 'MCACHE_' . strtoupper(trim($log));
-        $err = $this->obj->getResultCode();
-        if ($this->bufferWrite && $err == \Memcached::RES_NOTSTORED) {
-            $err = \Memcached::RES_SUCCESS;
-        }
-
-        switch ($err) {
+        switch ($err = $this->obj->getResultCode()) {
         case \Memcached::RES_SUCCESS:
             $this->log->debug($log . '_OK', array(
                 'prefix'    => $this->ini['prefix'],

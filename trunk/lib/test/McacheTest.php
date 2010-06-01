@@ -21,11 +21,24 @@ class McacheTest extends \Aleafs\Lib\LibTestShell
     protected function tearDown()
     {
         $this->cache->cleanAllCache();
-        @unlink($this->logfile);
+        unlink($this->logfile);
 
         parent::tearDown();
     }
 
+    private function assertLogMatch($string, $error = null)
+    {
+        if (false === ($log = @file($this->logfile))) {
+            $this->assertTrue(false, sprintf('Open log file "%s" failed.', $this->logfile));
+            return;
+        }
+
+        $this->assertTrue((bool)preg_match(
+            $string, end(array_filter(array_map('trim', $log)))
+        ), $error);
+    }
+
+    /* {{{ public String shellCallBack() */
     public function shellCallBack($key)
     {
         $this->shell++;
@@ -36,13 +49,14 @@ class McacheTest extends \Aleafs\Lib\LibTestShell
 
         return md5($key);
     }
+    /* }}} */
 
     /* {{{ private void initMemcache() */
     private function initMemcache()
     {
         $this->cache    = null;
         $this->cache	= new Mcache(array(
-            'logurl'	=> 'log://debug.notice.warn.error/' . $this->logfile,
+            'logurl'	=> 'log://debug.notice.warn.error/' . $this->logfile . '?buffer=0',
             'logtime'	=> true,
             'prefix'	=> 'test',
             'server'	=> array(
@@ -61,8 +75,13 @@ class McacheTest extends \Aleafs\Lib\LibTestShell
         $this->cache->setBufferWrite(false);
 
         $this->assertNull($this->cache->get('key1'));
+        $this->assertLogMatch("/^NOTICE:\t\[.+?\]\t.+?MCACHE_GET_FAIL\t/");
+
         $this->assertTrue($this->cache->set('key1', 'val1'));
+        $this->assertLogMatch("/^DEBUG:\t\[.+?\]\t.+?MCACHE_SET_OK\t/");
+
         $this->assertEquals('val1', $this->cache->get('key1'));
+        $this->assertLogMatch("/^DEBUG:\t\[.+?\]\t.+?MCACHE_GET_OK\t/");
 
         $val = array(
             'text'	=> '我是中文',
@@ -71,6 +90,8 @@ class McacheTest extends \Aleafs\Lib\LibTestShell
         $this->assertEquals($val, $this->cache->get('key2'));
 
         $this->assertTrue($this->cache->delete('key1'));
+        $this->assertLogMatch("/^DEBUG:\t\[.+?\]\t.+?MCACHE_DEL_OK\t/");
+
         $this->assertNull($this->cache->get('key1'));
     }
     /* }}} */
@@ -94,7 +115,6 @@ class McacheTest extends \Aleafs\Lib\LibTestShell
             'text'	=> '我是中文',
         );
         $this->assertTrue($this->cache->set('key2', $val));
-
 
         $this->cache	= null;
         $this->initMemcache();
@@ -120,6 +140,23 @@ class McacheTest extends \Aleafs\Lib\LibTestShell
         ));
         $this->assertEquals(1, $this->shell);
 
+        $val = array(
+            'key1'  => md5('key1'),
+            'key8'  => md5('key8'),
+        );
+        $this->assertEquals($val, $this->cache->shell(
+            array(&$this, 'shellCallBack'),
+            array('key1', 'key8')
+        ));
+        $this->assertEquals(2, $this->shell);
+        $this->assertLogMatch("/^DEBUG:\t\[.+?\]\t.+?MCACHE_MULTI_SET_OK\t/");
+
+        $obj = &$this;
+        $this->assertEquals(md5('key8'), $this->cache->shell(
+            function() use ($obj) {return $obj->shellCallBack('key8');},
+            'key8'
+        ));
+        $this->assertEquals(2, $this->shell);
     }
     /* }}} */
 
