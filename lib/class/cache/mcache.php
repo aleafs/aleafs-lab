@@ -111,7 +111,6 @@ class Mcache
             $this->beginTimer();
             $ret = $this->obj->get($key, null, $this->cas[$key]);
             $this->writeLog('GET', $key, $this->getElapsed());
-
             return (false !== $ret) ? $ret : null;
         }
 
@@ -193,9 +192,6 @@ class Mcache
         $this->beginTimer();
         $ret = $this->obj->delete($key);
         $this->writeLog('DEL', $key, $this->getElapsed());
-        if ($ret && isset($this->cas[$key])) {
-            unset($this->cas[$key]);
-        }
 
         return $ret ? true : false;
     }
