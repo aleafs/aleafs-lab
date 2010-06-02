@@ -168,7 +168,8 @@ class LogTest extends \Aleafs\Lib\LibTestShell
 
         clearstatcache();
         $this->assertEquals('', self::getLastLine($log->file), 'File MUST BE STILL IN BUFFER.');
-        $log->debug('BUFFER', str_repeat('a', 4096 - 49 - strlen($log->buffer)));
+
+        $log->debug('BUFFER', str_repeat('a', 4096 - 47 - strlen($log->buffer)));
         $this->assertEquals(1, $log->iotime, 'Log I/OTIME ERROR.');
         $this->assertEquals(
             preg_match(
