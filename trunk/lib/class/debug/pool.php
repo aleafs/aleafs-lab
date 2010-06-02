@@ -73,7 +73,7 @@ class Pool
      * @access public static
      * @return void
      */
-    public static function clean() 
+    public static function clean()
     {
         self::$debug = array();
     }
@@ -87,7 +87,7 @@ class Pool
      * @param  String $key (default null)
      * @return String
      */
-    public static function dump($key)
+    public static function dump($key = null)
     {
         if (null === $key) {
             return var_export(self::$debug, true);
