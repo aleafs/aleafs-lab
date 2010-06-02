@@ -50,16 +50,14 @@ class Cookie
      */
     public static function init($ini = null, $data = null)
     {
-        if (is_array($ini)) {
-            foreach ($ini AS $key => $val) {
-                $key = strtolower(trim($key));
-                if (0 === strpos($key, 'cookie.')) {
-                    $key = substr($key, 7);
-                }
+        foreach ((array)$ini AS $key => $val) {
+            $key = strtolower(trim($key));
+            if (0 === strpos($key, 'cookie.')) {
+                $key = substr($key, 7);
+            }
 
-                if (isset(self::$prop[$key])) {
-                    self::$prop[$key] = $val;
-                }
+            if (isset(self::$prop[$key])) {
+                self::$prop[$key] = $val;
             }
         }
 
@@ -123,7 +121,7 @@ class Cookie
      * 检查是否初始化
      *
      * @access private static
-     * @return void 
+     * @return void
      */
     private static function checkInit()
     {
