@@ -32,6 +32,7 @@ class LanguageTest extends LibTestShell
         parent::tearDown();
     }
 
+    /* {{{ public void test_should_default_lang_works_fine() */
     public function test_should_default_lang_works_fine()
     {
         Language::init('zh_cn', true);
@@ -54,7 +55,35 @@ class LanguageTest extends LibTestShell
             __DIR__ . '/lang/zh_CN.mo'
         );
     }
+    /* }}} */
 
+    /* {{{ public void test_should_multi_init_lang_works_fine() */
+    public function test_should_multi_init_lang_works_fine()
+    {
+        Language::init('en_US', true);
+        Language::register('', __DIR__ . '/lang');
+
+        $this->assertEquals(
+            'i\'m a utf-8 chinese',
+            Language::translate('我是utf-8中文')
+        );
+
+        Language::init('zh_CN', false);
+        $this->assertEquals(
+            '我来自中文的zh_cn.mo',
+            Language::translate('我是utf-8中文')
+        );
+
+        Language::unregister('');
+        $this->assertEquals(
+            '我是utf-8中文',
+            Language::translate('我是utf-8中文')
+        );
+
+    }
+    /* }}} */
+
+    /* {{{ public void test_should_multi_lang_works_fine() */
     public function test_should_multi_lang_works_fine()
     {
         Language::init('zh_cn', true);
@@ -97,6 +126,7 @@ class LanguageTest extends LibTestShell
             Language::translate('File "none.en_us.mo" is mo file')
         );
     }
+    /* }}} */
 
 }
 
