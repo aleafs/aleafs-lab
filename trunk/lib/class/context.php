@@ -5,7 +5,7 @@
 // +------------------------------------------------------------------------+
 // | Copyright (c) 2010 Aleafs.com. All Rights Reserved						|
 // +------------------------------------------------------------------------+
-// | Author: aleafs <zhangxc83eng@sohu.com>									|
+// | Author: aleafs <zhangxc83@sohu.com>									|
 // +------------------------------------------------------------------------+
 //
 // $Id: context.lib.php 4 2010-03-09 05:20:36Z zhangxc83 $
@@ -18,76 +18,93 @@ class Context
     /* {{{ 静态变量 */
 
     /**
-     * @用户IP
+     * @数据列表
      */
-    private static $userip;
-
-    /**
-     * @进程ID
-     */
-    private static $pid;
+    private static $data    = array();
 
     /* }}} */
 
-    /* {{{ public static String userip() */
+    /* {{{ public static void register() */
+    /**
+     * 注册一个变量
+     *
+     * @access public static
+     * @param  String $key
+     * @param  Mixture $val
+     * @return void
+     */
+    public static function register($key, $val)
+    {
+        self::$data[(string)$key] = $val;
+    }
+    /* }}} */
+
+    /* {{{ public static void unregister() */
+    /**
+     * 注销一个变量
+     *
+     * @access public static
+     * @param  String $key
+     * @return void
+     */
+    public static function unregister($key)
+    {
+        $key = (string)$key;
+        if (isset(self::$data[$key])) {
+            unset(self::$data[$key]);
+        }
+    }
+    /* }}} */
+
+    /* {{{ public static void cleanAllContext() */
+    /**
+     * 清理所有上下文数据
+     *
+     * @access public static
+     * @return void
+     */
+    public static function cleanAllContext()
+    {
+        self::$data = array();
+    }
+    /* }}} */
+
+    /* {{{ public static Mixture get() */
+    /**
+     * 获取变量
+     *
+     * @access public static
+     * @param  String $key
+     * @param  Mixture $default : default null
+     * @return Mixture
+     */
+    public static function get($key, $default = null)
+    {
+        $key = (string)$key;
+        if (isset(self::$data[$key])) {
+            return self::$data[$key];
+        }
+
+        return $default;
+    }
+    /* }}} */
+
+    /* {{{ public static Mixture userip() */
     /**
      * 获取当前用户IP
      *
-     * @access public static 
+     * @access public static
      * @param  Boolean $bolInt (default false)
      * @return String or Integer
      */
     public static function userip($bolInt = false)
     {
-        if (null === self::$userip) {
-            $key	= array(
-                'HTTP_X_FORWARDED_FOR',
-                'HTTP_CLIENT_IP',
-                'REMOTE_ADDR',
-            );
-
-            self::$userip = '127.0.0.1';
-            foreach ($key AS $idx) {
-                if (!isset($_SERVER[$idx])) {
-                    continue;
-                }
-                $strVal	= trim($_SERVER[$idx]);
-                if (false !== stripos($strVal, 'unknown')) {
-                    $strVal	= str_ireplace('unknown', '', $strVal);
-                }
-                $strVal	= reset(array_filter(explode(',', $strVal)));
-                if (!empty($strVal)) {
-                    self::$userip = $strVal;
-                    break;
-                }
-            }
+        if (null === ($ret = self::get('__ip__'))) {
+            $ret = self::_userip();
+            self::register('__ip__', $ret);
         }
 
-        return $bolInt ? sprintf('%u', ip2long(self::$userip)) : self::$userip;
-    }
-    /* }}} */
-
-    /* {{{ public static String idname() */
-    /**
-     * 返回统一的用户ID
-     *
-     * @access public static
-     * @return String
-     */
-    public static function idname()
-    {
-    }
-    /* }}} */
-
-    /* {{{ public static String token() */
-    /**
-     * 返回当前访问token
-     *
-     * @access public static
-     * @return String
-     */
-    public static function token()
-    {
+        return $bolInt ? sprintf('%u', ip2long($ret)) : $ret;
     }
     /* }}} */
 
@@ -100,11 +117,44 @@ class Context
      */
     public static function pid()
     {
-        if (null === self::$pid) {
-            self::$pid = getmypid();
+        if (null === ($ret = self::get('__pid__'))) {
+            $ret = is_callable('posix_getpid') ? posix_getpid() : getmypid();
+            self::register('__pid__', $ret);
         }
 
-        return self::$pid;
+        return $ret;
+    }
+    /* }}} */
+
+    /* {{{ private static String _userip() */
+    /**
+     * 读取用户实际IP
+     *
+     * @access private static
+     * @return String
+     */
+    private static function _userip()
+    {
+        $check  = array(
+            'HTTP_VIA',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_CLIENT_IP',
+            'REMOTE_ADDR',
+        );
+
+        foreach ($check AS $key) {
+            if (empty($_SERVER[$key])) {
+                continue;
+            }
+
+            if (!preg_match_all('/\d+\.\d+\.\d+.\d+/', $_SERVER[$key], $match)) {
+                continue;
+            }
+
+            return end(reset($match));
+        }
+
+        return 'unknown';
     }
     /* }}} */
 
