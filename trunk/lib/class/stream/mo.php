@@ -102,16 +102,6 @@ class Mo
     }
     /* }}} */
 
-    public function getAll()
-    {
-        $data = array();
-        for ($i = 0; $i < $this->header['count']; $i++) {
-            $data[$this->_get_original($i)] = $this->_get_translate($i);
-        }
-
-        return $data;
-    }
-
     /* {{{ private Boolean _load() */
     /**
      * 加载mo文件

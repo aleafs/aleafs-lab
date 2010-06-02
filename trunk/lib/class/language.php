@@ -75,6 +75,7 @@ class Language
         if ($lang != self::$lang) {
             self::$lang  = $lang;
             self::$cache = null;
+            self::$reader= array();
         }
 
         if ($cache && empty(self::$cache) && function_exists('apc_add')) {

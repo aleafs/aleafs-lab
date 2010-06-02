@@ -17,3 +17,6 @@ msgstr ""
 msgid "i'm a utf-8 chinese"
 msgstr "我是UTF-8中文"
 
+msgid "我是utf-8中文"
+msgstr "我来自中文的zh_cn.mo"
+
