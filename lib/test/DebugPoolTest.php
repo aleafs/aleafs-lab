@@ -53,7 +53,7 @@ class DebugPoolTest extends LibTestShell
 
         $val = 'debug1';
         Pool::push('test1', $val);
-        $this->assertEquals(var_export($val), Pool::dump('test1'));
+        $this->assertEquals(var_export($val, true), Pool::dump('test1'));
 
         $exp = array(
             $val,
@@ -62,17 +62,20 @@ class DebugPoolTest extends LibTestShell
             ),
         );
         Pool::push('test1', end($exp));
-        $this->assertEquals(var_export($exp), Pool::dump('test1'));
+        $this->assertEquals(var_export($exp, true), Pool::dump('test1'));
 
         $obj = new Stdclass();
         $obj->val1 = 'key1';
         $obj->val2 = array('啦啦啦');
 
         Pool::push('test2', $obj);
-        $this->assertEquals(var_export($obj), Pool::dump('test2'));
+        $this->assertEquals(var_export($obj, true), Pool::dump('test2'));
 
-        $exp[] = $obj;
-        $this->assertEquals(var_export($exp), Pool::dump());
+        $exp = array(
+            'test1' => $exp,
+            'test2' => $obj,
+        );
+        $this->assertEquals(var_export($exp, true), Pool::dump());
     }
     /* }}} */
 
