@@ -19,7 +19,11 @@ class LiveBox
 
     private $host   = array();          /**<  服务器列表      */
 
+    private $pool   = array();          /**<  带权重的选择池  */
+
     private $offs   = array();          /**<  不可用列表      */
+
+    private $maxInt = 0;                /**<  随即查找时最大随机数 */
 
     private $sign   = null;       /**<  不可用列表签名      */
 
@@ -136,6 +140,7 @@ class LiveBox
         $sign = (null === $host) ? $this->last : self::sign($host);
         if (isset($this->host[$sign])) {
             $this->offs[$sign] = time() + $this->live;
+            $this->pool = null;
         }
 
         return $this;
@@ -186,7 +191,7 @@ class LiveBox
      */
     public function fetch()
     {
-        $this->last = self::random(array_diff_key($this->host, $this->offs));
+        $this->last = $this->random(array_diff_key($this->host, $this->offs));
         if (null === $this->last) {
             throw new Exception('There is no available server.');
         }
@@ -195,6 +200,73 @@ class LiveBox
         $server['times']++;
 
         return $server['host'];
+    }
+    /* }}} */
+
+    /* {{{ private Mixture random() */
+    /**
+     * 根据权重随机选出一台服务器
+     *
+     * @access private static
+     * @param  Array $host
+     * @return Mixture
+     */
+    private function random($host)
+    {
+        if (empty($this->pool)) {
+            $weight = 0;
+            $hosts  = array_diff_key($this->host, $this->offs);
+
+            $this->pool = array();
+            foreach ($hosts AS $sign => $item) {
+                $weight += (int)$item['weight'];
+                $this->pool[$sign] = $weight;
+            }
+            $this->maxInt = $weight;
+        }
+
+        if (empty($this->pool)) {
+            return null;
+        }
+
+        $index  = array_keys($this->pool);
+        $random = rand(0, $this->maxInt - 1);
+        $sign   = self::search($random, $index, array_values($this->pool));
+        if (null !== $sign) {
+            return $sign;
+        }
+
+        return reset($index);
+
+        $random = rand(0, $weight - 1);
+        foreach ($stacks AS $key => $val) {
+            if ($val > $random) {
+                return $indexs[$key];
+            }
+        }
+
+        return reset($indexs);
+    }
+    /* }}} */
+
+    /* {{{ private static String  search() */
+    /**
+     * 二分法查找对应的服务器
+     *
+     * @access private
+     * @return String
+     */
+    private static function search($mouse, $index, $value, $left = -1, $right = -1)
+    {
+        if ($left == -1 || $right == -1) {
+            $left   = 0;
+            $right  = count($value);
+        }
+
+        $middle = (int)(($left + $right) / 2);
+        $snoopy = $value[$middle];
+        if ($snoopy == $mouse) {
+        }
     }
     /* }}} */
 
@@ -237,40 +309,6 @@ class LiveBox
         ksort($return);
 
         return $return;
-    }
-    /* }}} */
-
-    /* {{{ private static Mixture random() */
-    /**
-     * 根据权重随机选出一台服务器
-     *
-     * @access private static
-     * @param  Array $host
-     * @return Mixture
-     */
-    private static function random($host)
-    {
-        if (empty($host)) {
-            return null;
-        }
-
-        $weight = 0;
-        $indexs = array();
-        $stacks = array();
-        foreach ((array)$host AS $sign => $item) {
-            $weight += (int)$item['weight'];
-            $indexs[] = $sign;
-            $stacks[] = $weight;
-        }
-
-        $random = rand(0, $weight - 1);
-        foreach ($stacks AS $key => $val) {
-            if ($val > $random) {
-                return $indexs[$key];
-            }
-        }
-
-        return reset($indexs);
     }
     /* }}} */
 
