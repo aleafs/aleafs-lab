@@ -265,8 +265,19 @@ class LiveBox
 
         $middle = (int)(($left + $right) / 2);
         $snoopy = $value[$middle];
-        if ($snoopy == $mouse) {
+        if ($mouse > $value[$middle - 1] && $mouse <= $snoopy) {
+            return $index[$middle];
         }
+
+        if (abs($right - $left) <= 1) {
+            return null;
+        }
+
+        if ($mouse < $snoopy) {
+            return self::search($mouse, $index, $value, $left, $middle);
+        }
+
+        return self::search($mouse, $index, $value, $middle, $right);
     }
     /* }}} */
 
