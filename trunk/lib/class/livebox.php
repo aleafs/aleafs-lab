@@ -265,7 +265,7 @@ class LiveBox
 
         $middle = (int)(($left + $right) / 2);
         $snoopy = $value[$middle];
-        if ($mouse > $value[$middle - 1] && $mouse <= $snoopy) {
+        if ((!isset($value[$middle - 1]) || $mouse >= $value[$middle - 1]) && $mouse < $snoopy) {
             return $index[$middle];
         }
 
