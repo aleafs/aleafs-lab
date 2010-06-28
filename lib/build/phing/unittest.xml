@@ -30,6 +30,7 @@
 			<batchtest>
 				<fileset dir="test/">
 					<include name="**/*Test.php" />
+					<exclude name="SpiderTest.php" />
 				</fileset>
 			</batchtest>
 			<formatter type="xml" todir="build/unit_test" outfile="test.unit.report.xml" />
