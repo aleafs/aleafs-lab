@@ -1,61 +1,81 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 // +------------------------------------------------------------------------+
-// | 异步的并发HTTP请求类  					    							|
+// | 支持异步并发的HTTP类					    							|
 // +------------------------------------------------------------------------+
-// | Copygight (c) 2010 Aleafs.Com All Rights Reserved						|
+// | Copygight (c) 2003 - 2010 Taobao.com. All Rights Reserved				|
 // +------------------------------------------------------------------------+
-// | Author: zhangxc <zhangxc83@sohu.com>									|
+// | Author: pengchun <pengchun@taobao.com>									|
 // +------------------------------------------------------------------------+
-//
-// $Id: spider.php 1 2010-04-15 16:28:45Z zhangxc83 $
 
 namespace Aleafs\Lib;
 
 class Spider
 {
 
-	/* {{{ 静态常量 */
+    /* {{{ 静态常量 */
 
-	const CURLM_MAX_THREADS	= 10;
+    const MAX_THREADS	= 10;
 
-	/* }}} */
+    /* }}} */
 
-	/* {{{ 成员变量 */
+    /* {{{ 静态变量 */
 
-	private $handle		= null;
+    private static $default = array(
+        'log_url'   => null,
+        'retry'     => array(300, 500),
+        'timeout'   => array(
+            'conn'  => 1,
+            'write' => 2,
+            'read'  => 5,
+        ),
+    );
 
-	private $options	= array();
+    /* }}} */
 
-	private $request	= array();
+    /* {{{ 成员变量 */
 
-	private $results	= array();
+    private $option = array();
 
-	private $running;
+    private $handle = null;
 
-	private $status;
+    private $offset = 0;
 
-	/* }}} */
+    private $hosts  = array();
 
-	/* {{{ public void __construct() */
-	/**
-	 * 构造函数
-	 *
-	 * @access public
-	 * @return void
-	 */
-	public function __construct()
-	{
-		$this->handle	= curl_multi_init();
-		$this->options	= array(
-			'code'  => CURLINFO_HTTP_CODE,
-			'time'  => CURLINFO_TOTAL_TIME,
-			'length'=> CURLINFO_CONTENT_LENGTH_DOWNLOAD,
-			'type'  => CURLINFO_CONTENT_TYPE,
-			'url'   => CURLINFO_EFFECTIVE_URL,
-		);
-	}
-	/* }}} */
+    private $pools  = array();
+
+    private $result = array();
+
+    private $status;
+
+    private $isrun;
+
+    private $log;
+
+
+    /* }}} */
+
+    /* {{{ public void __construct() */
+    /**
+     * 构造函数
+     *
+     * @access public
+     * @param Array $option
+     * @return void
+     */
+    public function __construct($option = null)
+    {
+        $this->option = array_merge(self::$default, (array)$option);
+        if (!empty($this->option['log_url'])) {
+            $this->log  = new Log($this->option['log_url']);
+        }
+        $this->handle   = curl_multi_init();
+
+        $this->pools    = array();
+        $this->hosts    = array();
+    }
+    /* }}} */
 
     /* {{{ public void __destruct() */
     /**
@@ -64,138 +84,212 @@ class Spider
      * @access public
      * @return void
      */
-	public function __destruct()
-	{
-		foreach ($this->request AS $curl) {
-			if (!$curl) {
-				continue;
-			}
-
-			curl_multi_remove_handle($curl);
-			curl_close($curl);
-		}
-
-		if ($this->handle) {
-			curl_multi_close($this->handle);
-			$this->handle	= null;
-		}
+    public function __destruct()
+    {
+        if (!empty($this->handle)) {
+            curl_multi_close($this->handle);
+            $this->handle    = null;
+        }
     }
     /* }}} */
 
-	/* {{{ private void unBlockRun() */
-	/**
-	 * 非阻塞模式运行请求
-	 *
-	 * @access private
-	 * @param String $method
-	 * @param String $path
-	 * @param Array $data
-	 * @return void
-	 */
-	private function unBlockRun($method, $path, $data = null)
-	{
-		if (empty($this->mcurl)) {
-			$this->mcurl = curl_multi_init();
-		}
+    /* {{{ public void register() */
+    /**
+     * 注册一个URL
+     *
+     * @access public
+     * @param string $url
+     * @return void
+     */
+    public function register($url, $method = 'GET', $data = null)
+    {
+        $this->hosts[] = array(
+            'url'   => trim($url),
+            'type'  => strtoupper($method),
+            'data'  => $data,
+        );
+        $this->offset   = count($this->hosts) - 1;
+        $this->smartRun();
+    }
+    /* }}} */
 
-		$index  = 0;
-		$this->result   = array();
-		while (false !== ($host = $this->fetchHost($index++))) {
-			$curl = $this->getCurl($method, $this->getUrl($host, $path), $data);
-			$code = curl_multi_add_handle($this->mcurl, $curl);
+    /* {{{ public void cleanAllData() */
+    /**
+     * 清理所有的URL
+     *
+     * @access public
+     * @return void
+     */
+    public function cleanAllData()
+    {
+        $this->hosts    = array();
+        $this->result   = array();
+        $this->offset   = 0;
+    }
+    /* }}} */
 
-			if ($code == CURLM_CALL_MULTI_PERFORM || $code == CURLM_OK) {
-				do {
-					$this->status = curl_multi_exec($this->mcurl, $this->isrun);
-				} while ($this->status == CURLM_CALL_MULTI_PERFORM);
-			}
+    /* {{{ public String getResult() */
+    /**
+     * 获取执行结果
+     *
+     * @access public
+     * @param String $key
+     * @return String
+     */
+    public function getResult($key)
+    {
+        if (!isset($this->result[$key])) {
+            $this->storeResult();
+        }
 
-			$this->pools[(string)$curl] = $host;
-			if (count($this->pools) >= self::CURLM_MAX_THREADS) {
-				$this->storeResult();
-			}
-		}
-	}
-	/* }}} */
+        if (isset($this->result[$key])) {
+            return $this->result[$key];
+        }
 
-	/* {{{ private void storeResult() */
-	/**
-	 * 存入异步请求返回的结果
-	 *
-	 * @access private
-	 * @return void
-	 */
-	private function storeResult()
-	{
-		$innerSleep = 1;
-		$outerSleep = 1;
-		while ($this->isrun && ($this->status == CURLM_OK || $this->status == CURLM_CALL_MULTI_PERFORM)) {
-			usleep($outerSleep);
-			$outerSleep *= 2;
-			if (curl_multi_select($this->mcurl, 0) > 0) {
-				do {
-					$this->status = curl_multi_exec($this->mcurl, $this->isrun);
-					usleep($innerSleep);
-					$innerSleep *= 2;
-				} while ($this->status == CURLM_CALL_MULTI_PERFORM);
-				$innerSleep = 0;
-			}
+        return null;
+    }
+    /* }}} */
 
-			while ($done = curl_multi_info_read($this->mcurl)) {
-				$handle = &$done['handle'];
-				$index  = (string)$handle;
-				$this->result[$this->pools[$index]] = curl_multi_getcontent($handle);
-				curl_multi_remove_handle($this->mcurl, $handle);
-				curl_close($handle);
-				unset($this->pools[$index]);
-			}
-		}
-	}
-	/* }}} */
+    /* {{{ private void smartRun() */
+    /**
+     * 非阻塞模式运行请求
+     *
+     * @access private
+     * @return void
+     */
+    private function smartRun()
+    {
+        while (false !== ($host = $this->fetchUrl($this->offset++))) {
+            $curl = $this->getCurl($host['type'], $host['url'], $host['data']);
+            $code = curl_multi_add_handle($this->handle, $curl);
 
-	/* {{{ private Resource getCurl() */
-	/**
-	 * 初始化curl
-	 *
-	 * @access private
-	 * @param String $method
-	 * @param String $url
-	 * @param Mixture $data
-	 * @return Resource $curl
-	 */
-	private function getCurl($method, $url, $data = null)
-	{
-		$curl = curl_init($url);
-		curl_setopt($curl, CURLOPT_FAILONERROR,     true);
-		curl_setopt($curl, CURLOPT_FOLLOWLOCATION,  true);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER,  true);
-		curl_setopt($curl, CURLOPT_BUFFERSIZE,      8192);
-		curl_setopt($curl, CURLOPT_CONNECTTIMEOUT,  $this->ini->timeout['connect']);
-		curl_setopt($curl, CURLOPT_MAXREDIRS,       3);
-		curl_setopt($curl, CURLOPT_TIMEOUT,         (int)(1.2 * array_sum($this->ini->timeout)));
-		curl_setopt($curl, CURLOPT_ENCODING,        'gzip,deflate');
-		curl_setopt($curl, CURLOPT_USERAGENT,       'Taobao Edp Glider 2.0');
+            if ($code == CURLM_CALL_MULTI_PERFORM || $code == CURLM_OK) {
+                do {
+                    $this->status = curl_multi_exec($this->handle, $this->isrun);
+                } while ($this->status == CURLM_CALL_MULTI_PERFORM);
+            }
 
-		$method = strtoupper(trim($method));
-		switch ($method) {
-		case 'POST':
-			curl_setopt(CURLOPT_POST,   true);
-			break;
+            $this->pools[strval($curl)] = $host['url'];
+            if (count($this->pools) >= self::MAX_THREADS) {
+                $this->storeResult();
+            }
+        }
+    }
+    /* }}} */
 
-		case 'GET':
-			break;
+    /* {{{ private void storeResult() */
+    /**
+     * 存入异步请求返回的结果
+     *
+     * @access private
+     * @return void
+     */
+    private function storeResult()
+    {
+        $innerSleep = 1;
+        $outerSleep = 1;
+        while ($this->isrun && ($this->status == CURLM_OK || $this->status == CURLM_CALL_MULTI_PERFORM)) {
+            usleep($outerSleep);
+            $outerSleep *= 2;
+            if (curl_multi_select($this->handle, 0) > 0) {
+                do {
+                    $this->status = curl_multi_exec($this->handle, $this->isrun);
+                    usleep($innerSleep);
+                    $innerSleep *= 2;
+                } while ($this->status == CURLM_CALL_MULTI_PERFORM);
+                $innerSleep = 0;
+            }
 
-		default:
-			curl_setopt(CURLOPT_CUSTOMREQUEST,  $method);
-			break;
-		}
-		if (!empty($data)) {
-			curl_setopt(CURLOPT_POSTFIELDS, http_build_query($data));
-		}
+            while ($done = curl_multi_info_read($this->handle)) {
+                $handle = &$done['handle'];
+                $index  = strval($handle);
 
-		return $curl;
-	}
-	/* }}} */
+                if ($done['result'] != CURLE_OK) {
+                    if (!empty($this->log)) {
+                        $this->log->warning('SPIDER_ERROR', array(
+                            'url'   => $this->pools[$index],
+                            'code'  => $done['result'],
+                            'error' => curl_error($handle),
+                        ));
+                    }
+                } else {
+                    $this->result[$this->pools[$index]] = curl_multi_getcontent($handle);
+                    if (!empty($this->log)) {
+                        $this->log->debug('SPIDER_OK', array(
+                            'url'   => $this->pools[$index],
+                        ));
+                    }
+                }
+
+                curl_multi_remove_handle($this->handle, $handle);
+                curl_close($handle);
+                unset($this->pools[$index]);
+            }
+        }
+    }
+    /* }}} */
+
+    /* {{{ private String fetchUrl() */
+    /**
+     * 获取完整的URL
+     *
+     * @access private
+     * @param Integer $index
+     * @return String
+     */
+    private function fetchUrl($index)
+    {
+        if (!isset($this->hosts[$index])) {
+            return false;
+        }
+
+        return $this->hosts[$index];
+    }
+    /* }}} */
+
+    /* {{{ private Resource getCurl() */
+    /**
+     * 初始化curl
+     *
+     * @access private
+     * @param String $method
+     * @param String $url
+     * @param Mixture $data
+     * @return Resource $curl
+     */
+    private function getCurl($method, $url, $data = null)
+    {
+        $curl = curl_init($url);
+        curl_setopt($curl, CURLOPT_FAILONERROR,     true);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION,  true);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER,  true);
+        curl_setopt($curl, CURLOPT_BUFFERSIZE,      8192);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT,  $this->option['timeout']['conn']);
+        curl_setopt($curl, CURLOPT_MAXREDIRS,       3);
+        curl_setopt($curl, CURLOPT_TIMEOUT,         (int)(1.2 * array_sum($this->option['timeout'])));
+        curl_setopt($curl, CURLOPT_ENCODING,        'gzip,deflate');
+        curl_setopt($curl, CURLOPT_USERAGENT,       'Taobao Edp Myfox 1.0');
+
+        $method = strtoupper(trim($method));
+        switch ($method) {
+        case 'POST':
+            curl_setopt($curl, CURLOPT_POST,   true);
+            break;
+
+        case 'GET':
+            break;
+
+        default:
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST,  $method);
+            break;
+        }
+        if (!empty($data)) {
+            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+        }
+
+        return $curl;
+    }
+    /* }}} */
 
 }
 
