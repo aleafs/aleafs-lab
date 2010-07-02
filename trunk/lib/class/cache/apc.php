@@ -25,6 +25,12 @@ class Apc
 
     /* }}} */
 
+    /* {{{ 静态变量 */
+
+    private static $data    = array();
+
+    /* }}} */
+
     /* {{{ 成员变量 */
 
     private $prefix		= '';
@@ -46,8 +52,26 @@ class Apc
     {
         $this->prefix	= preg_replace('/[\s:]+/', '', $prefix);
         $this->compress	= $compress && function_exists('gzcompress') ? true : false;
+    }
+    /* }}} */
 
-        //ini_set('apc.slam_defense', 'Off'); PHP_INI_SYSTEM
+    /* {{{ public void __destruct() */
+    /**
+     * 析构函数
+     *
+     * @access public
+     * @return void
+     */
+    public function __destruct()
+    {
+        foreach (self::$data AS $key => &$val) {
+            if (empty($val['write'])) {
+                continue;
+            }
+            if (apc_store($key, $val['value'], $val['time'])) {
+                unset($val['write']);
+            }
+        }
     }
     /* }}} */
 
@@ -62,15 +86,17 @@ class Apc
      */
     public function set($key, $value, $expire = null)
     {
-        $expire = empty($expire) ? self::EXPIRE_TIME : (int)$expire;
-        return apc_store(
-            $this->name($key),
-            $this->pack(array(
+        $expire = is_null($expire) ? self::EXPIRE_TIME : (int)$expire;
+        self::$data[$this->name($key)] = array(
+            'write' => true,
+            'time'  => $expire,
+            'value' => $this->pack(array(
                 'ttl'   => time() + $expire,
                 'val'   => $value,
             )),
-            $expire
         );
+
+        return true;
     }
     /* }}} */
 
@@ -84,7 +110,12 @@ class Apc
      */
     public function get($key, $ttl = null)
     {
-        $data = apc_fetch($this->name($key));
+        $key    = $this->name($key);
+        if (isset(self::$data[$key])) {
+            $data = self::$data[$key]['value'];
+        } else {
+            $data = apc_fetch($this->name($key));
+        }
         if (false === $data) {
             return null;
         }
@@ -110,7 +141,10 @@ class Apc
      */
     public function delete($key)
     {
-        return apc_delete($this->name($key));
+        $key    = $this->name($key);
+        unset(self::$data[$key]);
+
+        return apc_delete($key);
     }
     /* }}} */
 
@@ -123,6 +157,7 @@ class Apc
      */
     public static function cleanAllCache()
     {
+        self::$data = array();
         return apc_clear_cache('user');
     }
     /* }}} */
