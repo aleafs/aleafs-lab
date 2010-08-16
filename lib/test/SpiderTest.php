@@ -8,13 +8,11 @@
 // | Author: pengchun <pengchun@taobao.com>									|
 // +------------------------------------------------------------------------+
 
-use \Edp\Core\Factory;
-use \Edp\Myfox\MyfoxUnitTestShell;
 use \Edp\Myfox\Spider;
 
-require_once(__DIR__ . '/../../classes/myfox/MyfoxUnitTestShell.php');
+require_once(__DIR__ . '/../class/TestShell.php');
 
-class SpiderTest extends MyfoxUnitTestShell
+class SpiderTest extends \Aleafs\Lib\TestShell
 {
 
     private $test_script;
