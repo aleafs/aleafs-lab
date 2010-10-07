@@ -10,6 +10,8 @@
 
 namespace Aleafs\Lib;
 
+use \Aleafs\Factory;
+
 class Spider
 {
 
@@ -17,26 +19,17 @@ class Spider
 
     const MAX_THREADS	= 10;
 
+    const SLOW_SECONDS  = 10;
+
     const USER_AGENT    = 'Aleafs Spider 1.0';
-
-    /* }}} */
-
-    /* {{{ 静态变量 */
-
-    private static $default = array(
-        'log_url'   => null,
-        'timeout'   => array(
-            'conn'  => 2,
-            'write' => 10,
-            'read'  => 40,
-        ),
-    );
 
     /* }}} */
 
     /* {{{ 成员变量 */
 
-    private $option = array();
+    private $thread = self::MAX_THREADS;
+
+    private $agents = self::USER_AGENT;
 
     private $handle = null;
 
@@ -54,8 +47,15 @@ class Spider
 
     private $isrun;
 
+    private $ini;
+
     private $log;
 
+    private $slow;
+
+    private $keep_alive = 0;
+
+    private $slow_threshold = self::SLOW_SECONDS;
 
     /* }}} */
 
@@ -64,17 +64,39 @@ class Spider
      * 构造函数
      *
      * @access public
-     * @param Array $option
      * @return void
      */
-    public function __construct($option = null)
+    public function __construct($ini)
     {
-        $this->option = array_merge(self::$default, (array)$option);
-        if (!empty($this->option['log_url'])) {
-            $this->log  = new Log($this->option['log_url']);
+        $this->ini  = Factory::getIni($ini, true);
+        if (!empty($this->ini->access_log)) {
+            $this->log  = Factory::getLog($this->ini->access_log);
+        } else {
+            $this->log  = new \Edp\Core\BlackHole\Log('');
         }
-        $this->handle   = curl_multi_init();
 
+        if (!empty($this->ini->slow_log)) {
+            $this->slow = Factory::getLog($this->ini->slow_log);
+        } else {
+            $this->slow = new \Edp\Core\BlackHole\Log('');
+        }
+
+        if (!empty($this->ini->max_threads)) {
+            $this->thread = (int)$this->ini->max_threads;
+        }
+
+        if (!empty($this->ini->user_agent)) {
+            $this->agents = trim($this->ini->user_agent);
+        }
+
+        if (!empty($this->ini->keep_alive)) {
+            $this->keep_alive   = max(0, (int)$this->ini->keep_alive);
+        }
+        if (!empty($this->ini->slow_second)) {
+            $this->slow_threshold  = (int)$this->ini->slow_second;
+        }
+
+        $this->handle   = curl_multi_init();
         $this->pools    = array();
         $this->hosts    = array();
     }
@@ -154,7 +176,7 @@ class Spider
             if (isset($this->result[$index])) {
                 return $this->result[$index];
             }
-            $this->storeResult();
+            $this->_getResult();
             $check  = false;
         }
 
@@ -193,14 +215,14 @@ class Spider
         while (false !== ($host = $this->fetchUrl($this->offset))) {
             $curl = $this->getCurl($host['type'], $host['url'], $host['data']);
             if (0 == curl_multi_add_handle($this->handle, $curl)) {
-                $this->pools[strval($curl)] = array(
+                $this->pools[(string)$curl] = array(
                     'pos'   => $this->offset,
                     'res'   => $curl,
                 );
             }
 
             $this->offset++;
-            if (count($this->pools) >= self::MAX_THREADS) {
+            if (count($this->pools) >= $this->thread) {
                 break;
             }
         }
@@ -211,14 +233,14 @@ class Spider
     }
     /* }}} */
 
-    /* {{{ private void storeResult() */
+    /* {{{ private void _getResult() */
     /**
      * 存入异步请求返回的结果
      *
      * @access private
      * @return void
      */
-    private function storeResult()
+    private function _getResult()
     {
         $usleep = 1;
         while (!empty($this->pools) && $this->isrun && $this->status == CURLM_OK) {
@@ -227,45 +249,68 @@ class Spider
                 $usleep *= 2;
                 continue;
             }
-            $usleep = min(1, (int)($usleep / 2));
 
+            $usleep = min(1, (int)($usleep / 2));
             do {
                 usleep($usleep);
                 $this->status = curl_multi_exec($this->handle, $this->isrun);
             } while ($this->status == CURLM_CALL_MULTI_PERFORM);
 
             while ($done = curl_multi_info_read($this->handle)) {
-                $handle = $done['handle'];
-                $pinfos = $this->pools[strval($handle)];
-                $index  = $pinfos['pos'];
-
-                $notice = array(
-                    'url'   => $this->hosts[$index]['url'],
-                    'code'  => curl_getinfo($handle, CURLINFO_HTTP_CODE),
-                    'errno' => curl_errno($handle),
-                    'error' => curl_error($handle),
-                );
-
-                $data   = curl_multi_getcontent($handle);
-                $size   = strlen($data);
-                if ($done['result'] != CURLE_OK || empty($size)) {
-                    $this->log->warning('SPIDER_ERROR', $notice);
-                    $this->errors[$index] = $notice;
-                } else {
-                    $this->result[$index] = $data;
-                    unset($notice['error'], $notice['errno']);
-                    $this->log->info('SPIDER_OK', array_merge(
-                        $notice, array('size' => $size, )
-                    ));
-                }
-
-                curl_multi_remove_handle($this->handle, $handle);
-                curl_close($handle);
-                unset($this->pools[strval($handle)]);
+                $this->store($done['handle'], $done['result']);
             }
-
             $this->smartRun();
         }
+
+        if (!empty($this->pools)) {
+            usleep(500);
+            foreach ($this->pools AS $pool) {
+                $this->store($pool['res']);
+            }
+        }
+    }
+    /* }}} */
+
+    /* {{{ private void store() */
+    /**
+     * 储存某个句柄的结果
+     *
+     * @access private
+     * @param resource $handle
+     * @return void
+     */
+    private function store($handle, $done = CURLE_OK)
+    {
+        $pinfos = $this->pools[(string)$handle];
+        $index  = $pinfos['pos'];
+
+        $notice = array(
+            'url'   => $this->hosts[$index]['url'],
+            'code'  => curl_getinfo($handle, CURLINFO_HTTP_CODE),
+            'errno' => curl_errno($handle),
+            'error' => curl_error($handle),
+        );
+
+        $data   = curl_multi_getcontent($handle);
+        $size   = strlen($data);
+        if ($done != CURLE_OK || empty($size)) {
+            $this->log->warning('SPIDER_ERROR', $notice);
+            $this->errors[$index] = $notice;
+        } else {
+            $this->result[$index] = $data;
+            unset($notice['error'], $notice['errno']);
+            $this->log->info('SPIDER_OK', array_merge(
+                $notice, array('size' => $size, )
+            ));
+        }
+
+        if (curl_getinfo($handle, CURLINFO_TOTAL_TIME) >= $this->slow_threshold) {
+            $this->slow->warning('HTTP_SLOW', curl_getinfo($handle));
+        }
+
+        curl_multi_remove_handle($this->handle, $handle);
+        curl_close($handle);
+        unset($this->pools[strval($handle)]);
     }
     /* }}} */
 
@@ -304,11 +349,17 @@ class Spider
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION,  true);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER,  true);
         curl_setopt($curl, CURLOPT_BUFFERSIZE,      8192);
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT,  $this->option['timeout']['conn']);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT,  $this->ini->timeout['connect']);
         curl_setopt($curl, CURLOPT_MAXREDIRS,       3);
-        curl_setopt($curl, CURLOPT_TIMEOUT,         (int)(1.2 * array_sum($this->option['timeout'])));
+        curl_setopt($curl, CURLOPT_TIMEOUT,         (int)(1.2 * array_sum($this->ini->timeout)));
         curl_setopt($curl, CURLOPT_ENCODING,        'gzip,deflate');
-        curl_setopt($curl, CURLOPT_USERAGENT,       self::USER_AGENT);
+        curl_setopt($curl, CURLOPT_USERAGENT,       $this->agents);
+        if ($this->keep_alive) {
+            curl_setopt($curl, CURLOPT_HTTPHEADER,  array(
+                'Connection: Keep-Alive',
+                sprintf('Keep-Alive: %d', $this->keep_alive)
+            ));
+        }
 
         $method = strtoupper(trim($method));
         switch ($method) {
@@ -324,8 +375,15 @@ class Spider
             break;
         }
         if (!empty($data)) {
-            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+            $data   = http_build_query($data);
+            curl_setopt($curl, CURLOPT_POSTFIELDS,  $data);
+            $size   = strlen($data);
+        } else {
+            $size   = 0;
         }
+        curl_setopt($curl, CURLOPT_HTTPHEADER,  array(
+            'Content-Length: ' . $size
+        ));
 
         return $curl;
     }
