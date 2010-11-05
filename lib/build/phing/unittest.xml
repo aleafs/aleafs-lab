@@ -21,6 +21,7 @@
 				<exclude name="class/exception.php" />
 				<exclude name="class/spider.php" />
 				<exclude name="class/debug/coverage.php" />
+				<exclude name="class/blackhole/**/*.php" />
 				<include name="class/**/*.php" />
 			</fileset>
 		</coverage-setup>
