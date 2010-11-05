@@ -12,6 +12,8 @@
 
 namespace Aleafs\Lib;
 
+use \Aleafs\Lib\Log;
+
 class Factory
 {
 
@@ -25,13 +27,23 @@ class Factory
 
     private static $log = array();
 
+    private static $ini = array();
+
     /* }}} */
 
+    /* {{{ public static void alias() */
+    /**
+     * 对象别名
+     *
+     * @access public static
+     * @return void
+     */
     public static function alias($class, $name, $arg = null)
     {
         $arg = func_get_args();
         self::$alias[self::objIndex($class, $name)] = array_slice($arg, 2);
     }
+    /* }}} */
 
     /* {{{ public static void register()
      * @access public static

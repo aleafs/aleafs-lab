@@ -50,6 +50,19 @@ class Url
     }
     /* }}} */
 
+    /* {{{ public Mixture param() */
+    /**
+     * 获取URL中的参数值
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function param($key, $default = null)
+    {
+        return isset($this->param[$key]) ? $this->param[$key] : $default;
+    }
+    /* }}} */
+
     /* {{{ public static string build() */
     /**
      * 构造URL
