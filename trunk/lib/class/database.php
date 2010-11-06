@@ -412,7 +412,7 @@ abstract class Database
      * @param  String $sql
      * @return Mixture
      */
-    public function query($sql)
+    public function query($sql, $try = true)
     {
         if (empty($this->link)) {
             if ($this->circuit >= self::CIRCUIT) {
