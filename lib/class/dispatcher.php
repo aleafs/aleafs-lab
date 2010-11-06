@@ -95,9 +95,26 @@ class Dispatcher
         Pool::push('global.post',   $post);
 
         $url    = new Url($this->url);
-        $ctrl   = sprintf('Controller\\%s', $url->module);
+        $ctrl   = self::ctrl($url->module);
         $ctrl   = new $ctrl();
         $ctrl->execute($url->action, $url->param, $post);
+    }
+    /* }}} */
+
+    /* {{{ private static string ctrl() */
+    /**
+     * 获取控制器类名
+     *
+     * @access private static
+     * @return string
+     */
+    private static function ctrl($ctrl)
+    {
+        if (empty($ctrl)) {
+            return '\Aleafs\Lib\Controller';
+        }
+
+        return sprintf('Controller\\%s', ucfirst(strtolower($ctrl)));
     }
     /* }}} */
 
