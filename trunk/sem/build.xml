@@ -1,0 +1,85 @@
+<?xml version="1.0" ?>
+<project name="Aleafs PHP Libarary" basedir="." default="unittest"
+	description="Aleafs PHP Libarary for PHP5.3">
+	<!-- Sets the DSTAMP, TSTAMP and TODAY properties -->
+	<tstamp>
+		<format property="FULLDATE" pattern="%Y%m/%d" />
+		<format property="FULLDATE1" pattern="%Y_%m_%d" />
+		<format property="FULLTIME" pattern="%H%M%S" />
+		<format property="FULLTIME1" pattern="%H_%M_%S" />
+	</tstamp>
+
+	<!-- build property file name -->
+	<property name="prop.file"
+		value="${host.name}-${host.arch}-${host.domain}.properties" />
+	<echo message="properties file: ${prop.file}" />
+	<!-- fix for windows -->
+	<condition property="prop.file" value="${env.COMPUTERNAME}.properties">
+		<os family="windows" />
+	</condition>
+
+	<available file="${prop.file}" property="test_ini_file_exists"	value="Yes" />
+
+	<if>
+		<equals arg1="${test_ini_file_exists}" arg2="1" />
+		<then />
+		<else>
+			<property name="properties.reset" value="true" />
+			<phing phingfile="build/phing/init.xml" inheritRefs="true"
+				inheritAll="true" target="-init" haltonfailure="true" />
+		</else>
+	</if>
+
+	<!-- Load our configuration -->
+	<property file="./${prop.file}" />
+
+	<target name="unittest" description="Run unit test.">
+		<phing phingfile="build/phing/makeconf.xml" inheritRefs="true"
+			inheritAll="true" target="-unittest" haltonfailure="true" />
+		<phing phingfile="build/phing/unittest.xml" inheritRefs="true"
+			inheritAll="true" target="-unittest" haltonfailure="true" />
+	</target>
+
+	<target name="functest" description="Run functional test.">
+		<phing phingfile="build/phing/makeconf.xml" inheritRefs="true"
+			inheritAll="true" target="-makeconf" haltonfailure="true" />
+		<phing phingfile="build/phing/unittest.xml" inheritRefs="true"
+			inheritAll="true" target="-unittest" haltonfailure="true" />
+	</target>
+
+	<target name="config" description="Config properties file.">
+		<if>
+			<equals arg1="${test_ini_file_exists}" arg2="1" />
+			<then>
+				<property name="properties.reset" value="false" />
+				<phing phingfile="build/phing/init.xml" inheritRefs="true"
+					inheritAll="true" target="-init" haltonfailure="true" />
+			</then>
+		</if>
+	</target>
+
+	<target name="reset" description="Initating phing environment.">
+		<if>
+			<equals arg1="${test_ini_file_exists}" arg2="1" />
+			<then>
+				<property name="properties.reset" value="true" />
+				<phing phingfile="build/phing/init.xml" inheritRefs="true"
+					inheritAll="true" target="-init" haltonfailure="true" />
+			</then>
+		</if>
+	</target>
+
+	<target name="cleanup" description="clean all files which should not be commit">
+		<phing phingfile="build/phing/unittest.xml" inheritRefs="true"
+			inheritAll="true" target="-cleanup" haltonfailure="true" />
+		<phing phingfile="build/phing/makeconf.xml" inheritRefs="true"
+			inheritAll="true" target="-cleanup" haltonfailure="true" />
+	</target>
+
+	<target name="makeconf" description="Run unit test.">
+		<phingcall target="cleanup" />
+		<phing phingfile="build/phing/makeconf.xml" inheritRefs="true"
+			inheritAll="true" target="-makeconf" haltonfailure="true" />
+	</target>
+
+</project>
