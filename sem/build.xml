@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
-<project name="Aleafs PHP Libarary" basedir="." default="unittest"
-	description="Aleafs PHP Libarary for PHP5.3">
+<project name="Aleafs Sem App" basedir="." default="unittest"
+	description="Aleafs Sem App">
 	<!-- Sets the DSTAMP, TSTAMP and TODAY properties -->
 	<tstamp>
 		<format property="FULLDATE" pattern="%Y%m/%d" />
