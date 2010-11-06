@@ -1,0 +1,42 @@
+<project name="makeconf" basedir="." default="-makeconf"
+	description="make all config files">
+
+	<target name="-makeconf" description="Make all config files">
+		<phingcall target="-cleanup" />
+		<phingcall target="-dev" />
+		<phingcall target="-unittest" />
+	</target>
+
+	<target name="-cleanup" description="delete old config files.">
+		<phingcall target="-cleanup-dev" />
+		<phingcall target="-cleanup-unittest" />
+	</target>
+
+	<target name="-cleanup-dev" description="Delete all config files.">
+		<!--
+		<delete file="config/session.ini" verbose="false" quiet="true" />
+		-->
+	</target>
+
+	<target name="-cleanup-unittest" description="Delete all config files.">
+
+	</target>
+
+	<target name="-dev" description="Make configure files for development">
+		<phingcall target="-cleanup-dev" />
+	</target>
+
+	<target name="-unittest" description="Make configure files for unit test.">
+		<phingcall target="-cleanup-unittest" />
+
+		<!--
+		<copy file="build/tpl/unittest/http.ini" todir="test/unit/sess_test/" overwrite="true" >
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="session.test.http.prefix" value="${session.test.http.prefix}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		-->
+	</target>
+</project>
