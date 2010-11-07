@@ -37,6 +37,15 @@
 				</replacetokens>
 			</filterchain>
 		</copy>
+
+		<copy file="build/tpl/mysql.ini" todir="config" overwrite="true">
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="mysql.master.server1" value="mysql://db_write:123456@edp.corp.alimama.com:9901" />
+					<token key="mysql.slave.server1" value="mysql://db_read:123456@edp.corp.alimama.com:9901" />
+				</replacetokens>
+			</filterchain>
+		</copy>
 	</target>
 
 	<target name="-unittest" description="Make configure files for unit test.">
