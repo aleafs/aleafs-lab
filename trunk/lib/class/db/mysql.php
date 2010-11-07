@@ -67,6 +67,25 @@ class Mysql extends Database
     }
     /* }}} */
 
+    /* {{{ public Mixture query() */
+    /**
+     * 执行QUERY
+     *
+     * @access protected
+     * @return Mixture
+     */
+    public function query($sql, $try = true)
+    {
+        if (preg_match('/^(INSERT|DELETE|UPDATE|ALTER|CREATE|DROP|LOAD)/is', trim($sql))) {
+            $this->_connectToMaster();
+        } else {
+            $this->_connectToSlave();
+        }
+
+        return $this->_query(self::sqlClean($sql), $try);
+    }
+    /* }}} */
+
     /* {{{ protected Boolean _connect() */
     /**
      * 连接数据库
@@ -101,19 +120,13 @@ class Mysql extends Database
     /* }}} */
 
     /* {{{ protected Mixture _query() */
-    /**
-     * 执行QUERY
-     *
-     * @access protected
-     * @return Mixture
-     */
     protected function _query($sql, $try = true)
     {
         $ret = mysql_query($sql, $this->link);
         if (false === $ret) {
             if ($try && 2006 == mysql_errno($this->link)) {
                 $this->_disconnect();
-                return $this->query($sql, false);
+                return $this->_query($sql, false);
             }
         }
 
@@ -124,6 +137,7 @@ class Mysql extends Database
     /* {{{ protected void _begin() */
     protected function _begin()
     {
+        $this->_connectToMaster();
         return $this->query('BEGIN');
     }
     /* }}} */

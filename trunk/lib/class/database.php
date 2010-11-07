@@ -434,7 +434,7 @@ abstract class Database
             }
         }
 
-        return $this->_query(self::sqlClean($sql));
+        return $this->_query(self::sqlClean($sql), $try);
     }
     /* }}} */
 
