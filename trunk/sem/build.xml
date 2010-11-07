@@ -82,4 +82,8 @@
 			inheritAll="true" target="-makeconf" haltonfailure="true" />
 	</target>
 
+	<target name="release" description="Make rpm file for code release.">
+		<phing phingfile="build/phing/release.xml" inheritRefs="true"
+			inheritAll="true" target="-release" haltonfailure="true" />
+	</target>
 </project>
