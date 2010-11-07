@@ -13,12 +13,31 @@
 
 namespace Aleafs\Lib\Db;
 
+use \Aleafs\Lib\Configer;
 use \Aleafs\Lib\Database;
+use \Aleafs\Lib\Factory;
+use \Aleafs\Lib\LiveBox;
 
 class Mysql extends Database
 {
 
+    /* {{{ 静态常量 */
+
+    const CACHE_PREFIX  = '#mysql#';
+
+    /* }}} */
+
     /* {{{ 成员变量 */
+
+    private $conf;
+
+    private $log;
+
+    private $master;
+
+    private $slave;
+
+    private $isMaster   = false;
 
     /* }}} */
 
@@ -29,8 +48,22 @@ class Mysql extends Database
      * @access public
      * @return void
      */
-    public function __construct($ini)
+    public function __construct($name)
     {
+        $this->conf = Configer::instance($name);
+        $this->log  = Factory::getLog($this->conf->get('log.url', ''));
+
+        ini_set('mysql.connect_timeout',    (int)$this->conf->get('timeout', 15));
+
+        $this->master   = new LiveBox(self::CACHE_PREFIX . '/master', 30);
+        foreach ((array)$this->conf->get('master', array()) AS $url) {
+            $this->master->register($host);
+        }
+
+        $this->slave    = new LiveBox(self::CACHE_PREFIX . '/slave', 180);
+        foreach ((array)$this->conf->get('slave', array()) AS $url) {
+            $this->slave->register($host);
+        }
     }
     /* }}} */
 
@@ -43,12 +76,11 @@ class Mysql extends Database
      */
     protected function _connect()
     {
-        if (!$this->link) {
-            $this->link = null;
-            return false;
+        if (empty($this->link)) {
+            $this->_connectToSlave();
         }
 
-        return true;
+        return empty($this->link) ? false : true;
     }
     /* }}} */
 
@@ -157,17 +189,6 @@ class Mysql extends Database
     }
     /* }}} */
 
-    /* {{{ private string _escape() */
-    private function _escape($string)
-    {
-        if (empty($this->link)) {
-            $this->_connect();
-        }
-
-        return mysql_real_escape_string($string, $this->link);
-    }
-    /* }}} */
-
     /* {{{ protected integer _numRows() */
     protected function _numRows()
     {
@@ -179,6 +200,103 @@ class Mysql extends Database
     protected function _affectedRows()
     {
         return mysql_affected_rows($this->link);
+    }
+    /* }}} */
+
+    /* {{{ private string _escape() */
+    private function _escape($string)
+    {
+        if (empty($this->link)) {
+            $this->_connect();
+        }
+
+        return mysql_real_escape_string($string, $this->link);
+    }
+    /* }}} */
+
+    /* {{{ private void _connectToMaster() */
+    private function _connectToMaster()
+    {
+        if (!empty($this->link) && true === $this->isMaster) {
+            return;
+        }
+
+        $this->_disconnect();
+        $this->_realConnect($this->master);
+        $this->isMaster = true;
+    }
+    /* }}} */
+
+    /* {{{ private void _connectToSlave() */
+    /**
+     * 连接从库
+     */
+    private function _connectToSlave()
+    {
+        if (!empty($this->link)) {
+            return;
+        }
+
+        try {
+            $this->_realConnect($this->slave);
+        } catch (\Exception $e) {
+            $this->_connectToMaster();
+        }
+    }
+    /* }}} */
+
+    /* {{{ private void _realConnect() */
+    /**
+     * 实际连接DB
+     *
+     * @access private
+     * @return void
+     */
+    private function _realConnect(&$box)
+    {
+        $link   = null;
+        $func   = $this->conf->get('pconnect', false) ? 'mysql_pconnect' : 'mysql_connect';
+        while (empty($link)) {
+            $url    = $box->fetch();
+            $host   = parse_url($url);
+            if (empty($host)) {
+                $this->log->warning('MYSQL_CONFIG_ERROR', array('url' => $url));
+                $box->setOffline();
+                continue;
+            }
+
+            $error  = error_reporting();
+            error_reporting(E_ERROR | E_PARSE);
+            $link   = $func(
+                sprintf('%s:%d', $host['host'], empty($host['port']) ? 3306 : $host['port']),
+                rawurldecode($host['user']), rawurldecode($host['pass']), true
+            );
+            error_reporting($error);
+
+            if (empty($link)) {
+                $box->setOffline();
+                $this->log->warning('MYSQL_CONNECT_ERROR', array(
+                    'errno' => mysql_errno(),
+                    'error' => mysql_error(),
+                ));
+            }
+        }
+
+        $encode = $this->conf->get('charset', '');
+        if (!empty($encode)) {
+            if (function_exists('mysql_set_charset')) {
+                mysql_set_charset($encode, $link);
+            } else {
+                mysql_query('SET NAMES ' . $encode, $link);
+            }
+        }
+
+        $dbname = $this->conf->get('dbname', '');
+        if (!empty($dbname)) {
+            mysql_select_db($dbname, $link);
+        }
+
+        $this->link = $link;
     }
     /* }}} */
 
