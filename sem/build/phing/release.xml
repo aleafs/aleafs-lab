@@ -1,0 +1,159 @@
+<project name="release" basedir="." default="-release" description="Make rpm file for code release">
+	<target name="-release" description="Make rpm file for code release">
+		<!-- svn tag settings -->
+		<input propertyname="release.svn.tag" defaultValue="trunk" promptChar=":">SVN tag name</input>
+		<if>
+			<equals arg1="${release.svn.tag}" arg2="trunk" />
+			<then>
+				<property name="release.svn.url" value="${svn.url}/trunk" />
+			</then>
+			<else>
+				<property name="release.svn.url" value="${svn.url}/tags/${release.svn.tag}" />
+			</else>
+		</if>
+		<phingcall target="-confirm" />
+		<phingcall target="-cleanup" />
+		<phingcall target="-checkout" />
+
+		<property file="codes.properties" override="true" />
+		<phingcall target="-codes" />
+
+		<phingcall target="-config" >
+			<property name="rpm.config.mode" value="test" />
+		</phingcall>
+
+		<phingcall target="-config" >
+			<property name="rpm.config.mode" value="rc1" />
+		</phingcall>
+
+		<phingcall target="-config" >
+			<property name="rpm.config.mode" value="rc2" />
+		</phingcall>
+
+		<phingcall target="-config" >
+			<property name="rpm.config.mode" value="release" />
+		</phingcall>
+
+		<delete dir="build/src" verbose="false" quiet="true" includeemptydirs="true" />
+		<delete dir="build/rpm/src" verbose="false" quiet="true" includeemptydirs="true" />
+
+		<echo message="" />
+		<echo message="" />
+		<echo message="****************************************************************" />
+		<echo message="*" />
+		<echo message="*    All Done" />
+		<echo message="*" />
+		<echo message="****************************************************************" />
+		<echo message="" />
+		<echo message="" />
+
+	</target>
+	<target name="-confirm" description="Confirm for rpming&#39;s begin">
+		<echo message="" />
+		<echo message="" />
+		<echo message="****************************************************************" />
+		<echo message="*" />
+		<echo message="*    SVN checkout url: ${release.svn.url}" />
+		<echo message="*" />
+		<echo message="****************************************************************" />
+		<echo message="" />
+		<echo message="" />
+		<input propertyname="release.confirm" promptChar="?">All settings is correctly (y/n)</input>
+		<if>
+			<equals arg1="${release.confirm}" arg2="y" />
+			<then>
+			</then>
+			<else>
+				<fail message="Release is canceled!" />
+			</else>
+		</if>
+	</target>
+
+	<target name="-cleanup" description="Cleanup all old files.">
+		<delete dir="build/src" verbose="false" quiet="true" includeemptydirs="true" />
+		<delete dir="build/rpm/src" verbose="false" quiet="true" includeemptydirs="true" />
+	</target>
+
+	<target name="-checkout" description="Checkout all codes from subversion">
+		<svncheckout svnpath="/usr/bin/svn" nocache="true" repositoryurl="${release.svn.url}" todir="build/src"/>
+	</target>
+
+	<target name="-config" description="Make Myfox-cfg release">
+		<property file="${rpm.config.mode}.properties" override="true" />
+		<property name="rpm.tmp.dir" value="build/rpm/src/${rpm.config.mode}" />
+		<mkdir dir="${rpm.tmp.dir}" />
+		<svncheckout svnpath="/usr/bin/svn" nocache="true" repositoryurl="${export.url}" todir="${rpm.tmp.dir}/myfox-cfg"/>
+		<svncheckout svnpath="/usr/bin/svn" nocache="true" repositoryurl="${foxins.url}" todir="${rpm.tmp.dir}/myfox-ins"/>
+		<svncheckout svnpath="/usr/bin/svn" nocache="true" repositoryurl="${gateway.url}" todir="${rpm.tmp.dir}/myfox-gateway"/>
+
+		<property name="config.dir" value="build/src/" override="true" />
+		<phing dir="build/src" phingfile="build/phing/makeconf.xml" inheritRefs="true" inheritAll="true" target="-dev" haltonfailure="true" />
+
+		<copy todir="${rpm.tmp.dir}/myfox-cfg/config" overwrite="true" includeemptydirs="true">
+			<fileset dir="build/src/config">
+				<include name="**" />
+				<exclude name="**/.svn/**" />
+			</fileset>
+		</copy>
+
+		<copy todir="${rpm.tmp.dir}/myfox-cfg/tools" overwrite="true" includeemptydirs="true">
+			<fileset dir="build/src/tools">
+				<include name="getfile.sh" />
+				<include name="router.sh" />
+			</fileset>
+		</copy>
+
+		<copy todir="${rpm.tmp.dir}/myfox-ins" overwrite="true" includeemptydirs="true">
+			<fileset dir="build/src/tools">
+				<include name="getfile.sh" />
+				<include name="import.sh" />
+			</fileset>
+		</copy>
+
+		<copy todir="${rpm.tmp.dir}/myfox-gateway" overwrite="true" includeemptydirs="true">
+			<fileset dir="build/src/tools">
+				<include name="gateway.sh" />
+			</fileset>
+		</copy>
+
+		<exec command="for f in `svn st | grep '^?'| awk '{print $2}'`; do svn add $f; done"
+			dir="${rpm.tmp.dir}/myfox-cfg" checkreturn="true" outputProperty="svn.add.result" />
+		<svncommit svnpath="/usr/bin/svn" nocache="true" workingcopy="${rpm.tmp.dir}/myfox-cfg"
+			recursive="true" message="myfox ${rpm.config.mode} config for rpm package on ${FULLDATE2} ${FULLTIME2}" />
+
+		<exec command="for f in `svn st | grep '^?'| awk '{print $2}'`; do svn add $f; done"
+			dir="${rpm.tmp.dir}/myfox-ins" checkreturn="true" outputProperty="svn.add.result" />
+		<svncommit svnpath="/usr/bin/svn" nocache="true" workingcopy="${rpm.tmp.dir}/myfox-ins"
+			recursive="true" message="myfox ${rpm.config.mode} import for rpm package on ${FULLDATE2} ${FULLTIME2}" />
+
+		<exec command="for f in `svn st | grep '^?'| awk '{print $2}'`; do svn add $f; done"
+			dir="${rpm.tmp.dir}/myfox-gateway" checkreturn="true" outputProperty="svn.add.result" />
+		<svncommit svnpath="/usr/bin/svn" nocache="true" workingcopy="${rpm.tmp.dir}/myfox-gateway"
+			recursive="true" message="myfox ${rpm.config.mode} gateway for rpm package on ${FULLDATE2} ${FULLTIME2}" />
+	</target>
+
+	<target name="-codes" description="checkin all codes">
+		<mkdir dir="build/rpm/src/codes" />
+
+		<svncheckout svnpath="/usr/bin/svn" nocache="true" repositoryurl="${export.url}" todir="build/rpm/src/codes"/>
+
+		<copy todir="build/rpm/src/codes" overwrite="true" includeemptydirs="true">
+			<fileset dir="build/src">
+				<include name="classes/**" />
+				<include name="webroot/**" />
+				<include name="resource/conf/**" />
+				<include name="tools/*.php" />
+				<include name="changelog" />
+				<include name="releasenotes" />
+				<exclude name="**/.svn/**" />
+			</fileset>
+		</copy>
+
+		<exec command="for f in `svn st | grep '^?'| awk '{print $2}'`; do svn add $f; done"
+			dir="build/rpm/src/codes" checkreturn="true" outputProperty="svn.add.result" />
+		<svncommit svnpath="/usr/bin/svn" nocache="true" workingcopy="build/rpm/src/codes"
+			recursive="true" message="myfox codes for rpm package on ${FULLDATE2} ${FULLTIME2}" />
+	</target>
+
+</project>
+
