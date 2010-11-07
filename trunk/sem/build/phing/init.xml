@@ -42,7 +42,7 @@
 		<copy file="build/tpl/default.properties" tofile="./${prop.file}" overwrite="true">
 			<filterchain>
 				<replacetokens begintoken="##" endtoken="##">
-					<token key="dir.root" value="${dir.root}/" />
+					<token key="dir.root" value="${dir.root}" />
 					<token key="run.mode" value="${run.mode}" />
 				</replacetokens>
 			</filterchain>
