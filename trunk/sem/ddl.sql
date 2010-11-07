@@ -8,7 +8,7 @@ CREATE TABLE useracct (
 	addtime datetime not null default '0000-00-00 00:00:00',
 	modtime datetime not null default '0000-00-00 00:00:00',
 	email varchar(200) not null default '',
-	UNIQUE KEY uk_user_name (username),
+	UNIQUE KEY uk_user_name (username)
 ) ENGINE = InnoDB DEFAULT CHARSET=UTF8;
 
 CREATE TABLE user_permission (
