@@ -1,6 +1,5 @@
 <?php
-namespace Com\Aleafs;
-class AutoLoadOrderTestClass
+class Com_Aleafs_AutoLoadOrderTestClass
 {
 	public function path()
 	{
