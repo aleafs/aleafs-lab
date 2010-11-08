@@ -14,6 +14,21 @@
 class Aleafs_Sem_Dispatcher extends Aleafs_Lib_Dispatcher
 {
 
+    /* {{{ public static void setAutoLoad() */
+    /**
+     * 自动加载初始化
+     *
+     * @access public static
+     * @return void
+     */
+    public static function setAutoLoad()
+    {
+        require_once __DIR__ . '/../lib/autoload.php';
+        Aleafs_Lib_AutoLoad::init();
+        Aleafs_Lib_AutoLoad::register('aleafs_sem',     __DIR__);
+    }
+    /* }}} */
+
 	/* {{{ private static string ctrl() */
 	/**
 	 * 获取控制器类名

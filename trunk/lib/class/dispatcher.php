@@ -45,9 +45,6 @@ class Dispatcher
      */
     public static function run($ini, $url, $post = null)
     {
-        require_once __DIR__ . '/autoload.php';
-        AutoLoad::init();
-
         try {
             $dsp    = new self($ini);
             $dsp->dispach($url, $post);
@@ -58,6 +55,20 @@ class Dispatcher
         if (empty($GLOBALS['__in_debug_tools']) && function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();
         }
+    }
+    /* }}} */
+
+    /* {{{ public static void setAutoLoad() */
+    /**
+     * 自动加载初始化
+     *
+     * @access public static
+     * @return void
+     */
+    public static function setAutoLoad()
+    {
+        require_once __DIR__ . '/autoload.php';
+        AutoLoad::init();
     }
     /* }}} */
 
@@ -128,6 +139,7 @@ class Dispatcher
      */
     private function __construct($ini)
     {
+        self::setAutoLoad();
         Configer::register('default',   $ini);
 
         $this->config   = Configer::instance('default');
