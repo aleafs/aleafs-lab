@@ -191,7 +191,7 @@ class Aleafs_Lib_LiveBox
     {
         $this->last = $this->random(array_diff_key($this->host, $this->offs));
         if (null === $this->last) {
-            throw new Exception('There is no available server.');
+            throw new Aleafs_Lib_Exception('There is no available server.');
         }
 
         $server = &$this->host[$this->last];

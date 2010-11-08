@@ -62,7 +62,7 @@ class Aleafs_Lib_FileCacheTest extends Aleafs_Lib_LibTestShell
 			$cache->set('key1', 'val1');
 			$this->assertTrue(false);
 		} catch (Exception $e) {
-			$this->assertTrue($e instanceof \Aleafs\Lib\Exception);
+			$this->assertTrue($e instanceof Aleafs_Lib_Exception);
 			$this->assertContains(
 				'Derectory "' . __DIR__ . '/filecache/readonly/',
 				$e->getMessage()
