@@ -141,13 +141,14 @@ class Aleafs_Lib_Language
     public static function translate($string, $domain = null)
     {
         if (!empty(self::$cache)) {
-            return self::$cache->shell(
-                function() use ($string, $domain) {
-                    return Language::_gettext($string, $domain);
-                },
-                json_encode(array('d' => $domain, 's' => $string)),
-                self::CACHE_EXPIRE
-            );
+            $key    = json_encode(array('d' => $domain, 's' => $string));
+            $text   = self::$cache->get($key);
+            if (empty($text)) {
+                $text   = self::_gettext($string, $domain);
+                self::$cache->set($key, $text, self::CACHE_EXPIRE);
+            }
+
+            return $text;
         }
 
         return self::_gettext($string, $domain);

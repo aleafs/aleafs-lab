@@ -10,16 +10,15 @@
 //
 // $Id: LiveBoxTest.php 47 2010-04-26 05:27:46Z zhangxc83 $
 
-namespace Aleafs\Lib;
 require_once(__DIR__ . '/../class/TestShell.php');
 
-class LiveBoxTest extends LibTestShell
+class Aleafs_Lib_LiveBoxTest extends Aleafs_Lib_LibTestShell
 {
 
     protected function setUp()
     {
         parent::setUp();
-        $this->pool = new LiveBox(__CLASS__);
+        $this->pool = new Aleafs_Lib_LiveBox(__CLASS__);
     }
 
     protected function tearDown()
@@ -87,8 +86,8 @@ class LiveBoxTest extends LibTestShell
 
         try {
             $this->pool->fetch();
-        } catch (\Exception $e) {
-            $this->assertTrue($e instanceof \Aleafs\Lib\Exception);
+        } catch (Exception $e) {
+            $this->assertTrue($e instanceof Aleafs_Lib_Exception);
             $this->assertContains(
                 'There is no available server',
                 $e->getMessage(),
@@ -101,7 +100,7 @@ class LiveBoxTest extends LibTestShell
     /* {{{ public function test_should_live_time_works_fine() */
     public function test_should_live_time_works_fine()
     {
-        $pool = new LiveBox(__CLASS__, 2);
+        $pool = new Aleafs_Lib_LiveBox(__CLASS__, 2);
         if (!$pool->useCache()) {
             return;
         }
@@ -109,7 +108,7 @@ class LiveBoxTest extends LibTestShell
         $pool->register('www.baidu.com', 1)->setOffline('www.baidu.com');
         unset($pool);
 
-        $pool = new LiveBox(__CLASS__);
+        $pool = new Aleafs_Lib_LiveBox(__CLASS__);
         $pool->register('www.baidu.com', 1)->register('www.google.com', 1);
 
         for ($i = 0; $i < 10; $i++) {
@@ -121,7 +120,7 @@ class LiveBoxTest extends LibTestShell
         unset($pool);
 
         sleep(2);
-        $pool = new LiveBox(__CLASS__);
+        $pool = new Aleafs_Lib_LiveBox(__CLASS__);
         $pool->register('www.baidu.com', 1)->register('www.google.com', 1);
 
         $return = array();

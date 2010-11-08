@@ -8,11 +8,9 @@
 // | Author: pengchun <pengchun@taobao.com>									|
 // +------------------------------------------------------------------------+
 
-use \Aleafs\Lib\Parser\Url;
-
 require_once(__DIR__ . '/../class/TestShell.php');
 
-class UrlTest extends \Aleafs\Lib\LibTestShell
+class Aleafs_Lib_UrlTest extends Aleafs_Lib_LibTestShell
 {
 
     /* {{{ protected void setUp() */
@@ -32,22 +30,22 @@ class UrlTest extends \Aleafs\Lib\LibTestShell
     /* {{{ public void test_should_parse_right_module_and_action_and_param() */
     public function test_should_parse_right_module_and_action_and_param()
     {
-        $url = new Url('');
+        $url = new Aleafs_Lib_Parser_Url('');
         $this->assertEquals('', $url->module);
         $this->assertEquals('', $url->action);
         $this->assertEquals(array(), $url->param);
 
-        $url = new Url('test');
+        $url = new Aleafs_Lib_Parser_Url('test');
         $this->assertEquals('test', $url->module);
         $this->assertEquals('', $url->action);
         $this->assertEquals(array(), $url->param);
 
-        $url = new Url('test//index/a/b/c/2');
+        $url = new Aleafs_Lib_Parser_Url('test//index/a/b/c/2');
         $this->assertEquals('test', $url->module);
         $this->assertEquals('index', $url->action);
         $this->assertEquals(array('a' => 'b', 'c' => '2'), $url->param);
 
-        $url = new Url("test\t/in\ndex/__SQL__/b/c/2/d");
+        $url = new Aleafs_Lib_Parser_Url("test\t/in\ndex/__SQL__/b/c/2/d");
         $this->assertEquals('test', $url->module);
         $this->assertEquals('index', $url->action);
         $this->assertEquals(array(
@@ -61,7 +59,7 @@ class UrlTest extends \Aleafs\Lib\LibTestShell
     {
         $this->assertEquals(
             'module/action/name/' . urlencode('朱镕基') . '/age/2',
-            Url::build('module', 'action', array(
+            Aleafs_Lib_Parser_Url::build('module', 'action', array(
                 'na me' => '朱镕基',
                 'age  ' => 2,
                 'array' => array('我应该被忽略'),
@@ -76,7 +74,7 @@ class UrlTest extends \Aleafs\Lib\LibTestShell
      */
     public function test_should_parse_zero_correctly()
     {
-        $url = new Url('test//index/a/b/c/0');
+        $url = new Aleafs_Lib_Parser_Url('test//index/a/b/c/0');
         $this->assertEquals(array('a' => 'b', 'c' => '0'), $url->param);
     }
     /* }}} */

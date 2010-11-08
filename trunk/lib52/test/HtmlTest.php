@@ -10,12 +10,9 @@
 //
 // $Id: HtmlTest.php 72 2010-05-24 06:47:01Z zhangxc83 $
 
-namespace Aleafs\Lib;
-use \Aleafs\Lib\Render\Html;
-
 require_once(__DIR__ . '/../class/TestShell.php');
 
-class HtmlTest extends LibTestShell
+class Aleafs_Lib_HtmlTest extends Aleafs_Lib_LibTestShell
 {
 
     /* {{{ private static Boolean cleanDir() */
@@ -67,14 +64,14 @@ class HtmlTest extends LibTestShell
 
     public function test_should_html_compile_works_fine()
     {
-        Html::init(array(
+        Aleafs_Lib_Render_Html::init(array(
             'tpl_path'  => __DIR__ . '/html/tpl',
             'obj_path'  => __DIR__ . '/html/obj',
             'theme'     => 'default',
             'expire'    => 0,
         ));
 
-        $html   = new Html();
+        $html   = new Aleafs_Lib_Render_Html();
         $html->assign('scalar', 'I\m a scalar variabe.');
         $html->assign('array', array(1, 2, 3));
         $html->render('index', 'user', false);
@@ -85,11 +82,11 @@ class HtmlTest extends LibTestShell
         try {
             $html->render('not_complete', 'user', false);
             $this->assertTrue(false, 'Exception should be throw here.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->assertContains('uncompleted', $e->getMessage());
         }
 
-        Html::init(array(
+        Aleafs_Lib_Render_Html::init(array(
             'tpl_path'  => __DIR__ . '/html/tpl',
             'obj_path'  => __DIR__ . '/html/obj',
             'theme'     => 'theme_2',
@@ -102,7 +99,7 @@ class HtmlTest extends LibTestShell
         try {
             $html->render('not_exists', 'user', false);
             $this->assertTrue(false, 'No template file exception should be throw out.');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->assertContains('No such template source file', $e->getMessage());
         }
     }
