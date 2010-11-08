@@ -10,12 +10,11 @@
 //
 // $Id: DebugTimerTest.php 2010-06-01 aleafs Exp $
 
-use \Aleafs\Lib\LibTestShell;
 use \Aleafs\Lib\Debug\Timer;
 
 require_once(__DIR__ . '/../class/TestShell.php');
 
-class DebugTimerTest extends LibTestShell
+class Aleafs_Lib_DebugTimerTest extends Aleafs_Lib_LibTestShell
 {
 
 	protected function setUp()
@@ -31,17 +30,17 @@ class DebugTimerTest extends LibTestShell
 	/* {{{ public void test_should_timer_works_fine() */
 	public function test_should_timer_works_fine()
 	{
-		Timer::init(false);
-		Timer::start('key1');
-		$this->assertEquals(null, Timer::elapsed('key1'));
+		Aleafs_Lib_Debug_Timer::init(false);
+		Aleafs_Lib_Debug_Timer::start('key1');
+		$this->assertEquals(null, Aleafs_Lib_Debug_Timer::elapsed('key1'));
 
-		Timer::init(true);
-		Timer::start('key1');
+		Aleafs_Lib_Debug_Timer::init(true);
+		Aleafs_Lib_Debug_Timer::start('key1');
 		usleep(300);
-		$this->assertEquals(null, Timer::elapsed('key2'));
+		$this->assertEquals(null, Aleafs_Lib_Debug_Timer::elapsed('key2'));
 
-		$this->assertFalse(null == Timer::elapsed('Key1 '));
-		$this->assertEquals(null, Timer::elapsed('key1'));
+		$this->assertFalse(null == Aleafs_Lib_Debug_Timer::elapsed('Key1 '));
+		$this->assertEquals(null, Aleafs_Lib_Debug_Timer::elapsed('key1'));
 	}
 	/* }}} */
 

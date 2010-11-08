@@ -10,12 +10,9 @@
 //
 // $Id: ApcTest.php 63 2010-05-12 07:40:08Z zhangxc83 $
 
-namespace Aleafs\Lib;
-use \Aleafs\Lib\Cache\Apc;
-
 require_once(__DIR__ . '/../class/TestShell.php');
 
-class ApcTest extends LibTestShell
+class Aleafs_Lib_ApcTest extends Aleafs_Lib_LibTestShell
 {
 
     private $shell  = 0;
@@ -27,7 +24,7 @@ class ApcTest extends LibTestShell
 
     protected function tearDown()
     {
-        Apc::cleanAllCache();
+        Aleafs_Lib_Cache_Apc::cleanAllCache();
         parent::tearDown();
     }
 
@@ -35,7 +32,7 @@ class ApcTest extends LibTestShell
     public function test_should_apc_without_compress_works_fine()
     {
         $val = array('a' => 'b', 'c' => array('d' => 'e'));
-        $apc = new Apc(__METHOD__);
+        $apc = new Aleafs_Lib_Cache_Apc(__METHOD__);
         $this->assertEquals(null, $apc->get('key1'), 'Apc should be empty.');
 
         $apc->set('key1', $val, 1);
@@ -57,7 +54,7 @@ class ApcTest extends LibTestShell
     public function test_should_apc_with_compress_works_fine()
     {
         $val = array('a' => 'b', 'c' => array('d' => 'e'));
-        $apc = new Apc(__METHOD__, true);
+        $apc = new Aleafs_Lib_Cache_Apc(__METHOD__, true);
         $this->assertEquals(null, $apc->get('key1'), 'Apc should be empty.');
 
         $apc->set('key1', $val, 1);
@@ -70,7 +67,7 @@ class ApcTest extends LibTestShell
     /* {{{ public void test_should_cache_shell_works_fine() */
     public function test_should_cache_shell_works_fine()
     {
-        $apc = new Apc(__METHOD__);
+        $apc = new Aleafs_Lib_Cache_Apc(__METHOD__);
         $this->shell = 0;
 
         $this->assertEquals(md5(1), $apc->shell(array(&$this, 'loadShellData'), 1));
