@@ -1,10 +1,8 @@
 <?php
 
-use \Aleafs\Lib\Cache\File;
-
 require_once(__DIR__ . '/../class/TestShell.php');
 
-class FileCacheTest extends \Aleafs\Lib\LibTestShell
+class Aleafs_Lib_FileCacheTest extends Aleafs_Lib_LibTestShell
 {
 
     private $shell  = 0;
@@ -12,7 +10,7 @@ class FileCacheTest extends \Aleafs\Lib\LibTestShell
     protected function setUp()
     {
 		parent::setUp();
-		$this->cache	= new File('test', __DIR__ . '/filecache');
+		$this->cache	= new Aleafs_Lib_Cache_File('test', __DIR__ . '/filecache');
 		$this->shell	= 0;
     }
 
@@ -53,7 +51,7 @@ class FileCacheTest extends \Aleafs\Lib\LibTestShell
 
 	public function test_should_exception_throw_out_when_write_error()
 	{
-		$cache	= new File('readonly', __DIR__ . '/filecache');
+		$cache	= new Aleafs_Lib_Cache_File('readonly', __DIR__ . '/filecache');
 		$cache->cleanAllCache();
 
 		@mkdir(__DIR__ . '/filecache/readonly', 0444, true);
@@ -63,7 +61,7 @@ class FileCacheTest extends \Aleafs\Lib\LibTestShell
 		try {
 			$cache->set('key1', 'val1');
 			$this->assertTrue(false);
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 			$this->assertTrue($e instanceof \Aleafs\Lib\Exception);
 			$this->assertContains(
 				'Derectory "' . __DIR__ . '/filecache/readonly/',

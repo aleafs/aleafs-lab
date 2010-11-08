@@ -10,12 +10,9 @@
 //
 // $Id: DebugPoolTest.php 2010-06-01 aleafs Exp $
 
-use \Aleafs\Lib\LibTestShell;
-use \Aleafs\Lib\Debug\Coverage;
-
 require_once(__DIR__ . '/../class/TestShell.php');
 
-class DebugCoverageTest extends LibTestShell
+class Aleafs_Lib_DebugCoverageTest extends Aleafs_Lib_LibTestShell
 {
 
     private $dbfile;
@@ -34,13 +31,13 @@ class DebugCoverageTest extends LibTestShell
 
     public function test_should_coverage_works_fine()
     {
-        Coverage::init($this->dbfile);
+        Aleafs_Lib_Debug_Coverage::init($this->dbfile);
 
         foreach (range(0, 12) AS $num) {
             $num = pow($num, 2);
         }
 
-        Coverage::flush();
+        Aleafs_Lib_Debug_Coverage::flush();
         $this->assertTrue(is_file($this->dbfile));
     }
 
