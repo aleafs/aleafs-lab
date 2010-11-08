@@ -11,7 +11,7 @@
 // $Id: autoload.php 22 2010-04-15 16:28:45Z zhangxc83 $
 //
 
-class Aleafs_Sem_Dispatcher extends \Aleafs\Lib\Dispatcher
+class Aleafs_Sem_Dispatcher extends Aleafs_Lib_Dispatcher
 {
 
 	/* {{{ private static string ctrl() */
