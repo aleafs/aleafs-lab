@@ -1,0 +1,24 @@
+<html>
+	<head>
+		<title>测试1</title>
+	</head>
+	<body>
+		<div id="main">
+			<h1>$scalar</h1>
+			<!--{loop $array $val}-->
+			<p>$val</p>
+			<!--{/loop}-->
+			<hr />
+			<!--{loop $array $key $val}-->
+			<!--{if $key % 2 == 0}-->
+			<p>偶数键 : $key -&gt; $val</p>
+			<!--{elseif $val % 3 == 0}-->
+			<p>被3整除 : $key -&gt; $val</p>
+			<!--{else}-->
+			<p>I'm lucky.</p>
+			<!--{/if}-->
+			<!--{/loop}-->
+		</div>
+	</body>
+	{element footer}
+
