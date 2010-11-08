@@ -10,42 +10,39 @@
 //
 // $Id: context.lib.php 4 2010-03-09 05:20:36Z zhangxc83 $
 
-use \Aleafs\Lib\Context;
-use \Aleafs\Lib\LibTestShell;
-
 require_once(__DIR__ . '/../class/TestShell.php');
 
-class ContextTest extends LibTestShell
+class Aleafs_Lib_ContextTest extends Aleafs_Lib_LibTestShell
 {
 
     protected function setUp()
     {
         parent::setUp();
-		Context::cleanAllContext();
+		Aleafs_Lib_Context::cleanAllContext();
     }
 
     protected function tearDown()
     {
-		Context::cleanAllContext();
+		Aleafs_Lib_Context::cleanAllContext();
         parent::tearDown();
 	}
 
 	/* {{{ public void test_should_register_and_get_works_fine() */
 	public function test_should_register_and_get_works_fine()
 	{
-		Context::register('key1', 'val1');
-		Context::register('key2', new StdClass());
-		Context::unregister('key2');
-		Context::unregister('I_am_not_exists');
-		$this->assertEquals('val1', Context::get('key1', 'val2'));
-		$this->assertEquals('default', Context::get('key2', 'default'));
+		Aleafs_Lib_Context::register('key1', 'val1');
+		Aleafs_Lib_Context::register('key2', new StdClass());
+		Aleafs_Lib_Context::unregister('key2');
+		Aleafs_Lib_Context::unregister('I_am_not_exists');
+		$this->assertEquals('val1', Aleafs_Lib_Context::get('key1', 'val2'));
+		$this->assertEquals('default', Aleafs_Lib_Context::get('key2', 'default'));
 	}
 	/* }}} */
 
 	/* {{{ public void test_should_get_correct_pid() */
 	public function test_should_get_correct_pid()
 	{
-		$this->assertEquals(getmypid(), Context::pid());
+		$this->assertEquals(getmypid(), Aleafs_Lib_Context::pid());
 	}
 	/* }}} */
 
@@ -53,21 +50,21 @@ class ContextTest extends LibTestShell
 	public function test_should_get_correct_userip()
 	{
 		$_SERVER	= array();
-		$this->assertEquals('unknown', Context::userip());
-		$this->assertEquals(0, Context::userip(true));
+		$this->assertEquals('unknown', Aleafs_Lib_Context::userip());
+		$this->assertEquals(0, Aleafs_Lib_Context::userip(true));
 
 		$_SERVER['REMOTE_ADDR']	= '127.0.0.1';
-		$this->assertEquals('unknown', Context::userip());
-		$this->assertEquals(0, Context::userip(true));
+		$this->assertEquals('unknown', Aleafs_Lib_Context::userip());
+		$this->assertEquals(0, Aleafs_Lib_Context::userip(true));
 
-		Context::cleanAllContext();
-		$this->assertEquals('127.0.0.1', Context::userip());
-		$this->assertEquals(ip2long('127.0.0.1'), Context::userip(true));
+		Aleafs_Lib_Context::cleanAllContext();
+		$this->assertEquals('127.0.0.1', Aleafs_Lib_Context::userip());
+		$this->assertEquals(ip2long('127.0.0.1'), Aleafs_Lib_Context::userip(true));
 
 		$_SERVER['HTTP_X_FORWARDED_FOR'] = '202.111.111.123,59.66.192.112';
-		Context::cleanAllContext();
-		$this->assertEquals('59.66.192.112', Context::userip());
-		$this->assertEquals(ip2long('59.66.192.112'), Context::userip(true));
+		Aleafs_Lib_Context::cleanAllContext();
+		$this->assertEquals('59.66.192.112', Aleafs_Lib_Context::userip());
+		$this->assertEquals(ip2long('59.66.192.112'), Aleafs_Lib_Context::userip(true));
 	}
 	/* }}} */
 

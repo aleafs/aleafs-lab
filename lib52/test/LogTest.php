@@ -10,11 +10,9 @@
 //
 // $Id: LogTest.php 92 2010-06-02 13:20:01Z zhangxc83 $
 
-use \Aleafs\Lib\Log;
-
 require_once(__DIR__ . '/../class/TestShell.php');
 
-class LogTest extends \Aleafs\Lib\LibTestShell
+class Aleafs_Lib_LogTest extends Aleafs_Lib_LibTestShell
 {
 
     private $file;
@@ -48,7 +46,7 @@ class LogTest extends \Aleafs\Lib\LibTestShell
 
     public function test_should_write_debug_log_ok()
     {
-        $log = new Log(sprintf(
+        $log = new Aleafs_Lib_Log(sprintf(
             'log://debug/%s/log_for_test.log?buffer=0', __DIR__
         ));
         $this->assertEquals(0, $log->cache, 'Init Log Buffer Error.');
@@ -72,7 +70,7 @@ class LogTest extends \Aleafs\Lib\LibTestShell
 
     public function test_should_write_notice_log_ok()
     {
-        $log = new Log(sprintf(
+        $log = new Aleafs_Lib_Log(sprintf(
             'log://notice.blablalla/%s/log_for_test.log?buffer=02', __DIR__
         ));
         $this->assertEquals(2, $log->cache, 'Init Log Buffer Error.');
@@ -99,7 +97,7 @@ class LogTest extends \Aleafs\Lib\LibTestShell
 
     public function test_should_write_warn_log_ok()
     {
-        $log = new Log(sprintf(
+        $log = new Aleafs_Lib_Log(sprintf(
             'log://WarN.blablalla/%s/log_for_test.log?buffer=02s02s', __DIR__
         ));
         $this->assertEquals(2, $log->cache, 'Init Log Buffer Error.');
@@ -126,7 +124,7 @@ class LogTest extends \Aleafs\Lib\LibTestShell
 
     public function test_should_write_error_log_ok()
     {
-        $log = new Log(sprintf(
+        $log = new Aleafs_Lib_Log(sprintf(
             'log://ERROR.blablalla/%s/log_for_test.log?buffer=02', __DIR__
         ));
 
@@ -152,7 +150,7 @@ class LogTest extends \Aleafs\Lib\LibTestShell
 
     public function test_should_buffer_control_fine()
     {
-        $log = new Log(sprintf(
+        $log = new Aleafs_Lib_Log(sprintf(
             'log://debug.warn.notice.ERROR.blablalla/%s/log_for_test.log', __DIR__
         ));
 
@@ -182,7 +180,7 @@ class LogTest extends \Aleafs\Lib\LibTestShell
 
     public function test_should_flush_data_when_destruct()
     {
-        $log = new Log(sprintf(
+        $log = new Aleafs_Lib_Log(sprintf(
             'log://debug.warn.notice.ERROR.blablalla/%s/log_for_test.log', __DIR__
         ));
 
