@@ -1,7 +1,6 @@
 <?php
-namespace Factory;
 
-class Person
+class Factory_Person
 {
 
 	private $age;

@@ -10,11 +10,9 @@
 //
 // $Id: ConfigerTest.php 58 2010-05-05 00:14:58Z zhangxc83 $
 
-namespace Aleafs\Lib;
-
 require_once(__DIR__ . '/../class/TestShell.php');
 
-class ConfigerTest extends LibTestShell
+class Aleafs_Lib_ConfigerTest extends Aleafs_Lib_LibTestShell
 {
 
 	protected function setUp()
@@ -24,32 +22,32 @@ class ConfigerTest extends LibTestShell
 
 	protected function tearDown()
     {
-        Configer::makeSureRemoveAll();
+        Aleafs_Lib_Configer::makeSureRemoveAll();
 		parent::tearDown();
 	}
 
     public function test_config_factory_works_fine()
     {
-        Configer::register('test_ini', 'ini://' . __DIR__ . '/config/ini_test.ini');
-        Configer::register('ini_test', 'ini://' . __DIR__ . '/config/ini_test.ini');
+        Aleafs_Lib_Configer::register('test_ini', 'ini://' . __DIR__ . '/config/ini_test.ini');
+        Aleafs_Lib_Configer::register('ini_test', 'ini://' . __DIR__ . '/config/ini_test.ini');
 
-        Configer::unregister('INI_test');
+        Aleafs_Lib_Configer::unregister('INI_test');
 
         try {
-            Configer::instance('ini_tesT');
-        } catch (\Exception $e) {
-            $this->assertTrue($e instanceof \Aleafs\Lib\Exception);
+            Aleafs_Lib_Configer::instance('ini_tesT');
+        } catch (Exception $e) {
+            $this->assertTrue($e instanceof Aleafs_Lib_Exception);
             $this->assertContains('Undefined config object named as "ini_test"', $e->getMessage());
         }
 
-        $this->assertTrue(Configer::instance('test_ini') instanceof Configer);
+        $this->assertTrue(Aleafs_Lib_Configer::instance('test_ini') instanceof Aleafs_Lib_Configer);
     }
 
     public function test_should_ini_file_works_fine()
     {
-        Configer::register('test_ini', __DIR__ . '/config/ini_test.ini');
+        Aleafs_Lib_Configer::register('test_ini', __DIR__ . '/config/ini_test.ini');
 
-        $obj = Configer::instance('test_ini');
+        $obj = Aleafs_Lib_Configer::instance('test_ini');
         $this->assertEquals(2, $obj->get('i_am_not_exists', 2));
 
     }
