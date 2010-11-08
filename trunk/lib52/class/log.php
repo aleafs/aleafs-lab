@@ -257,6 +257,10 @@ class Aleafs_Lib_Log
             $this->file = substr($this->file, 1);
         }
 
+        if (empty($this->file)) {
+            return;
+        }
+
         $this->level    = 0;
         $tmp = array_flip(explode('.', strtolower($url['host'])));
         if (isset($tmp['debug'])) {
