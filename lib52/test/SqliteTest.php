@@ -1,12 +1,9 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 
-namespace Aleafs\Lib;
-use Aleafs\Lib\Db\Sqlite;
-
 require_once(__DIR__ . '/../class/TestShell.php');
 
-class SqliteTest extends LibTestShell
+class Aleafs_Lib_SqliteTest extends Aleafs_Lib_LibTestShell
 {
     private $dao;
 
@@ -23,7 +20,7 @@ class SqliteTest extends LibTestShell
         error_reporting($this->err ^ E_WARNING);
 
         $this->file = __DIR__ . '/dbtest/i_am_only_for_test.sqlite';
-        $this->dao	= new Sqlite($this->file);
+        $this->dao	= new Aleafs_Lib_Db_Sqlite($this->file);
         $this->assertTrue((bool)$this->dao->query(
             'CREATE TABLE test_autoincrement_and_string (
                 seqid INTEGER AUTOINCREMENT,
@@ -73,17 +70,17 @@ class SqliteTest extends LibTestShell
 
         $this->assertEquals(
             $this->dao->clear()->order('seqid', 'ASC')
-            ->where('seqid', -1, Database::NE, false)
-            ->where('seqid', array(234234234,12131321), Database::NOTIN, false)
-            ->where('seqid', count($data) + 1000, Database::LT, false)
-            ->where('seqid', -1, Database::GT)
-            ->where('seqid', 'sadfkwe', Database::NOTLIKE)
+            ->where('seqid', -1, Aleafs_Lib_Database::NE, false)
+            ->where('seqid', array(234234234,12131321), Aleafs_Lib_Database::NOTIN, false)
+            ->where('seqid', count($data) + 1000, Aleafs_Lib_Database::LT, false)
+            ->where('seqid', -1, Aleafs_Lib_Database::GT)
+            ->where('seqid', 'sadfkwe', Aleafs_Lib_Database::NOTLIKE)
             ->select('sign', 'numb')->getAll(),
                 $data, 'getAll Data Doesn\'t match after insert.'
             );
 
         $this->assertEquals(
-            $this->dao->clear()->where('seqid', 3, Database::LE)->update(array('numb' => 'round(numb, 2)'), array('numb' => false))->affectedRows(),
+            $this->dao->clear()->where('seqid', 3, Aleafs_Lib_Database::LE)->update(array('numb' => 'round(numb, 2)'), array('numb' => false))->affectedRows(),
             3, 'Affected Rows is not 3 when update.'
         );
 
@@ -101,7 +98,7 @@ class SqliteTest extends LibTestShell
         );
 
         $this->assertEquals(
-            $this->dao->clear()->where('seqid', array(1,4,99999), Database::IN, false)->delete()->affectedRows(),
+            $this->dao->clear()->where('seqid', array(1,4,99999), Aleafs_Lib_Database::IN, false)->delete()->affectedRows(),
             2,
             'Delete affected Rows Error.'
         );
@@ -124,7 +121,7 @@ class SqliteTest extends LibTestShell
             array('sign' => 'ba', 'numb' => 1.00),
         );
 
-        $dao = new Sqlite($this->file);     /* < 测文件存在情况下_connect分支 */
+        $dao = new Aleafs_Lib_Db_Sqlite($this->file);     /* < 测文件存在情况下_connect分支 */
         $dao->table('test_autoincrement_and_string');
         foreach ($data AS $row) {
             $this->assertEquals(1, $dao->clear()->insert($row)->affectedRows(), 'Insert Error.');

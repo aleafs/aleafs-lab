@@ -10,11 +10,7 @@
 //
 // $Id: mcache.php 63 2010-05-12 07:40:08Z zhangxc83 $
 
-namespace Aleafs\Lib\Cache;
-
-use \Aleafs\Lib\Factory;
-
-class Mcache
+class Aleafs_Lib_Cache_Mcache
 {
 
     /* {{{ 静态变量 */
@@ -65,7 +61,7 @@ class Mcache
     {
         $this->ini  = array_merge(self::$default, (array)$ini);
         if (!empty($this->ini['logurl'])) {
-            $this->log  = Factory::getLog($this->ini['logurl']);
+            $this->log  = Aleafs_Lib_Factory::getLog($this->ini['logurl']);
         }
 
         $this->initMcache();
