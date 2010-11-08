@@ -1,0 +1,51 @@
+<project name="init" basedir="." default="-init"
+	description="Initating phing environment">
+
+	<target name="-cleanup">
+		<delete file="${prop.file}" verbose="false" quiet="true" />
+	</target>
+
+	<target name="-init">
+		<!-- set root dir with current path -->
+		<php expression="realpath(&quot;${env.PWD}&quot;)" returnProperty="dir.root" />
+		<property name="run.mode" value="dev" />
+
+		<echo message="" />
+		<echo message="" />
+		<echo message="****************************************************************" />
+		<echo message="*" />
+		<echo message="*    Please input settings for TEST ENVIRONMENT" />
+		<echo message="*" />
+		<echo message="****************************************************************" />
+		<echo message="" />
+		<echo message="" />
+		<phingcall target="-test" />
+
+		<phingcall target="-copyfile" />
+	</target>
+	<target name="-test">
+
+	</target>
+
+	<target name="-dev">
+		<phingcall target="-one-mode">
+			<property name="name.run.mode" value="run.mode" />
+		</phingcall>
+	</target>
+
+	<target name="-one-mode">
+		<input propertyname="${name.run.mode}" defaultValue="${${name.run.mode}}"
+			promptChar=":">Run mode ${run.mode} </input>
+	</target>
+
+	<target name="-copyfile">
+		<copy file="build/tpl/default.properties" tofile="./${prop.file}" overwrite="true">
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="dir.root" value="${dir.root}/" />
+					<token key="run.mode" value="${run.mode}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+	</target>
+</project>
