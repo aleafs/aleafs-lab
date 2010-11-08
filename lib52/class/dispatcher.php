@@ -10,8 +10,6 @@
 //
 // $Id: autoload.php 22 2010-04-15 16:28:45Z zhangxc83 $
 
-use \Aleafs\Lib\Parser\Url;
-
 class Aleafs_Lib_Dispatcher
 {
 
@@ -38,9 +36,6 @@ class Aleafs_Lib_Dispatcher
      */
     public static function run($ini, $url, $post = null)
     {
-        require_once __DIR__ . '/autoload.php';
-        Aleafs_Lib_AutoLoad::init();
-
         try {
             $dsp    = new self($ini);
             $dsp->dispach($url, $post);
@@ -51,6 +46,20 @@ class Aleafs_Lib_Dispatcher
         if (empty($GLOBALS['__in_debug_tools']) && function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();
         }
+    }
+    /* }}} */
+
+    /* {{{ public static void setAutoLoad() */
+    /**
+     * 自动加载初始化
+     *
+     * @access public static
+     * @return void
+     */
+    public static function setAutoLoad()
+    {
+        require_once __DIR__ . '/autoload.php';
+        Aleafs_Lib_AutoLoad::init();
     }
     /* }}} */
 
@@ -121,6 +130,7 @@ class Aleafs_Lib_Dispatcher
      */
     private function __construct($ini)
     {
+        self::setAutoLoad();
         Aleafs_Lib_Configer::register('default',   $ini);
 
         $this->config   = Aleafs_Lib_Configer::instance('default');
