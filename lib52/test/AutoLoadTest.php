@@ -1,15 +1,14 @@
 <?php
-namespace Aleafs\Lib;
 
 require_once(__DIR__ . '/../class/TestShell.php');
 
-class AutoLoadTest extends LibTestShell
+class Aleafs_Lib_AutoLoadTest extends Aleafs_Lib_LibTestShell
 {
 
 	protected function setUp()
 	{
 		parent::setUp();
-		AutoLoad::removeAllRules();
+		Aleafs_Lib_AutoLoad::removeAllRules();
 	}
 
 	protected function tearDown()
@@ -19,14 +18,14 @@ class AutoLoadTest extends LibTestShell
 
 	public function test_should_class_loader_worked_fine()
 	{
-		AutoLoad::register('com', __DIR__ . '/autoload/com');
-		AutoLoad::register('com\\\\aleafs', __DIR__ . '/autoload/com');
+		Aleafs_Lib_Autoload::register('com', __DIR__ . '/autoload/com');
+		Aleafs_Lib_Autoload::register('com\\\\aleafs', __DIR__ . '/autoload/com');
 
-		$case1	= new \Com\Aleafs\AutoLoadTestClass();
-		$this->assertEquals(1, \Com\Aleafs\AutoLoadTestClass::$requireTime, 'Class Load Failed.');
+		$case1	= new Com_Aleafs_AutoloadTestClass();
+		$this->assertEquals(1, Com_Aleafs_AutoloadTestClass::$requireTime, 'Class Load Failed.');
 
-		$case2	= new \Com\Aleafs\AutoLoadTestClass();
-		$this->assertEquals(1, \Com\Aleafs\AutoLoadTestClass::$requireTime, 'Class Load Duplicate.');
+		$case2	= new Com_Aleafs_AutoloadTestClass();
+		$this->assertEquals(1, Com_Aleafs_AutoloadTestClass::$requireTime, 'Class Load Duplicate.');
 		$this->assertContains(
 			strtr(__DIR__ . '/autoload/com/aleafs/autoloadtestclass.php', '\\', '/'),
 			strtr($case2->path(), '\\', '/'),
@@ -36,13 +35,13 @@ class AutoLoadTest extends LibTestShell
 
 	public function test_should_class_loader_by_order_worked_fine()
 	{
-		AutoLoad::register('com', __DIR__ . '/autoload/com');
-		AutoLoad::register('com\\\\aleafs1', __DIR__ . '/autoload/com', 'com');
-		AutoLoad::register('com\\\\aleafs2', __DIR__ . '/autoload/com', 'com');
-		AutoLoad::unregister('com/aleafs2');
-		AutoLoad::register('com\\\\aleafs', __DIR__ . '/autoload/com', 'com');
+		Aleafs_Lib_Autoload::register('com', __DIR__ . '/autoload/com');
+		Aleafs_Lib_Autoload::register('com\\\\aleafs1', __DIR__ . '/autoload/com', 'com');
+		Aleafs_Lib_Autoload::register('com\\\\aleafs2', __DIR__ . '/autoload/com', 'com');
+		Aleafs_Lib_Autoload::unregister('com/aleafs2');
+		Aleafs_Lib_Autoload::register('com\\\\aleafs', __DIR__ . '/autoload/com', 'com');
 
-		$case = new \Com\Aleafs\AutoLoadOrderTestClass();
+		$case = new Com_Aleafs_AutoloadOrderTestClass();
 		$this->assertEquals(
 			strtr(__DIR__ . '/autoload/com/autoloadordertestclass.php', '\\', '/'),
 			strtr($case->path(), '\\', '/'),
@@ -52,11 +51,11 @@ class AutoLoadTest extends LibTestShell
 
 	public function test_should_throw_file_not_found_when_cant_find_class_file()
 	{
-		AutoLoad::register('com', __DIR__ . '/autoload/com');
+		Aleafs_Lib_Autoload::register('com', __DIR__ . '/autoload/com');
 		try {
-			$case1 = new \Com\I\Am\Not\Exists();
-		} catch (\Exception $e) {
-			$this->assertTrue($e instanceof \Aleafs\Lib\Exception, 'Exception Type doesn\'t match,');
+			$case1 = new Com_I_Am_Not_Exists();
+		} catch (Exception $e) {
+			$this->assertTrue($e instanceof Aleafs_Lib_Exception, 'Exception Type doesn\'t match,');
 			$this->assertContains(
 				sprintf('File "%s/autoload/com/i/am/not/exists.php', strtr(__DIR__, '\\', '/')),
 				strtr($e->getMessage(), '\\', '/'),
@@ -67,13 +66,13 @@ class AutoLoadTest extends LibTestShell
 
 	public function test_should_throw_class_not_found_when_rule_not_defined()
 	{
-		AutoLoad::register('com', __DIR__ . '/autoload/com');
+		Aleafs_Lib_Autoload::register('com', __DIR__ . '/autoload/com');
 		try {
-			$case1 = new \I\Am\Not\Exists();
-		} catch (\Exception $e) {
-			$this->assertTrue($e instanceof \Aleafs\Lib\Exception, 'Exception Type doesn\'t match,');
+			$case1 = new I_Am_Not_Exists();
+		} catch (Exception $e) {
+			$this->assertTrue($e instanceof Aleafs_Lib_Exception, 'Exception Type doesn\'t match,');
 			$this->assertContains(
-				'Class "I\Am\Not\Exists" Not Found',
+				'Class "I_Am_Not_Exists" Not Found',
 				$e->getMessage(),
 				'Exception Message doesn\'t match.'
 			);
@@ -82,11 +81,11 @@ class AutoLoadTest extends LibTestShell
 
 	public function test_should_throw_class_not_found_when_class_not_in_file()
 	{
-		AutoLoad::register('com', __DIR__ . '/autoload/com');
+		Aleafs_Lib_Autoload::register('com', __DIR__ . '/autoload/com');
 		try {
-			$case1 = new \Com\Aleafs\AutoLoadTestCaseClassNameNotMatched();
-		} catch (\Exception $e) {
-			$this->assertTrue($e instanceof \Aleafs\Lib\Exception, 'Exception Type doesn\'t match,');
+			$case1 = new Com_Aleafs_AutoloadTestCaseClassNameNotMatched();
+		} catch (Exception $e) {
+			$this->assertTrue($e instanceof Aleafs_Lib_Exception, 'Exception Type doesn\'t match,');
 			$this->assertTrue(
 				(bool)preg_match(
 					'/^Class "(.+?)" NOT FOUND IN "(.+?)"/is',

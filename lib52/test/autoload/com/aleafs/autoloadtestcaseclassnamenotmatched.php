@@ -1,5 +1,4 @@
 <?php
-namespace Com\Aleafs;
-class AutoLoadTestClassNotMatched
+class Com_Aleafs_AutoLoadTestClassNotMatched
 {
 }

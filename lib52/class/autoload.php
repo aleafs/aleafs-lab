@@ -128,7 +128,7 @@ class Aleafs_Lib_AutoLoad
     public static function callback($class)
     {
         $ordina	= $class;
-        $class	= preg_replace('/[\/_\]{1,}/', '/', $class);
+        $class	= preg_replace('/[\/_\\\]{1,}/', '/', $class);
         $index	= strrpos($class, '/');
 
         if (false === $index) {
@@ -180,7 +180,7 @@ class Aleafs_Lib_AutoLoad
      */
     private static function normalize($name)
     {
-        $name = preg_replace('/[\/_\]+/', '/', preg_replace('/\s+/', '/', $name));
+        $name = preg_replace('/[\/_\\\]+/', '/', preg_replace('/\s+/', '/', $name));
         return strtolower(trim($name, '/'));
     }
     /* }}} */

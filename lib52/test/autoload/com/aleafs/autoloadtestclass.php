@@ -1,6 +1,5 @@
 <?php
-namespace Com\Aleafs;
-class AutoLoadTestClass
+class Com_Aleafs_AutoLoadTestClass
 {
 	public static $requireTime = 0;
 
@@ -10,5 +9,5 @@ class AutoLoadTestClass
 	}
 }
 
-AutoLoadTestClass::$requireTime++;
+Com_Aleafs_AutoLoadTestClass::$requireTime++;
 
