@@ -1,11 +1,9 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 
-use \Aleafs\Lib\Cache\Mcache;
-
 require_once(__DIR__ . '/../class/TestShell.php');
 
-class McacheTest extends \Aleafs\Lib\LibTestShell
+class Aleafs_Lib_McacheTest extends Aleafs_Lib_LibTestShell
 {
 
     private $shell  = 0;
@@ -20,7 +18,9 @@ class McacheTest extends \Aleafs\Lib\LibTestShell
 
     protected function tearDown()
     {
-        $this->cache->cleanAllCache();
+        if ($this->cache) {
+            $this->cache->cleanAllCache();
+        }
         unlink($this->logfile);
 
         parent::tearDown();
@@ -33,8 +33,9 @@ class McacheTest extends \Aleafs\Lib\LibTestShell
             return;
         }
 
+        $log    = array_filter(array_map('trim', $log));
         $this->assertTrue((bool)preg_match(
-            $string, end(array_filter(array_map('trim', $log)))
+            $string, end($log)
         ), $error);
     }
 
@@ -55,7 +56,7 @@ class McacheTest extends \Aleafs\Lib\LibTestShell
     private function initMemcache()
     {
         $this->cache    = null;
-        $this->cache	= new Mcache(array(
+        $this->cache	= new Aleafs_Lib_Cache_Mcache(array(
             'logurl'	=> 'log://debug.notice.warn.error/' . $this->logfile . '?buffer=0',
             'logtime'	=> true,
             'prefix'	=> 'test',
