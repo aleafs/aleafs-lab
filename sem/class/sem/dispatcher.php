@@ -11,6 +11,8 @@
 // $Id: autoload.php 22 2010-04-15 16:28:45Z zhangxc83 $
 //
 
+require_once(__DIR__ . '/../lib/dispatcher.php');
+
 class Aleafs_Sem_Dispatcher extends Aleafs_Lib_Dispatcher
 {
 
@@ -24,6 +26,7 @@ class Aleafs_Sem_Dispatcher extends Aleafs_Lib_Dispatcher
     public static function setAutoLoad()
     {
         require_once __DIR__ . '/../lib/autoload.php';
+
         Aleafs_Lib_AutoLoad::init();
         Aleafs_Lib_AutoLoad::register('aleafs_sem',     __DIR__);
     }
