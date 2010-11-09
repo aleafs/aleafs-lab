@@ -139,6 +139,12 @@ class Aleafs_Sem_Dispatcher
             Aleafs_Lib_Configer::register($name,   $file);
         }
 
+        Aleafs_Lib_Context::register('webroot', sprintf(
+            '%s/%s',
+            rtrim($this->config->get('url.server', ''), '/'),
+            $this->prefix
+        ));
+
         set_time_limit($this->config->get('timeout', 30));
         register_shutdown_function(array(&$this, 'shutdownCallBack'));
     }
