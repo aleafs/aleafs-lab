@@ -15,6 +15,7 @@ CREATE TABLE user_permission (
 	autokid int(10) unsigned not null auto_increment PRIMARY KEY,
 	userid int(10) unsigned not null default 0,
 	pm_stat smallint(5) unsigned not null default 0,
+	pm_type smallint(5) unsigned not null default 0,
 	pm_func char(10) not null default '',
 	se_name char(10) not null default '',
 	addtime datetime not null default '0000-00-00 00:00:00',
