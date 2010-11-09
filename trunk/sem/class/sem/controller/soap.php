@@ -68,7 +68,7 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
     private static function wsdl($name)
     {
         $render = new Aleafs_Lib_Render_Html();
-        $render->assign('soap_namespace', Aleafs_Lib_Context::get('webroot'));
+        $render->assign('webroot', Aleafs_Lib_Context::get('webroot'));
 
         header('Content-type: application/xml;charset=utf-8');
         try {

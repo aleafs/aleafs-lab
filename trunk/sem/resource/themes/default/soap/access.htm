@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="$soap_namespace/access" targetNamespace="$soap_namespace/access" name="Aleafs_Sem_Access">
+<wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="$webroot/soap/access" targetNamespace="$webroot/soap/access" name="Aleafs_Sem_Access">
 	<wsdl:types>
-		<xsd:schema targetNamespace="$soap_namespace/access">
+		<xsd:schema targetNamespace="$webroot/soap/access">
 			<xsd:element name="AuthHeader" type="tns:AuthHeader" />
 			<xsd:complexType name="AuthHeader">
 				<xsd:sequence>
@@ -84,7 +84,7 @@
 	<wsdl:binding name="SoapBinding" type="PortAccess">
 		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
 		<wsdl:operation name="heartbeat">
-			<soap:operation soapAction="$soap_namespace/access/action/heartbeat" />
+			<soap:operation soapAction="$webroot/soap/access/heartbeat" />
 			<wsdl:input>
 				<soap:header message="tns:AuthHeader" part="AuthHeader" use="literal" />
 				<soap:body use="literal" />
@@ -98,7 +98,7 @@
 
 	<wsdl:service name="AccessService">
 		<wsdl:port binding="tns:SoapBinding" name="AccessService">
-			<soap:address location="$soap_namespace/access" />
+			<soap:address location="$webroot/soap/access" />
 		</wsdl:port>
 	</wsdl:service>
 </wsdl:definitions>
