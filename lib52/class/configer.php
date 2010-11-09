@@ -132,7 +132,19 @@ class Aleafs_Lib_Configer
         }
         $key = strtolower(trim($key));
 
-        return isset($this->option[$key]) ? $this->option[$key] : $default;
+        if (isset($this->option[$key])) {
+            return $this->option[$key];
+        }
+
+        $var = $this->option;
+        foreach (explode('.', $key) AS $idx) {
+            if (!isset($var[$idx])) {
+                return $default;
+            }
+            $var = $var[$idx];
+        }
+
+        return $var;
     }
     /* }}} */
 

@@ -90,7 +90,7 @@ class Aleafs_Lib_Dispatcher
     private function dispach($url, $post = null)
     {
         $this->url  = preg_replace(
-            sprintf('/^\/?%s/is', $this->prefix),
+            sprintf('/^\/?%s/is', strtr($this->prefix, array('/' => '\\/'))),
             '', $url, 1
         );
         Aleafs_Lib_Debug_Pool::push('global.url',    $this->url);
