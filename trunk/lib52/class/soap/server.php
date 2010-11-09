@@ -30,7 +30,7 @@ class Aleafs_Lib_Soap_Server
 	 * @access public
 	 * @return void
 	 */
-	public function __construct($charset, $password = null)
+	public function __construct($charset = 'utf-8', $password = null)
 	{
 		$this->charset	= trim($charset);
 		$this->password	= (string)$password;
