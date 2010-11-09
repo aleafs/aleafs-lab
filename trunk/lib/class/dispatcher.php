@@ -99,7 +99,7 @@ class Dispatcher
     private function dispach($url, $post = null)
     {
         $this->url  = preg_replace(
-            sprintf('/^\/?%s/is', $this->prefix),
+            sprintf('/^\/?%s/is', strtr($this->prefix, array('/' => '\\/'))),
             '', $url, 1
         );
         Pool::push('global.url',    $this->url);
