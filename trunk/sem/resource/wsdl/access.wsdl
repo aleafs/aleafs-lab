@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="##soap.namespace##/access" targetNamespace="##soap.namespace##/access" name="Aleafs_Sem_Access">
+	<wsdl:types>
+		<xsd:schema targetNamespace="##soap.namespace##/access">
+			<xsd:element name="AuthHeader" type="tns:AuthHeader" />
+			<xsd:complexType name="AuthHeader">
+				<xsd:sequence>
+					<xsd:element name="appname" type="xsd:string" />
+					<xsd:element name="username" type="xsd:string" />
+					<xsd:element name="machine" type="xsd:string" />
+					<xsd:element name="nodename" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="ResHeader" type="tns:ResHeader" />
+			<xsd:complexType name="ResHeader">
+				<xsd:sequence>
+					<xsd:element name="status" type="xsd:int" />
+					<xsd:element name="description" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+		</xsd:schema>
+	</wsdl:types>
+
+	<wsdl:message name="">
+		<wsdl:part name="" type="xsd:string" />
+	</wsdl:message>
+
+	<wsdl:portType name="PortAccess">
+		<wsdl:operation name="heartbeat">
+			<wsdl:document>客户端心跳检测接口</wsdl:document>
+			<wsdl:input message="tns:AuthHeader" />
+			<wsld:output message="tns:ResHeader" />
+		</wsdl:operation>
+	</wsdl:portType>
+
+	<wsdl:binding name="SoapBinding" type="PortAccess">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+		<wsdl:operation name="heartbeat">
+			<soap:operation soapAction="##soap.namespace##/access/action/heartbeat" />
+			<wsdl:input>
+				<soap:header message="tns:AuthHeader" part="AuthHeader" use="literal" />
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:header message="tns:ResHeader" part="ResHeader" use="literal" />
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+
+	<wsdl:service name="AccessService">
+		<wsdl:port binding="tns:SoapBinding" name="AccessService">
+			<soap:address location="##soap.namespace##/access" />
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>
