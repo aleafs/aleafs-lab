@@ -34,6 +34,10 @@
 			<filterchain>
 				<replacetokens begintoken="##" endtoken="##">
 					<token key="dir.root" value="${dir.root}" />
+					<token key="global.timeout" value="${global.timeout}" />
+					<token key="global.log.url" value="${global.log.url}" />
+					<token key="global.url.server" value="${global.url.server}" />
+					<token key="global.url.prefix" value="${global.url.prefix}" />
 				</replacetokens>
 			</filterchain>
 		</copy>
