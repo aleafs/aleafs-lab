@@ -70,7 +70,7 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
         $render = new Aleafs_Lib_Render_Html();
         $render->assign('soap_namespace', 'http://api.aleafs.com/soap');
 
-        header('Context-Type: html/xml;charset=utf-8;');
+        header('Context-Type: html/xml, charset=utf-8;');
         $render->render($name, 'soap', true);
         try {
             $render->render($name, 'soap', true);
