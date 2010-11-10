@@ -19,7 +19,9 @@ class Aleafs_Lib_Soap_Server
 
 	private $password	= null;
 
-	private $charset	= 'utf-8';
+    private $charset	= 'utf-8';
+
+    private $soapHeader = null;
 
 	/* }}} */
 
@@ -50,6 +52,19 @@ class Aleafs_Lib_Soap_Server
 	}
 	/* }}} */
 
+    /* {{{ public void setHeader() */
+    /**
+     * 设置返回头
+     *
+     * @access public
+     * @return void
+     */
+    public function setHeader($header)
+    {
+        $this->soapHeader   = $header;
+    }
+    /* }}} */
+
 	/* {{{ public void run() */
 	/**
 	 * SOAP Server运行
@@ -58,7 +73,7 @@ class Aleafs_Lib_Soap_Server
 	 * @return void
 	 */
 	public function run($class)
-	{
+    {
 		$server	= new SoapServer($this->wsdl, array(
 			'soap_version'	=> SOAP_1_2,
 			'encoding'		=> $this->charset,
@@ -67,6 +82,10 @@ class Aleafs_Lib_Soap_Server
 		$data	= file_get_contents('php://input');
 		if (!empty($this->password)) {
 		}
+
+        if (!empty($this->soapHeader) && ($this->soapHeader instanceof SoapHeader)) {
+            $server->addSoapHeader($this->soapHeader);
+        }
 
 		$server->setClass($class);
 		$server->handle($data);
