@@ -39,14 +39,15 @@ class Aleafs_Sem_Dispatcher
         try {
             $dsp    = new self($ini);
             $dsp->dispach($url, $post);
+        } catch (SoapFault $e) {
+            self::$timeout  = false;
+            throw $e;
         } catch (Exception $e) {
+            self::$timeout  = false;
             throw $e;
         }
 
-        self::$timeout  = false;
-        if (empty($GLOBALS['__in_debug_tools']) && function_exists('fastcgi_finish_request')) {
-            fastcgi_finish_request();
-        }
+        self::term();
     }
     /* }}} */
 
@@ -106,18 +107,34 @@ class Aleafs_Sem_Dispatcher
     }
     /* }}} */
 
-	/* {{{ private static string ctrl() */
-	/**
-	 * 获取控制器类名
-	 *
-	 * @access private static
-	 * @return string
-	 */
-	private static function ctrl($ctrl)
-	{
-		return sprintf('Aleafs_Sem_Controller_%s', ucfirst(strtolower($ctrl)));
-	}
-	/* }}} */
+    /* {{{ private static void term() */
+    /**
+     * 请求退出
+     *
+     * @access private static
+     * @return void
+     */
+    private static function term()
+    {
+        self::$timeout  = false;
+        if (empty($GLOBALS['__in_debug_tools']) && function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        }
+    }
+    /* }}} */
+
+    /* {{{ private static string ctrl() */
+    /**
+     * 获取控制器类名
+     *
+     * @access private static
+     * @return string
+     */
+    private static function ctrl($ctrl)
+    {
+        return sprintf('Aleafs_Sem_Controller_%s', ucfirst(strtolower($ctrl)));
+    }
+    /* }}} */
 
     /* {{{ private void __construct() */
     /**

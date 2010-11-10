@@ -36,7 +36,7 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
             'theme'     => 'default',
         ));
 
-//        $this->server	= new Aleafs_Lib_Soap_Server();
+        $this->server	= new Aleafs_Lib_Soap_Server();
     }
     /* }}} */
 
@@ -54,7 +54,11 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
             return self::wsdl($action);
         }
 
-        return parent::execute($action, $param, $post);
+        try {
+            $this->server->run(sprintf('Aleafs_Sem_Server_%s', ucfirst($action)));
+        } catch (Exception $e) {
+            self::fault(401, $e->getMessage());
+        }
     }
     /* }}} */
 
@@ -74,32 +78,21 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
         try {
             $render->render($name, 'soap', true);
         } catch (Exception $e) {
-            //TODO: soapFault
+            self::fault(404, $e->getMessage());
         }
     }
     /* }}} */
 
-    /* {{{ protected void actionAccess() */
+    /* {{{ private static void fault() */
     /**
-     * 基本服务请求
+     * 抛出SOAP异常
      *
-     * @access protected
+     * @access private static
      * @return void
      */
-    protected function actionAccess($param, $post = null)
+    private static function fault($code, $error)
     {
-    }
-    /* }}} */
-
-    /* {{{ protected void actionBaidu() */
-    /**
-     * 百度服务请求
-     *
-     * @access protected
-     * @return void
-     */
-    protected function actionBaidu($param, $post = null)
-    {
+        throw new SoapFault($code, $error);
     }
     /* }}} */
 
