@@ -14,6 +14,12 @@
 class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
 {
 
+    /* {{{ 静态常量 */
+
+    const WSDL_EXPIRE   = 3600;
+
+    /* }}} */
+
     /* {{{ 成员变量 */
 
     private $server;
@@ -55,6 +61,7 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
         }
 
         try {
+            $this->server->wsdl(self::wsdlfile($action));
             $this->server->run(sprintf('Aleafs_Sem_Server_%s', ucfirst($action)));
         } catch (Exception $e) {
             self::fault(401, $e->getMessage());
@@ -80,6 +87,31 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
         } catch (Exception $e) {
             self::fault(404, $e->getMessage());
         }
+    }
+    /* }}} */
+
+    /* {{{ private static string wsdlfile() */
+    /**
+     * 获取WSDL文件
+     *
+     * @access private static
+     * @return string
+     */
+    private static function wsdlfile($action)
+    {
+        $cache  = sprintf('%s/../../../cache/wsdl/%s', __DIR__, $action);
+        if (!is_file($cache) || time() - filemtime($cache) > self::WSDL_EXPIRE) {
+            $dr = dirname($cache);
+            if (!is_dir($dr)) {
+                mkdir($dr, 0744, true);
+            }
+
+            file_put_contents($cache, file_get_contents(
+                sprintf('%s/soap/%s/wsdl', Aleafs_Lib_Context::get('webroot'), $action)
+            ));
+        }
+
+        return $cache;
     }
     /* }}} */
 
