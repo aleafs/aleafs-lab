@@ -33,5 +33,20 @@ class Aleafs_Sem_Service
 	}
 	/* }}} */
 
+    /* {{{ public void checkAuth() */
+    /**
+     * 检查认证结果
+     *
+     * @access public
+     * @see http://www.laruence.com/2010/03/26/1365.html
+     * @return void
+     */
+    public function checkAuth()
+    {
+        if (empty($this->authenticated)) {
+        }
+    }
+    /* }}} */
+
 }
 
