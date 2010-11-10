@@ -8,7 +8,7 @@
 // | Author: aleafs <zhangxc83@sohu.com>									|
 // +------------------------------------------------------------------------+
 //
-// $Id: autoload.php 22 2010-04-15 16:28:45Z zhangxc83 $
+// $Id: server.php 22 2010-04-15 16:28:45Z zhangxc83 $
 
 class Aleafs_Lib_Soap_Server
 {
