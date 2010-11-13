@@ -50,12 +50,12 @@ class Aleafs_Lib_Db_Mysql extends Aleafs_Lib_Database
 
         $this->master   = new Aleafs_Lib_LiveBox(self::CACHE_PREFIX . '/master', 30);
         foreach ((array)$this->conf->get('master', array()) AS $url) {
-            $this->master->register($host);
+            $this->master->register($url);
         }
 
         $this->slave    = new Aleafs_Lib_LiveBox(self::CACHE_PREFIX . '/slave', 180);
         foreach ((array)$this->conf->get('slave', array()) AS $url) {
-            $this->slave->register($host);
+            $this->slave->register($url);
         }
     }
     /* }}} */

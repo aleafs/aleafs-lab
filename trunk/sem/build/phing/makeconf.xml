@@ -54,5 +54,25 @@
 
 	<target name="-unittest" description="Make configure files for unit test.">
 		<phingcall target="-cleanup-unittest" />
+		<copy file="build/tpl/global.ini" todir="test/unit/ini/" overwrite="true">
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="dir.root" value="${dir.root}" />
+					<token key="global.timeout" value="${global.timeout}" />
+					<token key="global.log.url" value="${global.log.url}" />
+					<token key="global.url.server" value="${global.url.server}" />
+					<token key="global.url.prefix" value="${global.url.prefix}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+
+		<copy file="build/tpl/mysql.ini" todir="test/unit/ini/" overwrite="true">
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="mysql.master.server1" value="mysql://db_write:123456@edp.corp.alimama.com:9901" />
+					<token key="mysql.slave.server1" value="mysql://db_read:123456@edp.corp.alimama.com:9901" />
+				</replacetokens>
+			</filterchain>
+		</copy>
 	</target>
 </project>

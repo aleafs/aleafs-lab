@@ -25,5 +25,15 @@ class Aleafs_Sem_TestShell extends PHPUnit_Framework_TestCase
         Aleafs_Lib_AutoLoad::register('aleafs_sem',     __DIR__);
     }
 
+    public static function registerDefault($ini)
+    {
+        Aleafs_Lib_Configer::makeSureRemoveAll();
+        Aleafs_Lib_Configer::register('default',   $ini);
+        $config = Aleafs_Lib_Configer::instance('default');
+        foreach ($config->get('includes', array()) AS $name => $file) {
+            Aleafs_Lib_Configer::register($name,   $file);
+        }
+    }
+
 }
 
