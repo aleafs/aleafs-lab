@@ -642,7 +642,7 @@ abstract class Database
     private function escape($value, $comma = true)
     {
         if (is_array($value)) {
-            $value	= array_unique(array_map(array(&$this, '_escape'), $value));
+            $value	= array_map(array(&$this, '_escape'), $value);
             if ($comma) {
                 return sprintf("'%s'", implode("','", $value));
             } else {
