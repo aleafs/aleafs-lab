@@ -124,9 +124,10 @@ abstract class Aleafs_Lib_Database
      */
     public function __destruct()
     {
-        if (!empty($this->datares)) {
-            $this->_free() && $this->datares = null;
+        if (is_resource($this->datares)) {
+            $this->_free();
         }
+        $this->datares = null;
 
         if (!empty($this->link)) {
             $this->rollback();
