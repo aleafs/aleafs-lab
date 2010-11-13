@@ -42,6 +42,31 @@ class Aleafs_Sem_Service
 
     /* }}} */
 
+    /* {{{ public void __construct() */
+    /**
+     * 构造函数
+     *
+     * @access public
+     * @return void
+     */
+    public function __construct()
+    {
+    }
+    /* }}} */
+
+    /* {{{ public Mixture __get() */
+    /**
+     * 魔术方法
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function __get($key)
+    {
+        return isset($this->$key) ? $this->$key : null;
+    }
+    /* }}} */
+
     /* {{{ public void AuthHeader() */
     /**
      * 验证头信息
@@ -70,7 +95,7 @@ class Aleafs_Sem_Service
      */
     protected function setSoapHeader($path = '')
     {
-        $server = &Aleafs_Lib_Context::get('soap.server');
+        $server = Aleafs_Lib_Context::get('soap.server');
         if (empty($server)) {
             return;
         }
