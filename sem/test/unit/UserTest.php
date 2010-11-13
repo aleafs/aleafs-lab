@@ -41,7 +41,17 @@ class Aleafs_Sem_UserTest extends Aleafs_Sem_TestShell
             'pm_func'   => 'BASE',
             'begdate'   => 20101111,
             'enddate'   => 20501111,
-        )));
+        )) > 0);
+
+        $this->assertEquals(array(
+            array(
+                'pm_stat'   => Aleafs_Sem_User::STAT_NORMAL,
+                'pm_type'   => 1,
+                'pm_func'   => 'BASE',
+                'begdate'   => '2010-11-11',
+                'enddate'   => '2050-11-11',
+            ),
+        ), Aleafs_Sem_User::getPermission('unittest', 'baidu'));
     }
     /* }}} */
 

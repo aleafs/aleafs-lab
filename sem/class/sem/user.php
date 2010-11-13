@@ -82,7 +82,7 @@ class Aleafs_Sem_User
 
         self::initDb();
 
-        return self::$loader->insert($perms);
+        return self::$loader->insert($perms)->lastId();
     }
     /* }}} */
 
