@@ -367,7 +367,7 @@ abstract class Aleafs_Lib_Database
 
         $arrRet	= array();
         while ($row = $this->_fetch($res)) {
-            $arrRet	= $row;
+            $arrRet[]	= $row;
         }
 
         return $arrRet;

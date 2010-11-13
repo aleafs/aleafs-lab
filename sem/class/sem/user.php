@@ -67,11 +67,22 @@ class Aleafs_Sem_User
      */
     public static function addPermission($appuser, $appname, $perms)
     {
+        $perms  = array_intersect_key(
+            (array)$perms, self::column(sprintf('%suser_permission', self::TABLE_PREFIX))
+        );
+        unset($perms['autokid']);
+
         if (empty($perms)) {
             return false;
         }
 
+        $perms['addtime']   = date('Y-m-d H:i:s');
+        $perms['se_user']   = $appuser;
+        $perms['se_name']   = $appname;
+
         self::initDb();
+
+        return self::$loader->insert($perms);
     }
     /* }}} */
 
@@ -103,6 +114,28 @@ class Aleafs_Sem_User
     }
     /* }}} */
 
+    /* {{{ private static Mixture column() */
+    /**
+     * 获取表结构
+     *
+     * @access private static
+     * @return Mixture
+     */
+    private static function column($table)
+    {
+        $table  = trim($table);
+        if (empty(self::$column[$table])) {
+            self::initDb();
+            $column = self::$loader->getAll(self::$loader->query(sprintf('DESC %s', $table)));
+            foreach ($column AS $row) {
+                self::$column[$table][$row['Field']] = $row['Type'];
+            }
+        }
+
+        return self::$column[$table];
+    }
+    /* }}} */
+
     /* {{{ private static void initDb() */
     /**
      * 初始化DB对象
@@ -116,28 +149,6 @@ class Aleafs_Sem_User
             self::$loader   = new Aleafs_Lib_Db_Mysql('mysql');
         }
         self::$loader->clear();
-    }
-    /* }}} */
-
-    /* {{{ private static Mixture column() */
-    /**
-     * 获取表结构
-     *
-     * @access private static
-     * @return Mixture
-     */
-    private static function column($table)
-    {
-        $table  = trim($table);
-        if (empty(self::$column[$table])) {
-            self::initDb();
-            $column = self::$loader->query(sprintf('DESC %s', $table))->getAll();
-            foreach ($column AS $row) {
-                self::$column[$table][$row['Field']] = $row['Type'];
-            }
-        }
-
-        return self::$column[$table];
     }
     /* }}} */
 
