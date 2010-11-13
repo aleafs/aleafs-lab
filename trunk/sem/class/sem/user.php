@@ -21,6 +21,8 @@ class Aleafs_Sem_User
     const STAT_NORMAL	= 200;
     const STAT_DISABLE	= 500;
 
+    const PERM_TRIAL    = 1;
+
     const TABLE_PREFIX  = '';
 
     /* }}} */
