@@ -67,7 +67,7 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
             Aleafs_Lib_Context::register('soap.server', $soap);
 
             $soap->setClass(sprintf('Aleafs_Sem_Server_%s', ucfirst($action)));
-            $soap->handle(file_get_contents('php://input'));
+            $soap->handle($post);
         } catch (Exception $e) {
             self::fault(401, $e->getMessage());
         }
