@@ -36,12 +36,13 @@ class Aleafs_Lib_AutoLoad
      */
     public static function init()
     {
-        self::register('aleafs_lib_cache',      __DIR__ . '/cache/');
-        self::register('aleafs_lib_configer',   __DIR__ . '/config/');
-        self::register('aleafs_lib_db',         __DIR__ . '/db/');
-        self::register('aleafs_lib_debug',      __DIR__ . '/debug/');
-        self::register('aleafs_lib_render',     __DIR__ . '/render/');
-        self::register('aleafs_lib',            __DIR__);
+        $__dir  = dirname(__FILE__);
+        self::register('aleafs_lib_cache',      $__dir . '/cache/');
+        self::register('aleafs_lib_configer',   $__dir . '/config/');
+        self::register('aleafs_lib_db',         $__dir . '/db/');
+        self::register('aleafs_lib_debug',      $__dir . '/debug/');
+        self::register('aleafs_lib_render',     $__dir . '/render/');
+        self::register('aleafs_lib',            $__dir);
 
         spl_autoload_register(array(__CLASS__, 'callback'));
     }
@@ -130,9 +131,10 @@ class Aleafs_Lib_AutoLoad
         $ordina	= $class;
         $class	= preg_replace('/[\/_\\\]{1,}/', '/', $class);
         $index	= strrpos($class, '/');
+        $__dir  = dirname(__FILE__);
 
         if (false === $index) {
-            require_once(__DIR__ . '/exception.php');
+            require_once($__dir . '/exception.php');
             throw new Aleafs_Lib_Exception(sprintf('Unregistered namespace when class "%s" defined.', $class));
         }
 
@@ -153,19 +155,19 @@ class Aleafs_Lib_AutoLoad
             if (is_file($file)) {
                 require $file;
             } else {
-                require_once(__DIR__ . '/exception.php');
+                require_once($__dir . '/exception.php');
                 throw new Aleafs_Lib_Exception(sprintf('File "%s" Not Found.', $file));
             }
 
             if (!class_exists($ordina)) {
-                require_once(__DIR__ . '/exception.php');
+                require_once($__dir . '/exception.php');
                 throw new Aleafs_Lib_Exception(sprintf('Class "%s" Not Found in "%s".', $ordina, $file));
             }
 
             return;
         }
 
-        require_once(__DIR__ . '/exception.php');
+        require_once($__dir . '/exception.php');
         throw new Aleafs_Lib_Exception(sprintf('Class "%s" Not Found.', $ordina));
     }
     /* }}} */
