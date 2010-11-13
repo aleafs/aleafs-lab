@@ -77,6 +77,8 @@
 		</copy>
 
 		<copy file="build/src/webroot/_htaccess_apache" tofile="${rpm.tmp.dir}/public_html/.htaccess" overwrite="true" />
+		<exec dir="${rpm.tmp.dir}" command="tar -cvzf ../release.tar.gz *" />
+		<delete dir="build/rpm/release" verbose="false" quiet="true" includeemptydirs="true" />
 	</target>
 
 </project>
