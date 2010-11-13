@@ -56,6 +56,7 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
     public function execute($action, $param, $post = null)
     {
         $action	= strtolower(trim($action));
+
         if (!empty($param['wsdl'])) {
             return self::wsdl($action);
         }
@@ -73,7 +74,6 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
             $soap->setObject(new $class());
             $soap->handle($post);
         } catch (Exception $e) {
-            throw $e;
             self::fault(401, $e->getMessage());
         }
     }
@@ -95,6 +95,7 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
         try {
             $render->render($name, 'soap', true);
         } catch (Exception $e) {
+            throw $e;
             self::fault(404, $e->getMessage());
         }
     }
