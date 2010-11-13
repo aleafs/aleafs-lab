@@ -42,14 +42,58 @@ class Aleafs_Sem_Service
 
     /* }}} */
 
-    /* {{{ public void authenticate() */
+    /* {{{ public void AuthHeader() */
+    /**
+     * 验证头信息
+     *
+     * @access public
+     * @return void
+     */
+    public function AuthHeader($header)
+    {
+        $this->authenticated    = false;
+        $this->authenticate(
+            strtolower(trim($header->appname)),
+            trim($header->username),
+            trim($header->machine),
+            trim($header->nodename)
+        );
+    }
+    /* }}} */
+
+    /* {{{ protected void setSoapHeader() */
+    /**
+     * 设置返回的SOAP头信息
+     *
+     * @access protected
+     * @return void
+     */
+    protected function setSoapHeader($path = '')
+    {
+        $server = &Aleafs_Lib_Context::get('soap.server');
+        if (empty($server)) {
+            return;
+        }
+
+        $server->addSoapHeader(new SoapHeader(
+            sprintf('%s/%s', Aleafs_Lib_Context::get('webroot'), trim($path, '/')),
+            'ResHeader', 
+            array(
+                'status'        => $this->errno,
+                'description'   => self::error($this->errno),
+            )
+        ));
+    }
+    /* }}} */
+
+    /* {{{ private void authenticate() */
     /**
      * 用户权限验证
      *
      * @access public void
      * @return void
      */
-    public function authenticate($appname, $appuser, $machine, $nodename)
+    private function authenticate($appname, $appuser, $machine, $nodename)
     {
         $perms  = Aleafs_Sem_User::getPermission($appuser, $appname);
         if (empty($perms)) {
@@ -87,18 +131,20 @@ class Aleafs_Sem_Service
     }
     /* }}} */
 
-    /* {{{ public void checkAuth() */
+    /* {{{ private static string error() */
     /**
-     * 检查认证结果
+     * 获取错误描述
      *
-     * @access public
-     * @see http://www.laruence.com/2010/03/26/1365.html
-     * @return void
+     * @access private static
+     * @return string
      */
-    public function checkAuth()
+    private static function error($errno)
     {
-        if (empty($this->authenticated)) {
+        if (isset(self::$errorMessage[$errno])) {
+            return self::$errorMessage[$errno];
         }
+
+        return 'unknown';
     }
     /* }}} */
 
