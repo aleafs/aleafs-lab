@@ -267,7 +267,7 @@ class Aleafs_Lib_Db_Mysql extends Aleafs_Lib_Database
             $url    = $box->fetch();
             $host   = parse_url($url);
             if (empty($host)) {
-                $this->log->warning('MYSQL_CONFIG_ERROR', array('url' => $url));
+                $this->log->warn('MYSQL_CONFIG_ERROR', array('url' => $url));
                 $box->setOffline();
                 continue;
             }
@@ -282,7 +282,7 @@ class Aleafs_Lib_Db_Mysql extends Aleafs_Lib_Database
 
             if (empty($link)) {
                 $box->setOffline();
-                $this->log->warning('MYSQL_CONNECT_ERROR', array(
+                $this->log->warn('MYSQL_CONNECT_ERROR', array(
                     'errno' => mysql_errno(),
                     'error' => mysql_error(),
                 ));
