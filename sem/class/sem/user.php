@@ -19,7 +19,9 @@ class Aleafs_Sem_User
 	const TYPE_CLIENT	= 20000;
 
 	const STAT_NORMAL	= 200;
-	const STAT_DISABLE	= 500;
+    const STAT_DISABLE	= 500;
+
+    const TABLE_PREFIX  = '';
 
 	/* }}} */
 
@@ -64,7 +66,12 @@ class Aleafs_Sem_User
 	public static function getInfoByName($name)
     {
         self::initDb();
-        var_dump(self::$loader);
+
+        return self::$loader->clear()
+            ->table(sprintf('%suseracct', self::TABLE_PREFIX))
+            ->where('username', $name)
+            ->select('userid', 'usertype', 'userstat', 'email')
+            ->getRow();
 	}
 	/* }}} */
 
