@@ -15,6 +15,9 @@
 		<property name="global.url.server" value="http://edp2.corp.alimama.com" />
 		<property name="global.url.prefix" value="${run.user}/sem" />
 
+		<property name="mysql.master.server1" value="mysql://db_write:123456@edp1.corp.alimama.com:9901" />
+		<property name="mysql.slave.server1" value="mysql://db_read:123456@edp1.corp.alimama.com:9901" />
+
 		<phingcall target="-copyfile" />
 
 	</target>
@@ -29,6 +32,8 @@
 					<token key="global.timeout" value="${global.timeout}" />
 					<token key="global.url.prefix" value="${global.url.prefix}" />
 					<token key="global.url.server" value="${global.url.server}" />
+					<token key="mysql.master.server1" value="${mysql.master.server1}" />
+					<token key="mysql.slave.server1" value="${mysql.slave.server1}" />
 				</replacetokens>
 			</filterchain>
 		</copy>
