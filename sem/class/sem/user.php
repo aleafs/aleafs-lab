@@ -62,7 +62,9 @@ class Aleafs_Sem_User
 	 * @return Mixture
 	 */
 	public static function getInfoByName($name)
-	{
+    {
+        self::initDb();
+        var_dump(self::$loader);
 	}
 	/* }}} */
 

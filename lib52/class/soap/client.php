@@ -47,7 +47,7 @@ class Aleafs_Lib_Soap_Client
 			$client->__setSoapHeaders($this->soapHeader());
 		}
 
-		return $client->__soapCall($request);
+		return $client->__soapCall($request, 'a');
 	}
 	/* }}} */
 

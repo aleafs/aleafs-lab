@@ -18,6 +18,8 @@ class Aleafs_Sem_UserTest extends Aleafs_Sem_TestShell
     protected function setUp()
     {
         parent::setUp();
+
+        self::registerDefault(__DIR__ . '/ini/global.ini');
     }
 
     protected function tearDown()
@@ -28,6 +30,7 @@ class Aleafs_Sem_UserTest extends Aleafs_Sem_TestShell
     /* {{{ public void test_ll() */
     public function test_ll()
     {
+        Aleafs_Sem_User::getInfoByName('aleafs');
     }
     /* }}} */
 
