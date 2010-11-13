@@ -36,9 +36,11 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
     public function __construct()
     {
         parent::__construct();
+
+        $__dir  = dirname(__FILE__);
         Aleafs_Lib_Render_Html::init(array(
-            'tpl_path'  => __DIR__ . '/../../../resource/themes',
-            'obj_path'  => __DIR__ . '/../../../cache/themes',
+            'tpl_path'  => $__dir . '/../../../resource/themes',
+            'obj_path'  => $__dir . '/../../../cache/themes',
             'theme'     => 'default',
         ));
     }
@@ -107,7 +109,7 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
      */
     private static function wsdlfile($action)
     {
-        $cache  = sprintf('%s/../../../cache/wsdl/%s', __DIR__, $action);
+        $cache  = sprintf('%s/../../../cache/wsdl/%s', dirname(__FILE__), $action);
         if (!is_file($cache) || time() - filemtime($cache) > self::WSDL_EXPIRE) {
             $dr = dirname($cache);
             if (!is_dir($dr)) {
