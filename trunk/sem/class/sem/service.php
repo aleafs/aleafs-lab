@@ -97,7 +97,7 @@ class Aleafs_Sem_Service
     {
         $perms  = Aleafs_Sem_User::getPermission($appuser, $appname);
         if (empty($perms)) {
-            $trials = Aleafs_Lib_Configer::instance('trial_user');
+            $trials = Aleafs_Lib_Configer::instance('trial');
             $days   = $trials->get(sprintf('%s.%s', $appname, $appuser), 0);
             if (empty($days)) {
                 $this->errno    = self::E_NOT_TRIAL;
