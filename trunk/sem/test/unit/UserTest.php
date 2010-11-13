@@ -55,4 +55,27 @@ class Aleafs_Sem_UserTest extends Aleafs_Sem_TestShell
     }
     /* }}} */
 
+    /* {{{ public void test_should_insert_select_user_works_fine() */
+    public function test_should_insert_select_user_works_fine()
+    {
+        $uname  = Aleafs_Sem_User::username('unittest', 'baidu');
+        Aleafs_Sem_User::cleanUser($uname);
+
+        $this->assertEquals(null, Aleafs_Sem_User::getUserInfo($uname));
+
+        $uid    = Aleafs_Sem_User::initUser($uname, array(
+            'usertype'  => Aleafs_Sem_User::TYPE_CLIENT,
+            'userstat'  => Aleafs_Sem_User::STAT_NORMAL,
+        ));
+        $this->assertTrue($uid > 0);
+
+        $this->assertEquals(array(
+            'userid'    => $uid,
+            'usertype'  => Aleafs_Sem_User::TYPE_CLIENT,
+            'userstat'  => Aleafs_Sem_User::STAT_NORMAL,
+            'email'     => '',
+        ), Aleafs_Sem_User::getUserInfo($uname));
+    }
+    /* }}} */
+
 }

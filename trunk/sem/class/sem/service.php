@@ -49,18 +49,26 @@ class Aleafs_Sem_Service
      * @access public void
      * @return void
      */
-    public function authenticate($appname, $username, $machine, $nodename)
+    public function authenticate($appname, $appuser, $machine, $nodename)
     {
-        $perms  = Aleafs_Sem_User::getPermission($username, $appname);
+        $perms  = Aleafs_Sem_User::getPermission($appuser, $appname);
         if (empty($perms)) {
             $trials = Aleafs_Lib_Configer::instance('trial_user');
-            $days   = $trials->get(sprintf('%s.%s', $appname, $username), 0);
+            $days   = $trials->get(sprintf('%s.%s', $appname, $appuser), 0);
             if (empty($days)) {
                 $this->errno    = self::E_NOT_TRIAL;
                 return;
             }
 
-            $pmid   = Aleafs_Sem_User::addPermission($username, $appname, array(
+            $userid = Aleafs_Sem_User::initUser(
+                Aleafs_Sem_User::username($appuser, $appname),
+                array(
+                    'usertype'  => Aleafs_Sem_User::TYPE_CLIENT,
+                    'userstat'  => Aleafs_Sem_User::STAT_NORMAL,
+                )
+            );
+            $pmid   = Aleafs_Sem_User::addPermission($appuser, $appname, array(
+                'userid'    => $userid,
                 'pm_stat'   => Aleafs_Sem_User::STAT_NORMAL,
                 'pm_type'   => Aleafs_Sem_User::PERM_TRIAL,
                 'pm_func'   => 'BASE',
@@ -71,7 +79,7 @@ class Aleafs_Sem_Service
                 $this->errno    = self::E_SYS_ERROR;
                 return;
             }
-            $perms  = Aleafs_Sem_User::getPermission($username, $appname);
+            $perms  = Aleafs_Sem_User::getPermission($appuser, $appname);
         }
 
         $this->permissions      = $perms;

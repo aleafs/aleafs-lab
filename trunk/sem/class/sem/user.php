@@ -35,6 +35,19 @@ class Aleafs_Sem_User
 
     /* }}} */
 
+    /* {{{ public static string username() */
+    /**
+     * 获取用户名
+     *
+     * @access public static
+     * @return String
+     */
+    public static function username($appuser, $appname)
+    {
+        return sprintf('%s/%s', strtolower(trim($appname)), trim($appuser));
+    }
+    /* }}} */
+
     /* {{{ public static Mixture getPermission() */
     /**
      * 获取用户权限
@@ -60,12 +73,12 @@ class Aleafs_Sem_User
     }
     /* }}} */
 
-    /* {{{ public static Boolean addPermission() */
+    /* {{{ public static Integer addPermission() */
     /**
      * 添加用户权限
      *
      * @access public static
-     * @return Boolean true or false
+     * @return Integer
      */
     public static function addPermission($appuser, $appname, $perms)
     {
@@ -88,24 +101,24 @@ class Aleafs_Sem_User
     }
     /* }}} */
 
-    /* {{{ public static Boolean cleanPermission() */
+    /* {{{ public static Integer cleanPermission() */
     public static function cleanPermission($appuser, $appname)
     {
         self::initDb();
 
         return self::$loader->table(sprintf('%suser_permission', self::TABLE_PREFIX))
-            ->where('se_user', $appuser)->where('se_name', $appname)->delete();
+            ->where('se_user', $appuser)->where('se_name', $appname)->delete()->affectedRows();
     }
     /* }}} */
 
-    /* {{{ public static Mixture getInfoByName() */
+    /* {{{ public static Mixture getUserInfo() */
     /**
      * 根据用户名获取信息
      *
      * @access public static
      * @return Mixture
      */
-    public static function getInfoByName($name)
+    public static function getUserInfo($name)
     {
         self::initDb();
 
@@ -113,6 +126,47 @@ class Aleafs_Sem_User
             ->where('username', $name)
             ->select('userid', 'usertype', 'userstat', 'email')
             ->getRow();
+    }
+    /* }}} */
+
+    /* {{{ public static Integer initUser() */
+    /**
+     * 初始化用户
+     *
+     * @access public static
+     * @return Integer
+     */
+    public static function initUser($uname, $column)
+    {
+        $table  = sprintf('%suseracct', self::TABLE_PREFIX);
+        $column = array_intersect_key((array)$column, self::column($table));
+        if (empty($column)) {
+            return false;
+        }
+
+        $column['username'] = trim($uname);
+        $column['addtime']  = date('Y-m-d H:i:s');
+        $column['modtime']  = $column['addtime'];
+
+        self::initDb();
+
+        return self::$loader->insert($column)->lastId();
+    }
+    /* }}} */
+
+    /* {{{ public static Integer cleanUser() */
+    /**
+     * 清理用户
+     *
+     * @access public static
+     * @return Integer
+     */
+    public static function cleanUser($uname)
+    {
+        self::initDb();
+
+        return self::$loader->table(sprintf('%suseracct', self::TABLE_PREFIX))
+            ->where('username', $uname)->delete()->affectedRows();
     }
     /* }}} */
 
