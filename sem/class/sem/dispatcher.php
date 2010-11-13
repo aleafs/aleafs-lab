@@ -161,11 +161,11 @@ class Aleafs_Sem_Dispatcher
             Aleafs_Lib_Configer::register($name,   $file);
         }
 
-        Aleafs_Lib_Context::register('webroot', sprintf(
-            '%s/%s',
-            rtrim($this->config->get('url.server', ''), '/'),
-            $this->prefix
-        ));
+        $webroot    = rtrim($this->config->get('url.server', ''), '/');
+        if (!empty($this->prefix)) {
+            $webroot = sprintf('%s/%s', $webroot, $this->prefix);
+        }
+        Aleafs_Lib_Context::register('webroot', $webroot);
 
         if (0 === strcasecmp('online', $this->config->get('run.mode'))) {
             error_reporting(0);
