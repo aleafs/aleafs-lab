@@ -23,8 +23,7 @@ CREATE TABLE user_permission (
 	begdate date not null default '0000-00-00',
 	enddate date not null default '0000-00-00',
 	se_user varchar(128) not null default '',
-	KEY idx_userperm_uid (userid),
-	KEY idx_perm_token (se_user, pm_func, se_name)
+	KEY idx_perm_token (se_user, se_name)
 ) ENGINE = InnoDB DEFAULT CHARSET=UTF8;
 
 INSERT INTO useracct (username) VALUES ('zhangxc83@sohu.com');

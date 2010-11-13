@@ -18,8 +18,9 @@ class Aleafs_Sem_UserTest extends Aleafs_Sem_TestShell
     protected function setUp()
     {
         parent::setUp();
-
         self::registerDefault(__DIR__ . '/ini/global.ini');
+
+        Aleafs_Sem_User::cleanPermission('unittest', 'baidu');
     }
 
     protected function tearDown()
@@ -27,10 +28,9 @@ class Aleafs_Sem_UserTest extends Aleafs_Sem_TestShell
         parent::tearDown();
 	}
 
-    /* {{{ public void test_ll() */
-    public function test_ll()
+    /* {{{ public void test_should_insert_select_permission_works_fine() */
+    public function test_should_insert_select_permission_works_fine()
     {
-        Aleafs_Sem_User::getInfoByName('aleafs');
     }
     /* }}} */
 
