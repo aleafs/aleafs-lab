@@ -28,13 +28,14 @@ class Aleafs_Lib_Db_Sqlite extends Aleafs_Lib_Database
         ini_set('sqlite.assoc_case', 2);    /* LOWER CASE*/
     }
 
-    public function getAll()
+    public function getAll($res = null)
     {
-        if (empty($this->datares)) {
+        $res    = empty($res) ? $this->datares : $res;
+        if (empty($res)) {
             return null;
         }
 
-        return sqlite_fetch_all($this->datares, SQLITE_ASSOC);
+        return sqlite_fetch_all($res, SQLITE_ASSOC);
     }
 
     protected function _connect()
