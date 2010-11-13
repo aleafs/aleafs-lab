@@ -358,14 +358,15 @@ abstract class Aleafs_Lib_Database
      * @access public
      * @return Mixture
      */
-    public function getAll()
+    public function getAll($res = null)
     {
-        if (empty($this->datares)) {
+        $res    = empty($res) ? $this->datares : $res;
+        if (empty($res)) {
             return null;
         }
 
         $arrRet	= array();
-        while ($row = $this->_fetch($this->datares)) {
+        while ($row = $this->_fetch($res)) {
             $arrRet	= $row;
         }
 
@@ -380,13 +381,14 @@ abstract class Aleafs_Lib_Database
      * @access public
      * @return Mixture
      */
-    public function getRow()
+    public function getRow($res = null)
     {
-        if (empty($this->datares)) {
+        $res    = empty($res) ? $this->datares : $res;
+        if (empty($res)) {
             return null;
         }
 
-        return $this->_fetch($this->datares);
+        return $this->_fetch($res);
     }
     /* }}} */
 
@@ -397,13 +399,14 @@ abstract class Aleafs_Lib_Database
      * @access public
      * @return Mixture
      */
-    public function getOne()
+    public function getOne($res = null)
     {
-        if (empty($this->datares)) {
+        $res    = empty($res) ? $this->datares : $res;
+        if (empty($res)) {
             return null;
         }
 
-        $temp   = $this->_fetch($this->datares);
+        $temp   = $this->_fetch($res);
         return reset($temp);
     }
     /* }}} */
