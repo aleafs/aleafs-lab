@@ -47,7 +47,7 @@
 
 	<target name="-cleanup" description="Cleanup all old files.">
 		<delete dir="build/src" verbose="false" quiet="true" includeemptydirs="true" />
-		<delete dir="build/rpm/src" verbose="false" quiet="true" includeemptydirs="true" />
+		<delete dir="build/rpm" verbose="false" quiet="true" includeemptydirs="true" />
 	</target>
 
 	<target name="-checkout" description="Checkout all codes from subversion">
@@ -56,7 +56,7 @@
 
 	<target name="-config" description="Make release package">
 		<property file="${rpm.config.mode}.properties" override="true" />
-		<property name="rpm.tmp.dir" value="build/${rpm.config.mode}" />
+		<property name="rpm.tmp.dir" value="build/rpm/${rpm.config.mode}" />
 		<mkdir dir="${rpm.tmp.dir}" />
 		<phing dir="build/src" phingfile="build/phing/makeconf.xml" inheritRefs="true" inheritAll="true" target="-dev" haltonfailure="true" />
 
@@ -65,10 +65,18 @@
 				<include name="class/**/*" />
 				<include name="config/**/*" />
 				<include name="resource/**/*" />
-				<include name="webroot/**/*" />
 				<exclude name="**/.svn/**" />
 			</fileset>
 		</copy>
+
+		<mkdir dir="${rpm.tmp.dir}/public_html" />
+		<copy todir="${rpm.tmp.dir}/public_html" overwrite="true" includeemptydirs="true">
+			<fileset dir="build/src/webroot">
+				<include name="index.php" />
+			</fileset>
+		</copy>
+
+		<copy file="build/src/webroot/_htaccess_apache" tofile="${rpm.tmp.dir}/public_html/.htaccess" overwrite="true" />
 	</target>
 
 </project>
