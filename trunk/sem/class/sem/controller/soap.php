@@ -41,8 +41,6 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
             'obj_path'  => __DIR__ . '/../../../cache/themes',
             'theme'     => 'default',
         ));
-
-        $this->server	= new Aleafs_Lib_Soap_Server();
     }
     /* }}} */
 
@@ -61,8 +59,15 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
         }
 
         try {
-            $this->server->wsdl(self::wsdlfile($action));
-            $this->server->run(sprintf('Aleafs_Sem_Server_%s', ucfirst($action)));
+            $soap   = new SoapServer(self::wsdlfile($action), array(
+                'soap_version'	=> SOAP_1_2,
+                'encoding'		=> 'utf-8',
+            ));
+
+            Aleafs_Lib_Context::register('soap.server', $soap);
+
+            $soap->setClass(sprintf('Aleafs_Sem_Server_%s', ucfirst($action)));
+            $soap->handle(file_get_contents('php://input'));
         } catch (Exception $e) {
             self::fault(401, $e->getMessage());
         }
