@@ -66,9 +66,12 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
 
             Aleafs_Lib_Context::register('soap.server', $soap);
 
-            $soap->setClass(sprintf('Aleafs_Sem_Server_%s', ucfirst($action)));
+            // XXX: setClass 无法识别autoload
+            $class  = sprintf('Aleafs_Sem_Service_%s', ucfirst($action));
+            $soap->setObject(new $class());
             $soap->handle($post);
         } catch (Exception $e) {
+            throw $e;
             self::fault(401, $e->getMessage());
         }
     }
