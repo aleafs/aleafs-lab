@@ -40,14 +40,14 @@ class Aleafs_Lib_Soap_Client
 	 * @access public
 	 * @return Mixture
 	 */
-	public function __call($request)
+	public function __call($request, $args)
 	{
 		$client	= new SoapClient($this->wsdl);
 		if (!empty($this->header)) {
 			$client->__setSoapHeaders($this->soapHeader());
 		}
 
-		return $client->__soapCall($request, 'a');
+		return $client->__soapCall($request, $args);
 	}
 	/* }}} */
 
