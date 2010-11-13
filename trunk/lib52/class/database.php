@@ -372,6 +372,23 @@ abstract class Aleafs_Lib_Database
     }
     /* }}} */
 
+    /* {{{ public Mixture getRow() */
+    /**
+     * 获取查询结果集第一行
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function getRow()
+    {
+        if (empty($this->datares)) {
+            return null;
+        }
+
+        return $this->_fetch($this->datares);
+    }
+    /* }}} */
+
     /* {{{ public Mixture getOne() */
     /**
      * 获取第一个单元格的数据
