@@ -34,6 +34,7 @@
 			<filterchain>
 				<replacetokens begintoken="##" endtoken="##">
 					<token key="dir.root" value="${dir.root}" />
+					<token key="run.mode" value="${run.mode}" />
 					<token key="global.timeout" value="${global.timeout}" />
 					<token key="global.log.url" value="${global.log.url}" />
 					<token key="global.url.server" value="${global.url.server}" />
@@ -65,6 +66,7 @@
 			<filterchain>
 				<replacetokens begintoken="##" endtoken="##">
 					<token key="dir.root" value="${dir.root}" />
+					<token key="run.mode" value="unittest" />
 					<token key="global.timeout" value="${global.timeout}" />
 					<token key="global.log.url" value="${global.log.url}" />
 					<token key="global.url.server" value="${global.url.server}" />
