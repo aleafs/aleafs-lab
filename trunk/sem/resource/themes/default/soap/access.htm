@@ -5,13 +5,9 @@
 			<xsd:element name="AuthHeader" type="tns:AuthHeader" />
 			<xsd:complexType name="AuthHeader">
 				<xsd:sequence>
-					<xsd:document>搜索引擎名字</xsd:document>
 					<xsd:element name="appname" type="xsd:string" />
-					<xsd:document>搜索引擎用户名</xsd:document>
 					<xsd:element name="username" type="xsd:string" />
-					<xsd:document>客户端机器MAC地址</xsd:document>
 					<xsd:element name="machine" type="xsd:string" />
-					<xsd:document>客户端机器名</xsd:document>
 					<xsd:element name="nodename" type="xsd:string" />
 				</xsd:sequence>
 			</xsd:complexType>
@@ -34,7 +30,6 @@
 			<xsd:complexType name="singleperm">
 				<xsd:sequence>
 					<xsd:element name="unit" type="xsd:string" />
-					<xsd:document>用户类型:(0-试用;1-授权)</xsd:document>
 					<xsd:element name="type" type="xsd:int" />
 					<xsd:element name="begdate" type="xsd:date" />
 					<xsd:element name="enddate" type="xsd:date" />
