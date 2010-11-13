@@ -132,6 +132,10 @@ class Aleafs_Sem_Dispatcher
      */
     private static function ctrl($ctrl)
     {
+        if (empty($ctrl)) {
+            return 'Aleafs_Lib_Controller';
+        }
+
         return sprintf('Aleafs_Sem_Controller_%s', ucfirst(strtolower($ctrl)));
     }
     /* }}} */
@@ -161,6 +165,11 @@ class Aleafs_Sem_Dispatcher
             rtrim($this->config->get('url.server', ''), '/'),
             $this->prefix
         ));
+
+        if (0 === strcasecmp('online', $this->config->get('run.mode'))) {
+            error_reporting(0);
+            ini_set('display_errors', 'Off');
+        }
 
         set_time_limit($this->config->get('timeout', 30));
         register_shutdown_function(array(&$this, 'shutdownCallBack'));
