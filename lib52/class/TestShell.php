@@ -10,7 +10,7 @@
 //
 // $Id: TestShell.php 47 2010-04-26 05:27:46Z zhangxc83 $
 
-require_once(__DIR__ . '/autoload.php');
+require_once(dirname(__FILE__) . '/autoload.php');
 require_once('PHPUnit/Framework/TestCase.php');
 
 date_default_timezone_set('Asia/Shanghai');

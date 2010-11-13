@@ -60,10 +60,11 @@ class Aleafs_Sem_Dispatcher
      */
     public static function setAutoLoad()
     {
-        require_once __DIR__ . '/../lib/autoload.php';
+        $__dir  = dirname(__FILE__);
+        require_once $__dir . '/../lib/autoload.php';
 
         Aleafs_Lib_AutoLoad::init();
-        Aleafs_Lib_AutoLoad::register('aleafs_sem',     __DIR__);
+        Aleafs_Lib_AutoLoad::register('aleafs_sem',     $__dir);
     }
     /* }}} */
 
