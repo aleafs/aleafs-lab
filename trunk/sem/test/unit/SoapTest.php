@@ -89,8 +89,8 @@ class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
         );
 
         $this->assertEquals(array(
-            'Permissions permission()',
-            'ResCallBack heartbeat(UserAgent $UserAgent)',
+            'Permissions permission(string $i_am_none_sence)',
+            'ResCallBack heartbeat(ClientAgent $ClientAgent)',
         ), $client->__getFunctions());
 
         $header = new SoapHeader(
@@ -139,7 +139,7 @@ class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
         );
 
         $result = $client->__soapCall(
-            'permission', array(), null, $header, $header
+            'permission', array('a'), null, $header, $header
         );
 
         $result = json_decode(json_encode($result->perms), true);
