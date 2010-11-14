@@ -137,7 +137,7 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
      */
     private static function fault($code, $error)
     {
-        throw new SoapFault($code, $error);
+        throw new SoapFault((string)$code, $error);
     }
     /* }}} */
 
