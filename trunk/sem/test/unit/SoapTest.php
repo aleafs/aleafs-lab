@@ -42,7 +42,7 @@ class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
     /* }}} */
 
     /* {{{ public void test_should_math_add_works_fine() */
-    public function _test_should_math_add_works_fine()
+    public function test_should_math_add_works_fine()
     {
 
         $client = new SoapClient(
@@ -110,6 +110,12 @@ class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
             'heartbeat', array(json_decode(json_encode(array('software' => 'PHP', 'version' => '5.3.2')))),
             null, $header, $header
         );
+
+        $this->assertEquals(array(
+            'status'        => 0,
+            'description'   => '',
+        ), (array)$header['ResHeader']);
+
         $this->assertEquals(array(
             'feedback' => 'access/heartbeat',
             'function' => 'PHP',
@@ -119,7 +125,7 @@ class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
     /* }}} */
 
     /* {{{ public void test_should_access_permission_works_fine() */
-    public function _test_should_access_permission_works_fine()
+    public function test_should_access_permission_works_fine()
     {
         $client = new SoapClient(
             sprintf('%s/soap/access/wsdl', $this->webroot),
@@ -143,6 +149,11 @@ class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
         $result = $client->__soapCall(
             'permission', array('a'), null, $header, $header
         );
+
+        $this->assertEquals(array(
+            'status'        => 0,
+            'description'   => '',
+        ), (array)$header['ResHeader']);
 
         $result = json_decode(json_encode($result->perms), true);
 
