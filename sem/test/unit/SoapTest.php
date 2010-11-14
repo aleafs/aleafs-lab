@@ -78,6 +78,7 @@ class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
     }
     /* }}} */
 
+    /* {{{ public void test_should_access_heartbeat_works_fine() */
     public function test_should_access_heartbeat_works_fine()
     {
         $client = new SoapClient(
@@ -88,8 +89,63 @@ class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
         );
 
         $this->assertEquals(array(
-            //'agentCall heartbeat(AuthHeader $AuthHeader)',
+            'Permissions permission()',
+            'ResCallBack heartbeat(UserAgent $UserAgent)',
         ), $client->__getFunctions());
+
+        $header = new SoapHeader(
+            sprintf('%s/soap/access', $this->webroot),
+            'AuthHeader',
+            json_decode(json_encode(array(
+                'appname'   => 'baidu',
+                'username'  => 'functest',
+                'machine'   => '123456',
+                'nodename'  => php_uname('n'),
+            )))
+        );
+
+        $result = $client->__soapCall(
+            'heartbeat', array(json_decode(json_encode(array('software' => 'PHP', 'version' => '5.3.2')))),
+            null, $header, $header
+        );
+
+        $this->assertEquals(array(
+            'feedback' => 'access/heartbeat',
+            'function' => 'PHP',
+            'args' => '5.3.2',
+        ), json_decode(json_encode($result), true));
     }
+    /* }}} */
+
+    /* {{{ public void test_should_access_permission_works_fine() */
+    public function test_should_access_permission_works_fine()
+    {
+        $client = new SoapClient(
+            sprintf('%s/soap/access/wsdl', $this->webroot),
+            array(
+                'encoding'  => 'utf-8',
+            )
+        );
+
+        $header = new SoapHeader(
+            sprintf('%s/soap/access', $this->webroot),
+            'AuthHeader',
+            json_decode(json_encode(array(
+                'appname'   => 'baidu',
+                'username'  => 'functest',
+                'machine'   => '123456',
+                'nodename'  => php_uname('n'),
+            )))
+        );
+
+        $result = $client->__soapCall(
+            'permission', array(), null, $header, $header
+        );
+
+        $result = json_decode(json_encode($result->perms), true);
+        //print_r($result);
+
+    }
+    /* }}} */
 
 }

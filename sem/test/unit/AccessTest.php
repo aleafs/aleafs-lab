@@ -62,9 +62,10 @@ class Aleafs_Sem_AccessTest extends Aleafs_Sem_TestShell
         ), $server->permission());
 
         $this->assertEquals(array(
-            'function'  => '',
-            'args'      => '',
-        ), $server->heartbeat());
+            'feedback'  => 'access/heartbeat',
+            'function'  => 'aa',
+            'args'      => 'bb',
+        ), $server->heartbeat(json_decode(json_encode(array('software' => 'aa', 'version' => 'bb')))));
     }
     /* }}} */
 
