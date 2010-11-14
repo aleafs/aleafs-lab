@@ -26,7 +26,6 @@
 				</xsd:sequence>
 			</xsd:complexType>
 
-			<xsd:element name="ResCallBack" type="tns:ResCallBack" />
 			<xsd:complexType name="ResCallBack">
 				<xsd:sequence>
 					<xsd:element name="feedback" type="xsd:string" />
@@ -45,14 +44,12 @@
 				</xsd:sequence>
 			</xsd:complexType>
 
-			<xsd:element name="Permissions" type="tns:Permissions" />
 			<xsd:complexType name="Permissions">
 				<xsd:sequence>
 					<xsd:element name="perms" type="tns:PermRow" minOccurs="0" maxOccurs="unbounded" />
 				</xsd:sequence>
 			</xsd:complexType>
 
-			<xsd:element name="ClientAgent" type="tns:ClientAgent" />
 			<xsd:complexType name="ClientAgent">
 				<xsd:sequence>
 					<xsd:element name="software" type="xsd:string" />
@@ -64,11 +61,11 @@
 	</wsdl:types>
 
 	<wsdl:message name="AuthHeader">
-		<wsdl:part name="AuthHeader" type="tns:AuthHeader" />
+		<wsdl:part name="AuthHeader" element="tns:AuthHeader" />
 	</wsdl:message>
 
 	<wsdl:message name="ResHeader">
-		<wsdl:part name="ResHeader" type="tns:ResHeader" />
+		<wsdl:part name="ResHeader" element="tns:ResHeader" />
 	</wsdl:message>
 
 	<wsdl:message name="ClientAgent">
