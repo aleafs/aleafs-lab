@@ -105,10 +105,10 @@ class Aleafs_Sem_Service
         $server->addSoapHeader(new SoapHeader(
             sprintf('%s/%s', Aleafs_Lib_Context::get('webroot'), trim($path, '/')),
             'ResHeader', 
-            array(
+            json_decode(json_encode(array(
                 'status'        => $this->errno,
                 'description'   => self::error($this->errno),
-            )
+            )))
         ));
     }
     /* }}} */

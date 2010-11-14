@@ -61,6 +61,7 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
             return self::wsdl($action);
         }
 
+        ob_start();
         try {
             $soap   = new SoapServer(self::wsdlfile($action), array(
                 'soap_version'	=> SOAP_1_2,
@@ -76,6 +77,9 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
         } catch (Exception $e) {
             self::fault(401, $e->getMessage());
         }
+
+        $data   = ob_get_clean();
+        echo $data;
     }
     /* }}} */
 
