@@ -49,6 +49,7 @@ class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
             sprintf('%s/soap/math/wsdl', $this->webroot),
             array(
                 'encoding'  => 'utf-8',
+                'cache_wsdl'    => WSDL_CACHE_NONE,
             )
         );
 
@@ -85,6 +86,7 @@ class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
             sprintf('%s/soap/access/wsdl', $this->webroot),
             array(
                 'encoding'  => 'utf-8',
+                'cache_wsdl'    => WSDL_CACHE_NONE,
             )
         );
 
@@ -124,6 +126,7 @@ class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
             sprintf('%s/soap/access/wsdl', $this->webroot),
             array(
                 'encoding'  => 'utf-8',
+                'cache_wsdl'    => WSDL_CACHE_NONE,
             )
         );
 
