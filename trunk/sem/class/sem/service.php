@@ -16,18 +16,20 @@ class Aleafs_Sem_Service
 
     /* {{{ 静态常量 */
 
-    const E_SUCCESS     = 0;
-    const E_NOT_TRIAL   = 401;
-    const E_SYS_ERROR   = 501;
+    const E_RESPONSE_OK     = 0;
+    const E_NO_AUTHENTICATE = 401;
+    const E_ACCESS_DENIED   = 402;
+    const E_SYSTEM_ERROR    = 501;
 
     /* }}} */
 
     /* {{{ 静态常量 */
 
     private static $errorMessage    = array(
-        self::E_SUCCESS     => '',
-        self::E_NOT_TRIAL   => '您不是试用用户',
-        self::E_SYS_ERROR   => '系统错误',
+        self::E_RESPONSE_OK     => '',
+        self::E_NO_AUTHENTICATE => '尚未进行授权验证',
+        self::E_ACCESS_DENIED   => '授权拒绝',
+        self::E_SYSTEM_ERROR    => '系统繁忙，请稍后再试',
     );
 
     /* }}} */
@@ -38,7 +40,7 @@ class Aleafs_Sem_Service
 
     protected $permissions      = array();
 
-    protected $errno    = self::E_SUCCESS;
+    protected $errno    = self::E_NO_AUTHENTICATE;
 
     /* }}} */
 
@@ -125,7 +127,7 @@ class Aleafs_Sem_Service
             $trials = Aleafs_Lib_Configer::instance('trial');
             $days   = $trials->get(sprintf('%s.%s', $appname, $appuser), 0);
             if (empty($days)) {
-                $this->errno    = self::E_NOT_TRIAL;
+                $this->errno    = self::E_ACCESS_DENIED;
                 return;
             }
 
@@ -145,12 +147,13 @@ class Aleafs_Sem_Service
                 'enddate'   => date('Y-m-d', time() + 86400 * ($days - 1)),
             ));
             if (empty($pmid)) {
-                $this->errno    = self::E_SYS_ERROR;
+                $this->errno    = self::E_SYSTEM_ERROR;
                 return;
             }
             $perms  = Aleafs_Sem_User::getPermission($appuser, $appname);
         }
 
+        $this->errno    = self::E_RESPONSE_OK;
         $this->permissions      = $perms;
         $this->authenticated	= true;
     }

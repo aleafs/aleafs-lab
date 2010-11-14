@@ -50,12 +50,13 @@ class Aleafs_Sem_Service_Access extends Aleafs_Sem_Service
      * @access public
      * @return Mixture
      */
-    public function heartbeat()
+    public function heartbeat($ua)
     {
         $this->setSoapHeader('access/heartbeat');
         return array(
-            'function'  => '',
-            'args'      => '',
+            'feedback'  => 'access/heartbeat',
+            'function'  => $ua->software,
+            'args'      => $ua->version,
         );
     }
     /* }}} */
