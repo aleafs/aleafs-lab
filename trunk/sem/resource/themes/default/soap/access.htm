@@ -2,6 +2,7 @@
 <wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="$webroot/soap/access" targetNamespace="$webroot/soap/access" name="Aleafs_Sem_Access">
 	<wsdl:types>
 		<xsd:schema targetNamespace="$webroot/soap/access">
+			<xsd:element name="AuthHeader" type="tns:AuthHeader" />
 			<xsd:complexType name="AuthHeader">
 				<xsd:sequence>
 					<xsd:element name="appname">
@@ -17,6 +18,7 @@
 				</xsd:sequence>
 			</xsd:complexType>
 
+			<xsd:element name="ResHeader" type="tns:ResHeader" />
 			<xsd:complexType name="ResHeader">
 				<xsd:sequence>
 					<xsd:element name="status" type="xsd:integer" />
@@ -24,6 +26,7 @@
 				</xsd:sequence>
 			</xsd:complexType>
 
+			<xsd:element name="ResCallBack" type="tns:ResCallBack" />
 			<xsd:complexType name="ResCallBack">
 				<xsd:sequence>
 					<xsd:element name="feedback" type="xsd:string" />
@@ -42,12 +45,14 @@
 				</xsd:sequence>
 			</xsd:complexType>
 
+			<xsd:element name="Permissions" type="tns:Permissions" />
 			<xsd:complexType name="Permissions">
 				<xsd:sequence>
 					<xsd:element name="perms" type="tns:PermRow" minOccurs="0" maxOccurs="unbounded" />
 				</xsd:sequence>
 			</xsd:complexType>
 
+			<xsd:element name="ClientAgent" type="tns:ClientAgent" />
 			<xsd:complexType name="ClientAgent">
 				<xsd:sequence>
 					<xsd:element name="software" type="xsd:string" />
