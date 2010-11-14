@@ -87,11 +87,12 @@
 
 		<wsdl:operation name="permission">
 			<wsdl:document>用户权限查询接口</wsdl:document>
+			<wsdl:input message="tns:UserAgent" />
 			<wsdl:output message="tns:ResPermission" />
 		</wsdl:operation>
 	</wsdl:portType>
 
-	<wsdl:binding name="SoapBinding" type="PortAccess">
+	<wsdl:binding name="SoapBinding" type="tns:PortAccess">
 		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
 		<wsdl:operation name="permission">
 			<soap:operation soapAction="$webroot/soap/access/permission" />
