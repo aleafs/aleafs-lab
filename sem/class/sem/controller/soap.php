@@ -37,6 +37,8 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
     {
         parent::__construct();
 
+        ini_set('soap.wsdl_cache_enabled',  '0');
+
         $__dir  = dirname(__FILE__);
         Aleafs_Lib_Render_Html::init(array(
             'tpl_path'  => $__dir . '/../../../resource/themes',
