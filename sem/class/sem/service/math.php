@@ -17,7 +17,6 @@ class Aleafs_Sem_Service_Math extends Aleafs_Sem_Service
 	/* {{{ public void AuthHeader() */
 	public function AuthHeader($params)
 	{
-		file_put_contents("auth.txt", $params->username."\t".$params->password."\t".$params->token);
 		$this->authenticated	= true;
 	}
 	/* }}} */

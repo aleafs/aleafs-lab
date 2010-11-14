@@ -15,11 +15,22 @@ require_once(__DIR__ . '/../../class/sem/TestShell.php');
 class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
 {
 
+    private $webroot;
+
     /* {{{ protected void setUp() */
     protected function setUp()
     {
         parent::setUp();
         self::registerDefault(__DIR__ . '/ini/global.ini');
+
+        $config = Aleafs_Lib_Configer::instance('default');
+        $global = rtrim($config->get('url.server', ''), '/');
+        $prefix = $config->get('url.prefix', '');
+        if (!empty($prefix)) {
+            $global = $global . '/' . trim($prefix, '/');
+        }
+
+        $this->webroot  = $global;
     }
     /* }}} */
 
@@ -33,22 +44,19 @@ class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
     /* {{{ public void test_should_math_add_works_fine() */
     public function test_should_math_add_works_fine()
     {
-        $config = Aleafs_Lib_Configer::instance('default');
-        $global = rtrim($config->get('url.server', ''), '/');
-        $prefix = $config->get('url.prefix', '');
-        if (!empty($prefix)) {
-            $global = $global . '/' . trim($prefix, '/');
-        }
 
         $client = new SoapClient(
-            sprintf('%s/soap/math/wsdl', $global),
+            sprintf('%s/soap/math/wsdl', $this->webroot),
             array(
                 'encoding'  => 'utf-8',
             )
         );
 
+        $this->assertEquals(array(
+            'AddResponse add(AddRequest $parameters)',
+        ), $client->__getFunctions());
         $header = new SoapHeader(
-            sprintf('%s/soap/math', $global),
+            sprintf('%s/soap/math', $this->webroot),
             'AuthHeader',
             json_decode(json_encode(array(
                 'username'  => 'unittest',
@@ -59,7 +67,7 @@ class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
 
         $result = $client->__soapCall(
             'add', array(json_decode(json_encode(array('a' => 50, 'b' => 20)))),
-            array(), $header, $header
+            null, $header, $header
         );
 
         $this->assertEquals(array('sum' => 70), (array)$result);
@@ -69,5 +77,19 @@ class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
         ), (array)$header['ResHeader']);
     }
     /* }}} */
+
+    public function test_should_access_heartbeat_works_fine()
+    {
+        $client = new SoapClient(
+            sprintf('%s/soap/access/wsdl', $this->webroot),
+            array(
+                'encoding'  => 'utf-8',
+            )
+        );
+
+        $this->assertEquals(array(
+            //'agentCall heartbeat(AuthHeader $AuthHeader)',
+        ), $client->__getFunctions());
+    }
 
 }
