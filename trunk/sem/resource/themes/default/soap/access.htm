@@ -2,44 +2,49 @@
 <wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="$webroot/soap/access" targetNamespace="$webroot/soap/access" name="Aleafs_Sem_Access">
 	<wsdl:types>
 		<xsd:schema targetNamespace="$webroot/soap/access">
-			<xsd:element name="AuthHeader" type="tns:AuthHeader" />
 			<xsd:complexType name="AuthHeader">
 				<xsd:sequence>
-					<xsd:element name="appname" type="xsd:string" />
+					<xsd:element name="appname">
+						<xsd:simpleType> 
+							<xsd:restriction base="xsd:string"> 
+								<xsd:enumeration value="baidu" /> 
+							</xsd:restriction> 
+						</xsd:simpleType> 
+					</xsd:element>
 					<xsd:element name="username" type="xsd:string" />
 					<xsd:element name="machine" type="xsd:string" />
 					<xsd:element name="nodename" type="xsd:string" />
 				</xsd:sequence>
 			</xsd:complexType>
 
-			<xsd:element name="ResHeader" type="tns:ResHeader" />
 			<xsd:complexType name="ResHeader">
 				<xsd:sequence>
-					<xsd:element name="status" type="xsd:int" />
+					<xsd:element name="status" type="xsd:integer" />
 					<xsd:element name="description" type="xsd:string" />
 				</xsd:sequence>
 			</xsd:complexType>
 
-			<xsd:complexType name="agentCall">
+			<xsd:complexType name="ResCallBack">
 				<xsd:sequence>
+					<xsd:element name="feedback" type="xsd:string" />
 					<xsd:element name="function" type="xsd:string" />
 					<xsd:element name="args" type="std:string" minOccurs="0" maxOccurs="unbounded" />
 				</xsd:sequence>
 			</xsd:complexType>
 
-			<xsd:complexType name="singleperm">
+			<xsd:complexType name="PermRow">
 				<xsd:sequence>
 					<xsd:element name="unit" type="xsd:string" />
-					<xsd:element name="type" type="xsd:int" />
+					<xsd:element name="type" type="xsd:integer" />
 					<xsd:element name="begdate" type="xsd:date" />
 					<xsd:element name="enddate" type="xsd:date" />
-					<xsd:element name="balance" type="xsd:int" />
+					<xsd:element name="balance" type="xsd:integer" />
 				</xsd:sequence>
 			</xsd:complexType>
 
-			<xsd:complexType name="permission">
+			<xsd:complexType name="Permissions">
 				<xsd:sequence>
-					<xsd:element name="perms" type="tns:singleperm" minOccurs="0" maxOccurs="unbounded" />
+					<xsd:element name="perms" type="tns:PermRow" minOccurs="0" maxOccurs="unbounded" />
 				</xsd:sequence>
 			</xsd:complexType>
 
@@ -54,11 +59,11 @@
 	</wsdl:types>
 
 	<wsdl:message name="AuthHeader">
-		<wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+		<wsdl:part name="AuthHeader" type="tns:AuthHeader" />
 	</wsdl:message>
 
 	<wsdl:message name="ResHeader">
-		<wsdl:part name="ResHeader" element="tns:ResHeader" />
+		<wsdl:part name="ResHeader" type="tns:ResHeader" />
 	</wsdl:message>
 
 	<wsdl:message name="UserAgent">
@@ -66,11 +71,11 @@
 	</wsdl:message>
 
 	<wsdl:message name="ResHeartbeat">
-		<wsdl:part name="ResHeartbeat" type="tns:agentCall" />
+		<wsdl:part name="ResCallBack" type="tns:ResCallBack" />
 	</wsdl:message>
 
 	<wsdl:message name="ResPermission">
-		<wsdl:part name="ResHeartbeat" type="tns:permission" />
+		<wsdl:part name="ResPermission" type="tns:Permissions" />
 	</wsdl:message>
 
 	<wsdl:portType name="PortAccess">
