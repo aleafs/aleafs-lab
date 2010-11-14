@@ -38,14 +38,6 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
         parent::__construct();
 
         $__dir  = dirname(__FILE__);
-        $cache  = sprintf('%s/../../../cache/system', $__dir);
-        if (!is_dir($cache)) {
-            mkdir($cache, 0744, true);
-        }
-
-        ini_set('soap.wsdl_cache_enabled',  '0');
-        ini_set('soap.wsdl_cache_dir',      $cache);
-
         Aleafs_Lib_Render_Html::init(array(
             'tpl_path'  => $__dir . '/../../../resource/themes',
             'obj_path'  => $__dir . '/../../../cache/themes',
@@ -73,6 +65,7 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
             $soap   = new SoapServer(self::wsdlfile($action), array(
                 'soap_version'	=> SOAP_1_2,
                 'encoding'		=> 'utf-8',
+                'cache_wsdl'    => 0,
             ));
 
             Aleafs_Lib_Context::register('soap.server', $soap);
