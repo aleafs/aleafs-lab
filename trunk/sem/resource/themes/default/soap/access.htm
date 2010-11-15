@@ -26,6 +26,7 @@
 				</xsd:sequence>
 			</xsd:complexType>
 
+			<xsd:element name="ResCallBack" type="tns:ResCallBack" />
 			<xsd:complexType name="ResCallBack">
 				<xsd:sequence>
 					<xsd:element name="feedback" type="xsd:string" />
@@ -33,7 +34,8 @@
 					<xsd:element name="args" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
 				</xsd:sequence>
 			</xsd:complexType>
-
+			
+			<xsd:element name="PermRow" type="tns:PermRow" />
 			<xsd:complexType name="PermRow">
 				<xsd:sequence>
 					<xsd:element name="unit" type="xsd:string" />
@@ -44,12 +46,14 @@
 				</xsd:sequence>
 			</xsd:complexType>
 
+			<xsd:element name="Permissions" type="tns:Permissions" />
 			<xsd:complexType name="Permissions">
 				<xsd:sequence>
 					<xsd:element name="perms" type="tns:PermRow" minOccurs="0" maxOccurs="unbounded" />
 				</xsd:sequence>
 			</xsd:complexType>
 
+			<xsd:element name="ClientAgent" type="tns:ClientAgent" />
 			<xsd:complexType name="ClientAgent">
 				<xsd:sequence>
 					<xsd:element name="software" type="xsd:string" />
@@ -61,40 +65,37 @@
 	</wsdl:types>
 
 	<wsdl:message name="AuthHeader">
-		<wsdl:part name="AuthHeader" element="tns:AuthHeader" />
+		<wsdl:part name="AuthHeader" element="tns:AuthHeader" ></wsdl:part>
 	</wsdl:message>
 
 	<wsdl:message name="ResHeader">
-		<wsdl:part name="ResHeader" element="tns:ResHeader" />
+		<wsdl:part name="ResHeader" element="tns:ResHeader" ></wsdl:part>
 	</wsdl:message>
 
 	<wsdl:message name="ClientAgent">
-		<wsdl:part name="ClientAgent" type="tns:ClientAgent" />
+		<wsdl:part name="ClientAgent" element="tns:ClientAgent" ></wsdl:part>
 	</wsdl:message>
 
 	<wsdl:message name="ResHeartbeat">
-		<wsdl:part name="ResCallBack" type="tns:ResCallBack" />
+		<wsdl:part name="ResCallBack" element="tns:ResCallBack" ></wsdl:part>
 	</wsdl:message>
 
 	<wsdl:message name="ResPermission">
-		<wsdl:part name="ResPermission" type="tns:Permissions" />
+		<wsdl:part name="ResPermission" element="tns:Permissions" ></wsdl:part>
 	</wsdl:message>
 
 	<wsdl:message name="i_am_none_sence">
-		<wsdl:part name="i_am_none_sence" type="xsd:string" />
+		<wsdl:part name="i_am_none_sence" type="xsd:string" ></wsdl:part>
 	</wsdl:message>
 
 	<wsdl:portType name="PortAccess">
 		<wsdl:operation name="heartbeat">
-			<wsdl:document>客户端心跳检测接口</wsdl:document>
-			<wsdl:input message="tns:ClientAgent" />
-			<wsdl:output message="tns:ResHeartbeat" />
+			<wsdl:input message="tns:ClientAgent" ></wsdl:input>
+			<wsdl:output message="tns:ResHeartbeat" ></wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="permission">
-			<wsdl:document>用户权限查询接口</wsdl:document>
-			<wsdl:input message="tns:i_am_none_sence" />
-			<wsdl:output message="tns:ResPermission" />
+			<wsdl:input message="tns:ClientAgent" ></wsdl:input>
+			<wsdl:output message="tns:ResPermission" ></wsdl:output>
 		</wsdl:operation>
 	</wsdl:portType>
 
@@ -111,7 +112,6 @@
 				<soap:body use="literal" />
 			</wsdl:output>
 		</wsdl:operation>
-
 		<wsdl:operation name="heartbeat">
 			<soap:operation soapAction="$webroot/soap/access/heartbeat" />
 			<wsdl:input>
@@ -123,7 +123,6 @@
 				<soap:body use="literal" />
 			</wsdl:output>
 		</wsdl:operation>
-
 	</wsdl:binding>
 
 	<wsdl:service name="AccessService">
