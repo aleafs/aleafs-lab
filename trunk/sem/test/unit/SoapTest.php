@@ -91,7 +91,7 @@ class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
         );
 
         $this->assertEquals(array(
-            'Permissions permission(string $i_am_none_sence)',
+            'Permissions permission(ClientAgent $ClientAgent)',
             'ResCallBack heartbeat(ClientAgent $ClientAgent)',
         ), $client->__getFunctions());
 
