@@ -1,0 +1,93 @@
+<?php echo "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"; ?>
+<wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="$webroot/soap/baidu" targetNamespace="$webroot/soap/baidu" name="Aleafs_Sem_Access">
+	<wsdl:types>
+		<xsd:schema targetNamespace="$webroot/soap/baidu">
+			<xsd:element name="AuthHeader" type="tns:AuthHeader" />
+			<xsd:complexType name="AuthHeader">
+				<xsd:sequence>
+					<xsd:element name="appname">
+						<xsd:simpleType> 
+							<xsd:restriction base="xsd:string"> 
+								<xsd:enumeration value="baidu" /> 
+							</xsd:restriction> 
+						</xsd:simpleType> 
+					</xsd:element>
+					<xsd:element name="username" type="xsd:string" />
+					<xsd:element name="machine" type="xsd:string" />
+					<xsd:element name="nodename" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="ResHeader" type="tns:ResHeader" />
+			<xsd:complexType name="ResHeader">
+				<xsd:sequence>
+					<xsd:element name="status" type="xsd:integer" />
+					<xsd:element name="description" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+			<xsd:element name="AdRankRequest" type="tns:AdRankRequest" />
+			<xsd:complexType name="AdRankRequest">
+				<xsd:sequence>
+					<xsd:element name="keyword" type="xsd:string" />
+					<xsd:element name="showurl" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+					<xsd:element name="webpage" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+			
+			<xsd:element name="AdRankResponse" type="tns:AdRankResponse" />
+			<xsd:complexType name="AdRankResponse">
+				<xsd:sequence>
+					<xsd:element name="cmatch" type="xsd:integer" />
+					<xsd:element name="rank" type="xsd:integer" />
+				</xsd:sequence>
+			</xsd:complexType>
+
+		</xsd:schema>
+	</wsdl:types>
+
+	<wsdl:message name="AuthHeader">
+		<wsdl:part name="AuthHeader" element="tns:AuthHeader" ></wsdl:part>
+	</wsdl:message>
+
+	<wsdl:message name="ResHeader">
+		<wsdl:part name="ResHeader" element="tns:ResHeader" ></wsdl:part>
+	</wsdl:message>
+
+	<wsdl:message name="AdRankRequest">
+		<wsdl:part name="AdRankRequest" element="tns:AdRankRequest" ></wsdl:part>
+	</wsdl:message>
+
+	<wsdl:message name="AdRankResponse">
+		<wsdl:part name="AdRankResponse" element="tns:AdRankResponse" ></wsdl:part>
+	</wsdl:message>
+
+	<wsdl:portType name="BaiduAd">
+		<wsdl:operation name="adrank">
+			<wsdl:input message="tns:AdRankRequest" ></wsdl:input>
+			<wsdl:output message="tns:AdRankResponse" ></wsdl:output>
+		</wsdl:operation>
+	</wsdl:portType>
+
+	<wsdl:binding name="SoapBinding" type="tns:BaiduAd">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+		<wsdl:operation name="adrank">
+			<soap:operation soapAction="$webroot/soap/baidu/adrank" />
+			<wsdl:input>
+				<soap:header message="tns:AuthHeader" part="AuthHeader" use="literal" />
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:header message="tns:ResHeader" part="ResHeader" use="literal" />
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+
+	<wsdl:service name="BaiduService">
+		<wsdl:port binding="tns:SoapBinding" name="BaiduService">
+			<soap:address location="$webroot/soap/baidu" />
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>
+<!--COMPLETE-->
