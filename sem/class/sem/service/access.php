@@ -23,7 +23,7 @@ class Aleafs_Sem_Service_Access extends Aleafs_Sem_Service
      */
     public function permission()
     {
-        $this->setSoapHeader('access/permission');
+        $this->setSoapHeader('soap/access');
         if (empty($this->authenticated)) {
             return array();
         }
@@ -52,7 +52,7 @@ class Aleafs_Sem_Service_Access extends Aleafs_Sem_Service
      */
     public function heartbeat($ua)
     {
-        $this->setSoapHeader('access/heartbeat');
+        $this->setSoapHeader('soap/access');
         return array(
             'feedback'  => 'access/heartbeat',
             'function'  => $ua->software,
