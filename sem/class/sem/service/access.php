@@ -35,7 +35,7 @@ class Aleafs_Sem_Service_Access extends Aleafs_Sem_Service
                 'type'      => (int)$row['pm_type'],
                 'begdate'   => $row['begdate'],
                 'enddate'   => $row['enddate'],
-                'balance'   => (int)self::balance($row['begdate'], $row['enddate']),
+                'balance'   => (int)self::balance($row['enddate'], date('Y-m-d')),
             );
         }
 
@@ -68,13 +68,13 @@ class Aleafs_Sem_Service_Access extends Aleafs_Sem_Service
      * @access private static
      * @return Integer
      */
-    private static function balance($beg, $end)
+    private static function balance($end, $beg = null)
     {
-        $beg = strtotime($beg);
+        $beg = strtotime(empty($beg) ? date('Y-m-d') : $beg);
         $end = strtotime($end);
 
         if ($end < $beg) {
-            return -1;
+            return 0;
         }
 
         return 1 + (int)($end - $beg) / 86400;
