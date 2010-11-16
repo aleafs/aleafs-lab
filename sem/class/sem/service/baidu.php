@@ -23,13 +23,22 @@ class Aleafs_Sem_Service_Baidu extends Aleafs_Sem_Service
 	{
 		$this->setSoapHeader('soap/baidu');
         if (empty($this->authenticated)) {
-            return array();
+            return array("rank" => 0, "cmatch" => 0);
         }
         
         $strWebPage = $this->_uncompress($params->webpage);
-        $arrAdList = $this->_getAdList($strWebPage);
+        $arrShowUrl = array();
+        if (is_array($params->showurl)) {
+        	$arrShowUrl = $params->showurl;
+        } else {
+        	$arrShowUrl = array($params->showurl);
+        }
         
-        return $this->_getAdPos($params->keyword, $params->showurl, $arrAdList);
+        //file_put_contents("webpage.txt", gettype($params->showurl)."\n".$arrShowUrl[0]."\n".$strWebPage);
+        $arrAdList = $this->_getAdList($strWebPage);
+        //file_put_contents("showurl.txt", count($arrAdList[0])."\n".$params->keyword."\n".$params->showurl. "\n" . $params->showurl[0]. "\n" .$params->showurl[1]);
+
+        return $this->_getAdPos($params->keyword, $arrShowUrl, $arrAdList);
 	}
 	
 	/**
