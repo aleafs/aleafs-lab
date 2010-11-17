@@ -60,7 +60,23 @@
 					<xsd:element name="version" type="xsd:string" />
 				</xsd:sequence>
 			</xsd:complexType>
-
+			
+			<xsd:element name="ClientAgent_HB" type="tns:ClientAgent_HB" />
+			<xsd:complexType name="ClientAgent_HB">
+				<xsd:sequence>
+					<xsd:element name="software" type="xsd:string" />
+					<xsd:element name="version" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+			
+			<xsd:element name="ClientAgent_VS" type="tns:ClientAgent_VS" />
+			<xsd:complexType name="ClientAgent_VS">
+				<xsd:sequence>
+					<xsd:element name="software" type="xsd:string" />
+					<xsd:element name="version" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+			
 		</xsd:schema>
 	</wsdl:types>
 
@@ -75,6 +91,14 @@
 	<wsdl:message name="ClientAgent">
 		<wsdl:part name="ClientAgent" element="tns:ClientAgent" ></wsdl:part>
 	</wsdl:message>
+	
+	<wsdl:message name="ClientAgent_HB">
+		<wsdl:part name="ClientAgent_HB" element="tns:ClientAgent_HB" ></wsdl:part>
+	</wsdl:message>
+	
+	<wsdl:message name="ClientAgent_VS">
+		<wsdl:part name="ClientAgent_VS" element="tns:ClientAgent_VS" ></wsdl:part>
+	</wsdl:message>
 
 	<wsdl:message name="ResHeartbeat">
 		<wsdl:part name="ResCallBack" element="tns:ResCallBack" ></wsdl:part>
@@ -84,18 +108,18 @@
 		<wsdl:part name="ResPermission" element="tns:Permissions" ></wsdl:part>
 	</wsdl:message>
 
-	<wsdl:message name="i_am_none_sence">
-		<wsdl:part name="i_am_none_sence" type="xsd:string" ></wsdl:part>
-	</wsdl:message>
-
 	<wsdl:portType name="PortAccess">
 		<wsdl:operation name="heartbeat">
-			<wsdl:input message="tns:ClientAgent" ></wsdl:input>
+			<wsdl:input message="tns:ClientAgent_HB" ></wsdl:input>
 			<wsdl:output message="tns:ResHeartbeat" ></wsdl:output>
 		</wsdl:operation>
 		<wsdl:operation name="permission">
 			<wsdl:input message="tns:ClientAgent" ></wsdl:input>
 			<wsdl:output message="tns:ResPermission" ></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="version">
+			<wsdl:input message="tns:ClientAgent_VS" ></wsdl:input>
+			<wsdl:output message="tns:ClientAgent_VS" ></wsdl:output>
 		</wsdl:operation>
 	</wsdl:portType>
 
@@ -114,6 +138,17 @@
 		</wsdl:operation>
 		<wsdl:operation name="heartbeat">
 			<soap:operation soapAction="$webroot/soap/access/heartbeat" />
+			<wsdl:input>
+				<soap:header message="tns:AuthHeader" part="AuthHeader" use="literal" />
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:header message="tns:ResHeader" part="ResHeader" use="literal" />
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="version">
+			<soap:operation soapAction="$webroot/soap/access/version" />
 			<wsdl:input>
 				<soap:header message="tns:AuthHeader" part="AuthHeader" use="literal" />
 				<soap:body use="literal" />
