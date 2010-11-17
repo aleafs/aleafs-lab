@@ -10,8 +10,6 @@
 //
 // $Id: autoload.php 22 2010-04-15 16:28:45Z zhangxc83 $
 
-date_default_timezone_set('Asia/Shanghai');
-
 class Aleafs_Sem_Dispatcher
 {
 
@@ -174,6 +172,7 @@ class Aleafs_Sem_Dispatcher
             ini_set('display_errors', 'Off');
         }
 
+        date_default_timezone_set('Asia/Shanghai');
         set_time_limit($this->config->get('timeout', 30));
         register_shutdown_function(array(&$this, 'shutdownCallBack'));
     }
