@@ -42,6 +42,37 @@ class Aleafs_Sem_Service_Baidu extends Aleafs_Sem_Service
 	}
 	
 	/**
+	 * 得到关键词的Q值
+	 *
+	 * @param array $params
+	 * @return array
+	 */
+	public function keyquality($params)
+	{
+		$this->setSoapHeader('soap/baidu');
+        if (empty($this->authenticated)) {
+            return array();
+        }     
+        //file_put_contents("webpage.txt", gettype($params->keywords)."\n".gettype($params->keywords[0])."\n");
+        //二维数组
+        if (!is_array($params->keywords))
+        {
+        	$arrWords = array($params->keywords);
+        } else {
+        	$arrWords = $params->keywords;
+        }
+        
+        $arrRet = array();
+        
+        foreach ($arrWords as $arrOne) {
+        	$intKeyQ = Aleafs_Sem_Quality::getKeywordQ($arrOne->keywid, $arrOne->q);
+        	$arrRet[] = array("keywid" => $arrOne->keywid, 'q' => $intKeyQ);
+        }
+        
+        return $arrRet;
+	}
+	
+	/**
 	 * 得到广告位置, multi-showurl
 	 *
 	 * @param string $keyword
@@ -57,7 +88,6 @@ class Aleafs_Sem_Service_Baidu extends Aleafs_Sem_Service
 		
 		foreach ($arrUrl as $strUrl) {
 			$ret = $this->_getAdPosOneUrl($keyword, $strUrl, $arrAdList, $arrRet);
-			//file_put_contents("rank.txt", $arrRet["rank"]."\n".$arrRet["cmatch"]."\n".$strUrl."\n".$arrAdList[1][0]);
 			if ($ret >= 0) {
 				if ($ret > 0)  {
 					$arrRet = array("rank" => 0, "cmatch" => 0);
