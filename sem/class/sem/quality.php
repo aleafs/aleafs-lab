@@ -7,7 +7,7 @@
 // +------------------------------------------------------------------------+
 // | Author: zhangxc <zhangxc83@sohu.com>									|
 // +------------------------------------------------------------------------+
-// 注意时区问题， date("Y-m-d", strtotime("-8 hours")))
+// 注意时区问题，dispatcher中设置 date_default_timezone_set('Asia/Shanghai');
 
 class Aleafs_Sem_Quality
 {
@@ -74,7 +74,7 @@ class Aleafs_Sem_Quality
         	$strModTime = trim($arrKeyInfo['modtime']);
         	$strModTime = substr($strModTime, 0, 10);
         	//有，但过期时更新
-        	if ($intQold != $intq || $strModTime != date("Y-m-d", strtotime("-8 hours")))
+        	if ($intQold != $intq || $strModTime != date("Y-m-d"))
         	{
         		$intQvalue = self::getRandQ($intq);
         		self::updateKeywordQ($keywid, $intQvalue, $intq);	
@@ -94,7 +94,7 @@ class Aleafs_Sem_Quality
     public static function insertKeywordQ($keywid, $intQvalue, $intq)
     {
     	$arrParam = array("keywid" => $keywid, "qvalue" => $intQvalue, "qold" => $intq);
-    	$arrParam['modtime'] = date('Y-m-d H:i:s', strtotime("-8 hours"));
+    	$arrParam['modtime'] = date('Y-m-d H:i:s');
     	
     	self::initDb();
         return self::$loader->table(sprintf('%sbaidu_word_q', self::TABLE_PREFIX))
@@ -111,7 +111,7 @@ class Aleafs_Sem_Quality
 	public static function updateKeywordQ($keywid, $intQvalue, $intq)
     {
     	$arrParam = array("qvalue" => $intQvalue, "qold" => $intq);
-    	$arrParam['modtime'] = date('Y-m-d H:i:s', strtotime("-8 hours"));
+    	$arrParam['modtime'] = date('Y-m-d H:i:s');
     	
     	self::initDb();
         return self::$loader->table(sprintf('%sbaidu_word_q', self::TABLE_PREFIX))

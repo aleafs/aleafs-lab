@@ -10,6 +10,8 @@
 //
 // $Id: autoload.php 22 2010-04-15 16:28:45Z zhangxc83 $
 
+date_default_timezone_set('Asia/Shanghai');
+
 class Aleafs_Sem_Dispatcher
 {
 
