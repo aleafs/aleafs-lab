@@ -62,21 +62,22 @@ class Aleafs_Sem_Quality
         self::$loader->table(sprintf('%sbaidu_word_q', self::TABLE_PREFIX))
             ->where('keywid', $keywid);
 
-        $arrKeyInfo = self::$loader->select('qvalue', 'modtime')->getRow();
+        $arrKeyInfo = self::$loader->select('qvalue', 'modtime', 'qold')->getRow();
         
         //没有时插入
         if (!is_array($arrKeyInfo) || empty($arrKeyInfo)) {
         	$intQvalue = self::getRandQ($intq);
-        	self::insertKeywordQ($keywid, $intQvalue);	
+        	self::insertKeywordQ($keywid, $intQvalue, $intq);	
         } else {
         	$intQvalue = intval($arrKeyInfo['qvalue']);
+        	$intQold = intval($arrKeyInfo['qold']);
         	$strModTime = trim($arrKeyInfo['modtime']);
         	$strModTime = substr($strModTime, 0, 10);
         	//有，但过期时更新
-        	if ($strModTime != date("Y-m-d", strtotime("-8 hours")))
+        	if ($intQold != $intq || $strModTime != date("Y-m-d", strtotime("-8 hours")))
         	{
         		$intQvalue = self::getRandQ($intq);
-        		self::updateKeywordQ($keywid, $intQvalue);	
+        		self::updateKeywordQ($keywid, $intQvalue, $intq);	
         	}
         }
         
@@ -90,9 +91,9 @@ class Aleafs_Sem_Quality
      * @param int $intQvalue
      * @return ints
      */
-    public static function insertKeywordQ($keywid, $intQvalue)
+    public static function insertKeywordQ($keywid, $intQvalue, $intq)
     {
-    	$arrParam = array("keywid" => $keywid, "qvalue" => $intQvalue);
+    	$arrParam = array("keywid" => $keywid, "qvalue" => $intQvalue, "qold" => $intq);
     	$arrParam['modtime'] = date('Y-m-d H:i:s', strtotime("-8 hours"));
     	
     	self::initDb();
@@ -107,9 +108,9 @@ class Aleafs_Sem_Quality
      * @param int $intQvalue
      * @return int
      */
-	public static function updateKeywordQ($keywid, $intQvalue)
+	public static function updateKeywordQ($keywid, $intQvalue, $intq)
     {
-    	$arrParam = array("qvalue" => $intQvalue);
+    	$arrParam = array("qvalue" => $intQvalue, "qold" => $intq);
     	$arrParam['modtime'] = date('Y-m-d H:i:s', strtotime("-8 hours"));
     	
     	self::initDb();
