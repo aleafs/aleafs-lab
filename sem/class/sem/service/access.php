@@ -41,6 +41,28 @@ class Aleafs_Sem_Service_Access extends Aleafs_Sem_Service
 
         return $perms;
     }
+    
+    /**
+     * 得到软件的当前版本
+     *
+     * @return array
+     */
+    public function version()
+    {
+    	
+   		$this->setSoapHeader('soap/access');
+        if (empty($this->authenticated)) {
+            return array();
+        }
+        
+        $arrRet = array("software" => "windows");
+        
+        $config = Aleafs_Lib_Configer::instance('default');
+        $arrRet['version'] = $config->get("software.version");
+        
+        return $arrRet;
+    }
+
     /* }}} */
 
     /* {{{ public Mixture heartbeat() */
