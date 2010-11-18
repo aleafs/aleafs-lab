@@ -21,7 +21,7 @@
 			<xsd:element name="ResHeader" type="tns:ResHeader" />
 			<xsd:complexType name="ResHeader">
 				<xsd:sequence>
-					<xsd:element name="status" type="xsd:integer" />
+					<xsd:element name="status" type="xsd:int" />
 					<xsd:element name="description" type="xsd:string" />
 				</xsd:sequence>
 			</xsd:complexType>
@@ -39,10 +39,10 @@
 			<xsd:complexType name="PermRow">
 				<xsd:sequence>
 					<xsd:element name="unit" type="xsd:string" />
-					<xsd:element name="type" type="xsd:integer" />
+					<xsd:element name="type" type="xsd:int" />
 					<xsd:element name="begdate" type="xsd:date" />
 					<xsd:element name="enddate" type="xsd:date" />
-					<xsd:element name="balance" type="xsd:integer" />
+					<xsd:element name="balance" type="xsd:int" />
 				</xsd:sequence>
 			</xsd:complexType>
 

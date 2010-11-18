@@ -21,7 +21,7 @@
 			<xsd:element name="ResHeader" type="tns:ResHeader" />
 			<xsd:complexType name="ResHeader">
 				<xsd:sequence>
-					<xsd:element name="status" type="xsd:integer" />
+					<xsd:element name="status" type="xsd:int" />
 					<xsd:element name="description" type="xsd:string" />
 				</xsd:sequence>
 			</xsd:complexType>
@@ -38,8 +38,8 @@
 			<xsd:element name="AdRankResponse" type="tns:AdRankResponse" />
 			<xsd:complexType name="AdRankResponse">
 				<xsd:sequence>
-					<xsd:element name="cmatch" type="xsd:integer" />
-					<xsd:element name="rank" type="xsd:integer" />
+					<xsd:element name="cmatch" type="xsd:int" />
+					<xsd:element name="rank" type="xsd:int" />
 				</xsd:sequence>
 			</xsd:complexType>
 			
@@ -52,8 +52,8 @@
 			
 			<xsd:complexType name="QStruct">
 				<xsd:sequence>
-					<xsd:element name="keywid" type="xsd:integer" />
-					<xsd:element name="q" type="xsd:integer" />
+					<xsd:element name="keywid" type="xsd:int" />
+					<xsd:element name="q" type="xsd:int" />
 				</xsd:sequence>
 			</xsd:complexType>
 			
