@@ -66,6 +66,7 @@ CREATE TABLE agent_session (
 -- Q值
 CREATE TABLE baidu_word_q (
 	keywid int(10) not null default 0,
+	qold smallint(5) unsigned not null default 0,
 	qvalue smallint(5) unsigned not null default 0,
 	modtime datetime not null default '0000-00-00 00:00:00',
 	UNIQUE KEY uk_q_word (keywid)
