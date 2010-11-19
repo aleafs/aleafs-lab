@@ -150,9 +150,9 @@ class Aleafs_Sem_Service_Baidu extends Aleafs_Sem_Service
 	{
 			$arrRet = array(0 => array(), 1 => array(), 2 => array());
 			
-			$PPPattern = "/<table id=\"300[0-9]\".*?class=\"ec_pp_f\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">[<tbody>]?<tr><td class=\"f EC_PP\">.*?推广<\/a><\/font><\/td><\/tr><\/table><br>/";
-			$PPIMPattern = "/<td [width=\"90%\" ]*style=\"line-height:24px;\" class=\"f16 EC_PP\" id=\"taw[0-9]\">.*?id=\"taw[0-9]\" class=\"f16 EC_PP\".*?<\/font><\/a>/s";
-			$IMPattern = "/<div id=\"bdfs[0-9]\" class=\"EC_PP\" style=\"word-break:break-all;cursor:hand;width:270px;\">.*?<\/font><\/a><\/div><br>/";
+			$PPPattern = "/<table id=\"300[0-9]\".*?<\/table>/";
+			$PPIMPattern = "/<table id=\"400[0-9]\".*?<\/table>/s";
+			$IMPattern = "/<div id=\"bdfs[0-9]\".*?<\/div>/";
 			
 			$arrMatch = array();
 			preg_match_all($PPPattern, $webpage, $arrMatch, PREG_SET_ORDER);
@@ -163,7 +163,7 @@ class Aleafs_Sem_Service_Baidu extends Aleafs_Sem_Service
 			
 			$arrMatch = array();
 			preg_match_all($PPIMPattern, $webpage, $arrMatch, PREG_SET_ORDER);
-			for ($i = 0; $i < count($arrMatch) / 2; $i ++)
+			for ($i = 0; $i < count($arrMatch); $i ++)
 			{
 				$arrRet[1][] = $arrMatch[$i][0];
 			}
