@@ -34,9 +34,9 @@ class Aleafs_Sem_Service_Baidu extends Aleafs_Sem_Service
         	$arrShowUrl = array($params->showurl);
         }
         
-        //file_put_contents("webpage.txt", gettype($params->showurl)."\n".$arrShowUrl[0]."\n".$strWebPage);
+        //file_put_contents("webpage.txt", gettype($params->showurl)."\n".count($arrShowUrl)."\t".$arrShowUrl[0]."\n".$strWebPage);
         $arrAdList = $this->_getAdList($strWebPage);
-        //file_put_contents("showurl.txt", count($arrAdList[1])."\n".$params->keyword."\n".$params->showurl. "\n" . $params->showurl[0]. "\n" .$params->showurl[1]);
+        //file_put_contents("showurl.txt", count($arrAdList[0])."\t".count($arrAdList[1])."\t".count($arrAdList[2])."\n".$params->keyword."\n".$params->showurl. "\n" . $params->showurl[0]. "\n" .$params->showurl[1]);
 
         return $this->_getAdPos($params->keyword, $arrShowUrl, $arrAdList);
 	}
@@ -150,7 +150,7 @@ class Aleafs_Sem_Service_Baidu extends Aleafs_Sem_Service
 	{
 			$arrRet = array(0 => array(), 1 => array(), 2 => array());
 			
-			$PPPattern = "/<table id=\"300[0-9]\"  class=\"ec_pp_f\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">[<tbody>]?<tr><td class=\"f EC_PP\">.*?推广<\/a><\/font><\/td><\/tr><\/table><br>/";
+			$PPPattern = "/<table id=\"300[0-9]\".*?class=\"ec_pp_f\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">[<tbody>]?<tr><td class=\"f EC_PP\">.*?推广<\/a><\/font><\/td><\/tr><\/table><br>/";
 			$PPIMPattern = "/<td [width=\"90%\" ]*style=\"line-height:24px;\" class=\"f16 EC_PP\" id=\"taw[0-9]\">.*?id=\"taw[0-9]\" class=\"f16 EC_PP\".*?<\/font><\/a>/s";
 			$IMPattern = "/<div id=\"bdfs[0-9]\" class=\"EC_PP\" style=\"word-break:break-all;cursor:hand;width:270px;\">.*?<\/font><\/a><\/div><br>/";
 			
