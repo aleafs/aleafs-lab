@@ -92,7 +92,8 @@ class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
 
         $this->assertEquals(array(
             'Permissions permission(ClientAgent $ClientAgent)',
-            'ResCallBack heartbeat(ClientAgent $ClientAgent)',
+            'ResCallBack heartbeat(ClientAgent_HB $ClientAgent_HB)',
+            'ClientAgent_VS version(ClientAgent_VS $ClientAgent_VS)',
         ), $client->__getFunctions());
 
         $header = new SoapHeader(
