@@ -1,1 +1,1 @@
-rewrite [^\.php]$ index.php last;
+rewrite [^\.(php|js|css|jpg|png|gif)]$ index.php last;
