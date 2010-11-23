@@ -134,7 +134,7 @@ class Aleafs_Sem_Dispatcher
     private static function ctrl($ctrl)
     {
         if (empty($ctrl)) {
-            return 'Aleafs_Lib_Controller';
+            return 'Aleafs_Sem_Controller_Webui';
         }
 
         return sprintf('Aleafs_Sem_Controller_%s', ucfirst(strtolower($ctrl)));
