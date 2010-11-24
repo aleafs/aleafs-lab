@@ -1,7 +1,4 @@
 RewriteEngine On
 RewriteBase /
 
-RewriteCond %{REQUEST_URI} !(images|img|css|js)
-RewriteCond %{REQUEST_FILENAME} !\.php
-
-RewriteRule (.+?) index.php last
+RewriteRule (soap|webui) index.php
