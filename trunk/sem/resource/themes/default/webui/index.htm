@@ -77,11 +77,33 @@
 				margin-top:5px;
 				color:#7E7E7E;
 				height:50px;
-				line-height:50px;
+				line-height:25px;
 				text-align:center;
 				width:980px;
 			}
 		</style>
+		
+		<link type="text/css" href="css/smoothness/jquery-ui-1.8.6.custom.css" rel="stylesheet" />	
+		<script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
+		<script type="text/javascript" src="js/jquery-ui-1.8.6.custom.min.js"></script>
+		
+		<script type="text/javascript">
+			$(function(){
+				// Dialog			
+				$('#dialog').dialog({
+					autoOpen: false,
+					width: 360,
+					modal: true
+				});
+				
+				// Dialog Link
+				$('#softdown').click(function(){
+					$('#dialog').dialog('open');
+					return false;
+				});	
+			});
+		</script>
+		
 		<script type="text/javascript">
 
 			var _gaq = _gaq || [];
@@ -98,6 +120,13 @@
 		</script>
 	</head>
 	<body>
+		<div id="dialog" title="下载" >
+			<p style="text-align:left;font-size:14pt;font-family:Arial,Helvetica,sans-serif,"宋体";">
+				Windows XP 32bit版：<a href ="./software/zhutuibao_x86.rar" target="_blank">下载</a> <br><br>
+				Windows Vista/7 64bit版：<a href ="./software/zhutuibao_x64.rar" target="_blank">下载</a><br>
+			</p>
+		</div>
+		
 		<div class="wrapper">
 			<div class="header">
 				<div class="logo"></div>
@@ -108,7 +137,7 @@
 			</div>
 
 			<div class="banner">
-				<a href="http://www.sina.com.cn" target="_blank" class="download"></a>
+				<a href="###" class="download" id="softdown"></a>
 			</div>
 
 			<div class="neck">
@@ -116,7 +145,8 @@
 
 			<div class="bottom"></div>
 
-			<div class="foot">&copy; Copyright 2010,　版权所有 zhutuibao.com</div>
+			<div class="foot">Email: zhutuibao@gmail.com&nbsp;&nbsp;QQ:1172120087<br>
+					&copy; Copyright 2010,　版权所有 zhutuibao.com</div>
 		</div>
 
 	</div>
