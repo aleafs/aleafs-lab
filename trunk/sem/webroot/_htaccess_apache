@@ -1,4 +1,7 @@
 RewriteEngine On
 RewriteBase /
 
-RewriteRule [^\.php] index.php
+RewriteCond %{REQUEST_URI} !(images|img|css|js)
+RewriteCond %{REQUEST_FILENAME} !\.php
+
+RewriteRule (.+?) index.php last
