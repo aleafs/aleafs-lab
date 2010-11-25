@@ -16,8 +16,8 @@
 		<property name="global.url.prefix" value="${run.user}/sem" />
 
 		<property name="mysql.log.url" value="log://debug.notice.warn.error/${run.home}/mysql-${run.mode}.log" />
-		<property name="mysql.master.server1" value="mysql://db_write:123456@edp1.corp.alimama.com:9901" />
-		<property name="mysql.slave.server1" value="mysql://db_read:123456@edp1.corp.alimama.com:9901" />
+		<property name="mysql.master.server1" value="mysql://db_write:123456@10.232.36.110:9902" />
+		<property name="mysql.slave.server1" value="mysql://db_read:123456@10.232.36.110:9902" />
 
 		<phingcall target="-copyfile" />
 

@@ -36,13 +36,6 @@ class Aleafs_Sem_Controller_Soap extends Aleafs_Lib_Controller
     public function __construct()
     {
         parent::__construct();
-
-        $__dir  = dirname(__FILE__);
-        Aleafs_Lib_Render_Html::init(array(
-            'tpl_path'  => $__dir . '/../../../resource/themes',
-            'obj_path'  => $__dir . '/../../../cache/themes',
-            'theme'     => 'default',
-        ));
     }
     /* }}} */
 
