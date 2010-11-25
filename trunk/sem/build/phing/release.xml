@@ -72,8 +72,8 @@
 		<mkdir dir="${rpm.tmp.dir}/public_html" />
 		<copy todir="${rpm.tmp.dir}/public_html" overwrite="true" includeemptydirs="true">
 			<fileset dir="build/src/webroot">
-				<include name="index.php" />
-				<include name="images/**/*" />
+				<include name="**/*" />
+				<exclude name="_htaccess_*" />
 			</fileset>
 		</copy>
 
