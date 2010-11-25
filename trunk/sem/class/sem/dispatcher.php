@@ -158,7 +158,7 @@ class Aleafs_Sem_Dispatcher
         $this->log      = Aleafs_Lib_Factory::getLog($this->config->get('log.url', ''));
         $this->prefix   = trim($this->config->get('url.prefix', ''), '/ ');
         foreach ($this->config->get('includes', array()) AS $name => $file) {
-            Aleafs_Lib_Configer::register($name,   $file);
+            Aleafs_Lib_Configer::register($name, $file);
         }
 
         $webroot    = rtrim($this->config->get('url.server', ''), '/');
@@ -171,6 +171,13 @@ class Aleafs_Sem_Dispatcher
             error_reporting(0);
             ini_set('display_errors', 'Off');
         }
+
+        Aleafs_Lib_Render_Html::init(array(
+            'tpl_path'  => $this->config->get('themes.source'),
+            'obj_path'  => $this->config->get('themes.object'),
+            'theme'     => $this->config->get('themes.default'),
+            'expire'    => $this->config->get('themes.expire'),
+        ));
 
         date_default_timezone_set('Asia/Shanghai');
         set_time_limit($this->config->get('timeout', 30));
