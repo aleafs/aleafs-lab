@@ -42,4 +42,19 @@ class Aleafs_Sem_Controller_Webui extends Aleafs_Lib_Controller
 	}
 	/* }}} */
 
+	/* {{{ protected void actionAbout() */
+	/**
+	 * 关于
+	 *
+	 * @access protected
+	 * @return void
+	 */
+	protected function actionAbout($param, $post = null)
+	{
+		$render = new Aleafs_Lib_Render_Html();
+		$render->assign('webroot', Aleafs_Lib_Context::get('webroot'));
+		$render->render('about', 'webui', true);
+	}
+    /* }}} */
+
 }
