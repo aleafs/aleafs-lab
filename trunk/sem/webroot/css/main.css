@@ -7,7 +7,7 @@ body,div,span {
 	text-align:center;
 }
 body {
-	background:url("../images/topbg.gif") repeat-x scroll 0 0 #F1F1F1;
+	background:url("../images/top_bg.gif") repeat-x scroll 0 0 #F1F1F1;
 	margin-top:0;
 }
 img {
@@ -20,44 +20,47 @@ h4 {
 	padding:0;
 }
 .wrapper {
-	width:1000px;
+	width:990px;
 	position:relative;
 	margin:auto;
 	text-align:left;
 }
 .header {
 	width : 100%;
-	height: 153px;
+	height: 150px;
 	border: 0;
 }
 .logo {
 	float: left;
-	width : 347px;
-	height: 153px;
+	width : 343px;
+	height: 150px;
 	background: url("../images/logo.gif") no-repeat;
+}
+.index {
+	background: url("../images/logo2.gif") no-repeat;
 }
 .top_r {
 	float:right;
 }
 .b_top {
-	width: 653px;
-	height: 45px;
-	background:url("../images/banner_top.png") no-repeat;
+	width: 647px;
+	height: 44px;
+	background:url("../images/btr.png") no-repeat;
 }
 .navi {
-	width:653px;
-	height: 108px;
+	width:647px;
+	height: 106px;
 }
 .navi span {
 	float:left;
 	display:block;
-	width : 113px;
-	height : 43px;
+	width : 111px;
+	height : 35px;
 	font-size:14px;
 	font-weight:bold;
 	overflow:hidden;
-	margin-top:65px;
-	padding-top:15px;
+	margin-top:71px;
+	padding-top:11px;
 	cursor:pointer;
 }
 .navi a {
@@ -65,12 +68,18 @@ h4 {
 }
 .current {
 	color:#FFFFFF;
-	background:url("../images/navi_bg.gif") no-repeat;
+	background:url("../images/navi_bg.png") no-repeat;
 }
-.banner {
-	height : 274px;
+.banner1 {
+	height: 132px;
 	width : 100%;
-	background:url("../images/banner.png") no-repeat;
+	background:url("../images/banner_1.png") no-repeat;
+	position:relative;
+}
+.banner2 {
+	height: 139px;
+	width : 100%;
+	background:url("../images/banner_2.png") no-repeat;
 	position:relative;
 }
 .banner a.download {
@@ -97,7 +106,7 @@ h4 {
 	color: #FFFFFF;
 }
 .neck {
-	height : 41px;
+	height : 43px;
 	width : 100%;
 	text-align: left;
 	background:url("../images/neck_bg.png") no-repeat;
@@ -106,7 +115,7 @@ h4 {
 	padding:17px 0 0 40px;
 }
 .bottom {
-	height : 190px;
+	height : 225px;
 	width : 100%;
 	background:url("../images/bottom.png") no-repeat;
 }
