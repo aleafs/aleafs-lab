@@ -132,7 +132,7 @@ class Html
 
         ob_start();
         include($this->template($tplName, $tplDir));
-        $data = ob_get_contents();
+        $data = trim(ob_get_contents());
         ob_end_clean();
 
         if (false !== $flush) {
