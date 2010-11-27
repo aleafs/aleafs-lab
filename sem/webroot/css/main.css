@@ -71,12 +71,21 @@ h4 {
 	background:url("../images/navi_bg.png") no-repeat;
 }
 .main {
-	position: absolute;
-	top: 109px;
-	width: 100%;
-	line-height:18px;
+	width: 970px;
 	text-align:left;
-	padding: 5px 10px 0 10px;
+	padding: 0 10px 0 10px;
+}
+.main h2 {
+	margin-top:0px;
+}
+.main ul {
+	padding-left:20px;
+}
+.main p,li {
+	line-height:22px;
+}
+.main p {
+	margin: 5px 0 5px 0;
 }
 .banner1 {
 	height: 132px;
@@ -105,10 +114,10 @@ h4 {
 	text-align:left;
 	margin:0;
 	padding:0;
-	line-height:18px;
+	line-height:16px;
 	position:absolute;
 	left:69px;
-	top:80px;
+	top:70px;
 }
 #message a {
 	color: #FFFFFF;
