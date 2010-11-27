@@ -37,7 +37,8 @@ class Aleafs_Sem_Controller_Webui extends Aleafs_Lib_Controller
 	protected function actionIndex($param, $post = null)
 	{
 		$render = new Aleafs_Lib_Render_Html();
-		$render->assign('webroot', Aleafs_Lib_Context::get('webroot'));
+		$render->assign('webroot',  Aleafs_Lib_Context::get('webroot'));
+        $render->assign('title',    '网络推广好助手');
 		$render->render('index', 'webui', true);
 	}
 	/* }}} */
