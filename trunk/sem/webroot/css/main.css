@@ -70,6 +70,14 @@ h4 {
 	color:#FFFFFF;
 	background:url("../images/navi_bg.png") no-repeat;
 }
+.main {
+	position: absolute;
+	top: 109px;
+	width: 100%;
+	line-height:18px;
+	text-align:left;
+	padding: 5px 10px 0 10px;
+}
 .banner1 {
 	height: 132px;
 	width : 100%;
