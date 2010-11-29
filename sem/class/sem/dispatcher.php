@@ -105,6 +105,7 @@ class Aleafs_Sem_Dispatcher
         $ctrl   = self::ctrl($url->module);
         $ctrl   = new $ctrl();
         $ctrl->execute($url->action, $url->param, $post);
+        $this->log->notice('DISPATCH', array('url' => $this->url));
     }
     /* }}} */
 
