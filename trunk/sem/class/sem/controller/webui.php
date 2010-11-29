@@ -75,4 +75,53 @@ class Aleafs_Sem_Controller_Webui extends Aleafs_Lib_Controller
 	}
     /* }}} */
 
+	/* {{{ protected void actionDownload() */
+	/**
+	 * 软件下载
+	 *
+	 * @access protected
+	 * @return void
+	 */
+    protected function actionDownload($param, $post = null)
+    {
+        if (empty($param['machine'])) {
+            throw new Aleafs_Lib_Exception('Machine type is required for download.');
+        }
+
+        $config = Aleafs_Lib_Configer::instance('default');
+        $file   = sprintf(
+            $config->get('software.source'),
+            strtolower(trim($param['machine']))
+        );
+
+        if (!is_readable($file)) {
+            throw new Aleafs_Lib_Exception(sprintf('No such file named as "%s"', $file));
+        }
+
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename='.basename($file));
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($file));
+
+        readfile($file);
+        flush();
+
+        $mysql  = new Aleafs_Lib_Db_Mysql('mysql');
+        $mysql->clear();
+
+        $time   = date('Y-m-d H:i:s');
+        $query  = sprintf(
+            "INSERT INTO soft_download (downcnt,addtime,modtime,ipaddr) VALUES (1,'%s','%s','%s')",
+            $time, $time, Aleafs_Lib_Context::userip()
+        );
+
+        $query .= sprintf(" ON DUPLICATE KEY UPDATE downcnt=downcnt+1,modtime='%s'", $time);
+        $mysql->query($query);
+    }
+    /* }}} */
+
 }
