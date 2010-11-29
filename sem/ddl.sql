@@ -76,3 +76,14 @@ CREATE TABLE baidu_word_q (
 CREATE TABLE baidu_word_rank (
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
+CREATE TABLE soft_download (
+	autokid int(10) unsigned not null auto_increment PRIMARY KEY,
+	downcnt int(10) unsigned not null default 0,
+	addtime datetime not null default '0000-00-00 00:00:00',
+	modtime datetime not null default '0000-00-00 00:00:00',
+	ipaddr varchar(15) not null default '',
+	uagent varchar(100) not null default '',
+	UNIQUE KEY uk_download_ip (ipaddr),
+	KEY idx_download_time (modtime)
+) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
+
