@@ -114,7 +114,7 @@ class Aleafs_Sem_Controller_Webui extends Aleafs_Lib_Controller
         $mysql->clear();
 
         $time   = date('Y-m-d H:i:s');
-        $uagent = $mysql->escape(Aleafs_Lib_Context::uagent());
+        $uagent = $mysql->escape(Aleafs_Lib_Context::uagent(), false);
 
         $query  = sprintf(
             "INSERT INTO soft_download (downcnt,addtime,modtime,ipaddr,uagent) VALUES (1,'%s','%s','%s','%s')",
