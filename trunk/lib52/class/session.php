@@ -38,10 +38,20 @@ class Aleafs_Lib_Session
      */
     private static $store   = null;
 
+    private static $config  = null;
+
     /**
      * @SESSION数据
      */
     private static $data    = array();
+
+    private static $attr    = array();
+
+    private static $ssid    = null;
+
+    private static $name    = null;
+
+    private static $flush   = false;
 
     /**
      * @相关属性
@@ -56,26 +66,6 @@ class Aleafs_Lib_Session
         'cookie.expire'     => 0,
     );
 
-    /**
-     * @Session签名
-     */
-    private static $sign = null;
-
-    /**
-     * @Cookie名字
-     */
-    private static $name = null;
-
-    /**
-     * @Session ID
-     */
-    private static $ssid = null;
-
-    /**
-     * @CACHE
-     */
-    private static $cache;
-
     /* }}} */
 
     /* {{{ public static void init() */
@@ -88,40 +78,34 @@ class Aleafs_Lib_Session
      */
     public static function init($ini = null)
     {
-        foreach ((array)$ini AS $key => $val) {
-            if (!isset(self::$prop[$key])) {
-                continue;
-            }
-            self::$prop[$key] = $val;
-        }
+        self::$config   = Aleafs_Lib_Configer::instance($ini);
+        $class  = sprintf('Aleafs_Lib_Session_%s', ucfirst(strtolower(trim(
+            self::$config->get('session.handle', 'file')
+        ))));
 
-        // XXX:
+        self::$store    = new $class(self::$config->get('session.namespace', '/tmp'));
 
-        // TODO: 初始化cache
-        self::$cache = new Cache\File('session');
-
-        self::$name = self::$prop['session.name'];
-        self::$ssid = trim(Cookie::get(self::$name));
-        if (empty(self::$ssid) || !self::cookieExpire($ssid)) {
+        self::$name = self::$config->get('session.name', 'PHPSESSID');
+        self::$ssid = trim(Aleafs_Lib_Cookie::get(self::$name));
+        if (empty(self::$ssid) || !self::cookieExpire(self::$ssid)) {
             self::$data = array();
-            self::$ssid = self::sessid();
-            Cookie::set(
-                self::$name, self::$ssid,
-                self::$prop['cookie.domain'],
-                self::$prop['cookie.path'],
-                self::$prop['cookie.expire'] > 0 ? time() + self::$prop['cookie.expire'] : 0
-            );
+            self::$attr = array();
+            self::$ssid = self::generate();
+            Aleafs_Lib_Cookie::set(self::$name, self::$ssid, self::$config->get('cookie.expire', 0));
         } else {
-            $json = self::$cache->get(self::$ssid);
-            self::$data = json_decode($json, true);
-            if (self::sessionExpire()) {
+            $object = json_decode(self::$store->fetch(self::$ssid), true);
+            self::$attr = isset($object['attr']) ? (array)$object['attr'] : array();
+            if (self::$attr[self::TS] < time() - self::$config->get('session.expire', 1440)) {
+                self::$store->delete(self::$ssid);
                 self::$data = array();
+                self::$attr = array();
+            } else {
+                self::$data = isset($object['data']) ? (array)$object['data'] : array();
             }
         }
-
-        self::$sign = crc32(json_encode(self::$data));
 
         self::$killer   = new Aleafs_Lib_SessionKiller();
+        self::$flush    = false;
         self::$inited   = true;
     }
     /* }}} */
@@ -139,7 +123,13 @@ class Aleafs_Lib_Session
     public static function set($key, $val, $flush = false)
     {
         self::checkInit();
-        self::$data[trim($key)] = $val;
+        $key = trim($key);
+        if ($val === self::$data[$key]) {
+            return;
+        }
+
+        self::$data[$key] = $val;
+        self::$flush = true;
         if ($flush) {
             self::flush();
         }
@@ -157,14 +147,14 @@ class Aleafs_Lib_Session
     {
         self::checkInit();
 
+        self::$attr = array();
         self::$data = array();
-        self::$cache->delete(self::$ssid);
-        Cookie::set(
-            self::$name, '',
-            self::$prop['cookie.domain'],
-            self::$prop['cookie.path'],
-            time() - 86400
-        );
+        if (self::$store->delete(self::$ssid)) {
+            self::$ssid     = null;
+            self::$flush    = false;
+        }
+
+        Aleafs_Lib_Cookie::set(self::$name, '', time() - 86400);
     }
     /* }}} */
 
@@ -203,6 +193,27 @@ class Aleafs_Lib_Session
     }
     /* }}} */
 
+    /* {{{ public static Mixture attr() */
+    /**
+     * 读取/写入ATTR数据
+     *
+     * @access public static
+     * @return Mixture
+     */
+    public static function attr($key, $val = null)
+    {
+        self::checkInit();
+
+        $key = strtolower(trim($key));
+        if (null !== $val) {
+            self::$attr[$key] = $val;
+            self::$flush = true;
+        }
+
+        return isset(self::$attr[$key]) ? self::$attr[$key] : null;
+    }
+    /* }}} */
+
     /* {{{ private static Boolean flush() */
     /**
      * 写入session
@@ -212,23 +223,20 @@ class Aleafs_Lib_Session
      */
     private static function flush()
     {
-        $time = time();
-        if (empty(self::$prop[self::TS]) ||
-            $time - self::$data[self::TS] >= self::$prop['touch.delay'] ||
-            rand(1, 100) <= self::$prop['touch.ratio'])
-        {
-            self::$data[self::TS] = $time + self::$prop['session.expire'];
+        $time   = time();
+        if ($time - (int)self::attr(self::TS) >= 120 || rand(1, 100) <= 10) {
+            self::attr(self::TS, $time);
         }
 
-        $sign = crc32(json_encode(self::$data));
-        if (self::$sign == $sign) {
-            return true;
+        if (empty(self::$attr[self::IP])) {
+            self::attr(self::IP, Aleafs_Lib_Context::userip(true));
         }
 
-        self::$cache->set(self::$ssid, self::$data, self::$prop['session.expire']);
-        self::$sign = $sign;
+        if (self::$flush && !empty(self::$ssid)) {
+            self::$store->set(self::$ssid, self::$data, self::$attr);
+        }
 
-        return true;
+        self::$flush = false;
     }
     /* }}} */
 
@@ -241,33 +249,20 @@ class Aleafs_Lib_Session
      */
     private static function checkInit()
     {
-        return (!self::$init) && self::init();
+        return (!self::$init) && self::init('session');
     }
     /* }}} */
 
-    /* {{{ private static String sessid() */
+    /* {{{ private static String generate() */
     /**
      * 生成一个新的sessid
      *
      * @access private static
      * @return String
      */
-    private static function sessid()
+    private static function generate()
     {
         return md5(uniqid(rand(), true));
-    }
-    /* }}} */
-
-    /* {{{ private static Boolean sessionExpire() */
-    /**
-     * 检查SESSION是否过期
-     *
-     * @access private static
-     * @return Boolean true or false
-     */
-    private static function sessionExpire()
-    {
-        return time() >= self::$data[self::TS] ? true : false;
     }
     /* }}} */
 
