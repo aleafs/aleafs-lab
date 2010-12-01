@@ -649,7 +649,7 @@ abstract class Aleafs_Lib_Database
     }
     /* }}} */
 
-    /* {{{ private String escape() */
+    /* {{{ public String escape() */
     /**
      * 安全过滤并打包
      *
@@ -658,7 +658,7 @@ abstract class Aleafs_Lib_Database
      * @param  Boolean $comma (default true)
      * @return String
      */
-    private function escape($value, $comma = true)
+    public function escape($value, $comma = true)
     {
         if (is_array($value)) {
             $value	= array_map(array(&$this, '_escape'), $value);

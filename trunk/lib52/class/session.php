@@ -34,6 +34,11 @@ class Aleafs_Lib_Session
     private static $killer  = null;
 
     /**
+     * @存储
+     */
+    private static $store   = null;
+
+    /**
      * @SESSION数据
      */
     private static $data    = array();
@@ -89,6 +94,8 @@ class Aleafs_Lib_Session
             }
             self::$prop[$key] = $val;
         }
+
+        // XXX:
 
         // TODO: 初始化cache
         self::$cache = new Cache\File('session');
