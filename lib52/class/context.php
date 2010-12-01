@@ -184,12 +184,26 @@ class Aleafs_Lib_Context
     private static function _uagent()
     {
         if (empty($_SERVER['HTTP_USER_AGENT'])) {
-            return '';
+            return 'unknown';
         }
 
-        $ua = $_SERVER['HTTP_USER_AGENT'];
+        $uagent = $_SERVER['HTTP_USER_AGENT'];
+        $spider = array(
+            'Baiduspider'   => 'Baidu Spider',
+            'Googlebot'     => 'Google Spider',
+            'Yahoo.+?Slurp' => 'Yahoo! Spider',
+            'iaskspider'    => 'Sina Iask Spider',
+            'Sogou.+?spider'=> 'Sogou Spider',
+            'YodaoBot'      => 'Yodao Spider',
+            'msnbot'        => 'Msn Spider',
+        );
+        foreach ($spider AS $key => $val) {
+            if (preg_match(sprintf('/%s/i', $key), $uagent)) {
+                return $val;
+            }
+        }
 
-        return $ua;
+        return $uagent;
     }
     /* }}} */
 
