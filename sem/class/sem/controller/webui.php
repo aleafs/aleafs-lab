@@ -114,12 +114,14 @@ class Aleafs_Sem_Controller_Webui extends Aleafs_Lib_Controller
         $mysql->clear();
 
         $time   = date('Y-m-d H:i:s');
+        $uagent = $mysql->escape(Aleafs_Lib_Context::uagent());
+
         $query  = sprintf(
-            "INSERT INTO soft_download (downcnt,addtime,modtime,ipaddr,'%s') VALUES (1,'%s','%s','%s','%s')",
-            $time, $time, Aleafs_Lib_Context::userip(), $mysql->escape(Aleafs_Lib_Context::uagent())
+            "INSERT INTO soft_download (downcnt,addtime,modtime,ipaddr,uagent) VALUES (1,'%s','%s','%s','%s')",
+            $time, $time, Aleafs_Lib_Context::userip(), $uagent
         );
 
-        $query .= sprintf(" ON DUPLICATE KEY UPDATE downcnt=downcnt+1,modtime='%s'", $time);
+        $query .= sprintf(" ON DUPLICATE KEY UPDATE downcnt=downcnt+1,modtime='%s',uagent='%s'", $time, $uagent);
         $mysql->query($query);
     }
     /* }}} */
