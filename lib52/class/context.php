@@ -134,7 +134,7 @@ class Aleafs_Lib_Context
     public static function uagent()
     {
         if (null === ($ret = self::get('__uagent__'))) {
-            self::register('__uagent__', self::_uagent());
+            self::register('__uagent__', $ret = self::_uagent());
         }
 
         return $ret;

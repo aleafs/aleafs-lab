@@ -68,5 +68,13 @@ class Aleafs_Lib_ContextTest extends Aleafs_Lib_LibTestShell
 	}
 	/* }}} */
 
+    /* {{{ public void test_should_get_uagent_works_fine() */
+    public function test_should_get_uagent_works_fine()
+    {
+        Aleafs_Lib_Context::register('__uagent__', 'PHPUNIT');
+        $this->assertEquals('PHPUNIT', Aleafs_Lib_Context::uagent());
+    }
+    /* }}} */
+
 }
 
