@@ -15,10 +15,9 @@ class Aleafs_Lib_Session
 
     /* {{{ 静态常量 */
 
-    /**
-     * @标记session过期时间的常量
-     */
     const TS    = '__ts__';
+
+    const IP    = '__ip__';
 
     /* }}} */
 
@@ -27,12 +26,17 @@ class Aleafs_Lib_Session
     /**
      * @是否已经初始化
      */
-    private static $init = false;
+    private static $inited  = false;
 
     /**
      * @用于析构的对象
      */
-    private static $kill = null;
+    private static $killer  = null;
+
+    /**
+     * @SESSION数据
+     */
+    private static $data    = array();
 
     /**
      * @相关属性
@@ -46,11 +50,6 @@ class Aleafs_Lib_Session
         'cookie.path'       => '/',
         'cookie.expire'     => 0,
     );
-
-    /**
-     * @Session数组
-     */
-    private static $data = null;
 
     /**
      * @Session签名
@@ -114,8 +113,9 @@ class Aleafs_Lib_Session
         }
 
         self::$sign = crc32(json_encode(self::$data));
-        self::$kill = new SessionKiller();
-        self::$init = true;
+
+        self::$killer   = new Aleafs_Lib_SessionKiller();
+        self::$inited   = true;
     }
     /* }}} */
 
@@ -247,6 +247,7 @@ class Aleafs_Lib_Session
      */
     private static function sessid()
     {
+        return md5(uniqid(rand(), true));
     }
     /* }}} */
 
