@@ -124,6 +124,23 @@ class Aleafs_Lib_Context
     }
     /* }}} */
 
+    /* {{{ public static Mixture uagent() */
+    /**
+     * 获取用户浏览器
+     *
+     * @access public static
+     * @return String
+     */
+    public static function uagent()
+    {
+        if (null === ($ret = self::get('__uagent__'))) {
+            self::register('__uagent__', self::_uagent());
+        }
+
+        return $ret;
+    }
+    /* }}} */
+
     /* {{{ private static String _userip() */
     /**
      * 读取用户实际IP
@@ -154,6 +171,25 @@ class Aleafs_Lib_Context
         }
 
         return 'unknown';
+    }
+    /* }}} */
+
+    /* {{{ private static String _uagent() */
+    /**
+     * 计算用户浏览器类型
+     *
+     * @access private static
+     * @return String
+     */
+    private static function _uagent()
+    {
+        if (empty($_SERVER['HTTP_USER_AGENT'])) {
+            return '';
+        }
+
+        $ua = $_SERVER['HTTP_USER_AGENT'];
+
+        return $ua;
     }
     /* }}} */
 
