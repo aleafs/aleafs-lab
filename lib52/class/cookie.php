@@ -68,23 +68,32 @@ class Aleafs_Lib_Cookie
      * @param  Mixture $val
      * @return void
      */
-    public static function set($key, $val)
+    public static function set($key, $val, $expire = null, $domain = null)
     {
         self::checkInit();
 
         $key = trim($key);
-        if (empty($val)) {
+        $val = trim($val);
+        if ('' == $val) {
             unset(self::$data[$key]);
         } else {
             self::$data[$key] = $val;
         }
 
+        $expire = (null === $expire) ? self::$prop['expire'] : (int)$expire;
+        if (null === $domain) {
+            $domain = self::$prop['domain'];
+            $path   = self::$prop['path'];
+        } else {
+            $url    = parse_url($domain);
+            $domain = empty($url['host']) ? null : $url['host'];
+            $path   = empty($url['path']) ? '/' : $url['path'];
+        }
+
         return setcookie(
             $key, $val,
-            self::$prop['expire'] > 0 ? time() + self::$prop['expire'] : 0,
-            self::$prop['path'],
-            self::$prop['domain'],
-            self::$prop['secure'],
+            empty($expire) ? 0 : time() + $expire,
+            $path, $domain, self::$prop['secure'],
             false
         );
     }

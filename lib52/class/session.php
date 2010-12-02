@@ -154,7 +154,7 @@ class Aleafs_Lib_Session
             self::$flush    = false;
         }
 
-        Aleafs_Lib_Cookie::set(self::$name, '', time() - 86400);
+        Aleafs_Lib_Cookie::set(self::$name, '', -86400);
     }
     /* }}} */
 
