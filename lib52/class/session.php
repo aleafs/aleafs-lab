@@ -93,7 +93,7 @@ class Aleafs_Lib_Session
             self::$ssid = self::generate();
             Aleafs_Lib_Cookie::set(self::$name, self::$ssid, self::$config->get('cookie.expire', 0));
         } else {
-            $object = json_decode(self::$store->fetch(self::$ssid), true);
+            $object = json_decode(self::$store->get(self::$ssid), true);
             self::$attr = isset($object['attr']) ? (array)$object['attr'] : array();
             if (self::$attr[self::TS] < time() - self::$config->get('session.expire', 1440)) {
                 self::$store->delete(self::$ssid);
