@@ -80,10 +80,10 @@ class Aleafs_Lib_Session
     {
         self::$config   = Aleafs_Lib_Configer::instance($ini);
         $class  = sprintf('Aleafs_Lib_Session_%s', ucfirst(strtolower(trim(
-            self::$config->get('session.handle', 'file')
+            self::$config->get('store.protocol', 'file')
         ))));
 
-        self::$store    = new $class(self::$config->get('session.namespace', '/tmp'));
+        self::$store    = new $class(self::$config->get('store.namespace', '/tmp'));
 
         self::$name = self::$config->get('session.name', 'PHPSESSID');
         self::$ssid = trim(Aleafs_Lib_Cookie::get(self::$name));
