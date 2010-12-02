@@ -22,6 +22,7 @@ class Aleafs_Sem_UserTest extends Aleafs_Sem_TestShell
         self::registerDefault(__DIR__ . '/ini/global.ini');
 
         Aleafs_Sem_User::cleanPermission('unittest', 'baidu');
+        Aleafs_Sem_User::cleanUser(Aleafs_Sem_User::username('unittest', 'baidu'));
     }
     /* }}} */
 

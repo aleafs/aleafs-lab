@@ -161,4 +161,25 @@ class Aleafs_Sem_SoapTest extends Aleafs_Sem_TestShell
     }
     /* }}} */
 
+    /* {{{ public void test_should_service_authheader_works_fine() */
+    public function test_should_service_authheader_works_fine()
+    {
+        Aleafs_Sem_User::cleanPermission('functest', 'baidu');
+        Aleafs_Sem_User::cleanUser(Aleafs_Sem_User::username('functest', 'baidu'));
+
+        $header = json_decode(json_encode(array(
+            'appname'   => 'baidu',
+            'username'  => 'functest',
+            'machine'   => 'MAC地址',
+            'nodename'  => '机器名',
+        )));
+
+        $server = new Aleafs_Sem_Service();
+        $server->AuthHeader($header);
+
+        $uinfo  = Aleafs_Sem_User::getUserInfo(Aleafs_Sem_User::username('functest', 'baidu'));
+        $this->assertTrue(!empty($uinfo));
+    }
+    /* }}} */
+
 }
