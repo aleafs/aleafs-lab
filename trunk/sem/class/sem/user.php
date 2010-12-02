@@ -82,8 +82,9 @@ class Aleafs_Sem_User
      */
     public static function addPermission($appuser, $appname, $perms)
     {
+        $table  = sprintf('%suser_permission', self::TABLE_PREFIX);
         $perms  = array_intersect_key(
-            (array)$perms, self::column(sprintf('%suser_permission', self::TABLE_PREFIX))
+            (array)$perms, self::column($table)
         );
         unset($perms['autokid']);
 
@@ -97,7 +98,7 @@ class Aleafs_Sem_User
 
         self::initDb();
 
-        return self::$loader->insert($perms)->lastId();
+        return self::$loader->table($table)->insert($perms)->lastId();
     }
     /* }}} */
 
@@ -122,7 +123,7 @@ class Aleafs_Sem_User
     {
         self::initDb();
 
-        return self::$loader->table(sprintf('%suseracct', self::TABLE_PREFIX))
+        return self::$loader->clear()->table(sprintf('%suseracct', self::TABLE_PREFIX))
             ->where('username', $name)
             ->select('userid', 'usertype', 'userstat', 'email')
             ->getRow();
@@ -150,7 +151,7 @@ class Aleafs_Sem_User
 
         self::initDb();
 
-        return self::$loader->insert($column)->lastId();
+        return self::$loader->table($table)->insert($column)->lastId();
     }
     /* }}} */
 
