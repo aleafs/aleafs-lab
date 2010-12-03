@@ -19,7 +19,10 @@ class Aleafs_Sem_Account
 	const ERR_PWD	= 102;
 	const CHECK_IP	= 201;
 	const KICK_OFF	= 202;
-	const REPUT_PWD	= 203;
+    const REPUT_PWD	= 203;
+
+    /* XXX:这个一定不要修改 */
+    const SAFE_SALT = 'e82e1ee05f3b1361f682beecaeda257f';
 
 	/* }}} */
 
@@ -36,6 +39,19 @@ class Aleafs_Sem_Account
 	private static $status	= 0;
 
 	/* }}} */
+
+    /* {{{ public static String password() */
+    /**
+     * 生成密码
+     *
+     * @access public static
+     * @return String
+     */
+    public static function password($pw)
+    {
+        return bin2hex(md5(self::SAFE_SALT . $pw, true));
+    }
+    /* }}} */
 
 	/* {{{ public static Boolean isLogin() */
 	/**
@@ -54,6 +70,25 @@ class Aleafs_Sem_Account
 	}
 	/* }}} */
 
+    /* {{{ public static Object  getUser() */
+    /**
+     * 校验密码
+     *
+     * @access public static
+     * @return Object or Boolean false
+     */
+    public static function getUser($un, $pw)
+    {
+        $un = Aleafs_Sem_User::getUserInfo($un, array('userid', 'username', 'password', 'checkip', 'sglogin'));
+        if (empty($un) || 0 !== strcmp($un['password'], self::password($pw))) {
+            return false;
+        }
+        unset($un['password']);
+
+        return json_decode(json_encode($un));
+    }
+    /* }}} */
+
 	/* {{{ public static String getMessage() */
 	/**
 	 * 获取用户的登录消息
@@ -61,9 +96,10 @@ class Aleafs_Sem_Account
 	 * @access public static
 	 * @return String
 	 */
-	public static function getMessage()
-	{
-		return empty(self::$message[self::$status]) ? '' : self::$message[self::$status];
+	public static function getMessage($code = null)
+    {
+        $code   = empty($code) ? self::$status : (int)$code;
+		return empty(self::$message[$code]) ? '' : self::$message[$code];
 	}
 	/* }}} */
 

@@ -79,6 +79,28 @@ class Aleafs_Sem_Controller_Login extends Aleafs_Lib_Controller
      */
     protected function actionPublic($param, $post = null)
     {
+        $un = isset($post['username']) ? $post['username'] : '';
+        $pw = isset($post['password']) ? $post['password'] : '';
+        $se = isset($post['_appname']) ? $post['_appname'] : '';
+        if (empty($un) || empty($pw)) {
+            $this->redirect('login', 'index', $param);
+            return;
+        }
+
+        $un = Aleafs_Sem_User::username($un, $se);
+        if (false === ($un = Aleafs_Sem_Account::getUser($un, $pw))) {
+            $this->redirect('login', 'index', $param);
+            return;
+        }
+
+        Aleafs_Lib_Session::set('isLogin',  true);
+        Aleafs_Lib_Session::set('uinfo',    $un);
+
+        Aleafs_Lib_Session::attr(Aleafs_Lib_Session::TS, time());
+        Aleafs_Lib_Session::attr(Aleafs_Lib_Session::IP, Aleafs_Lib_Context::userip(true));
+
+        // TODO: 通过传入解决
+        $this->redirect('admin', 'index');
     }
     /* }}} */
 
