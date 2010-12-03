@@ -91,6 +91,22 @@ class Aleafs_Sem_Controller_Webui extends Aleafs_Lib_Controller
     }
     /* }}} */
 
+    /* {{{ protected void actionContact() */
+    /**
+     * 联系我们
+     *
+     * @access protected
+     * @return void
+     */
+    protected function actionContact()
+    {
+        $render = new Aleafs_Lib_Render_Html();
+        $render->assign('webroot',  Aleafs_Lib_Context::get('webroot'));
+        $render->assign('title',    '联系我们');
+        $render->render('contact', 'webui', true);
+    }
+    /* }}} */
+
     /* {{{ protected void actionDownload() */
     /**
      * 软件下载
