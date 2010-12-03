@@ -47,7 +47,8 @@ class Aleafs_Sem_Controller_Login extends Aleafs_Lib_Controller
         if (!empty($param['msg'])) {
             $render->assign('message',  $param['msg']);
         }
-		$render->render('index', 'login', true);
+
+		$render->render(empty($param['tpl']) ? 'default' : $param['tpl'], 'login', true);
 	}
 	/* }}} */
 
