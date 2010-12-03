@@ -1,9 +1,9 @@
 
 CREATE TABLE web_session (
-	sesskey varchar(32) not null default '',
+	sesskey char(32) not null default '',
 	actime int(10) unsigned not null default 0,
 	ipaddr int(10) unsigned not null default 0,
-	sessval varchar(1024) binary,
+	sessval varchar(512) binary,
 	UNIQUE KEY uk_sess_key (sesskey)
 ) ENGINE = MEMORY DEFAULT CHARSET=UTF8;
 
