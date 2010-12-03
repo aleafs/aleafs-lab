@@ -119,14 +119,13 @@ class Aleafs_Sem_User
      * @access public static
      * @return Mixture
      */
-    public static function getUserInfo($name)
+    public static function getUserInfo($name, $column = null)
     {
         self::initDb();
 
+        $column = empty($column) ? array('userid', 'usertype', 'userstat', 'email') : $column;
         return self::$loader->clear()->table(sprintf('%suseracct', self::TABLE_PREFIX))
-            ->where('username', $name)
-            ->select('userid', 'usertype', 'userstat', 'email')
-            ->getRow();
+            ->where('username', $name)->select($column)->getRow();
     }
     /* }}} */
 
