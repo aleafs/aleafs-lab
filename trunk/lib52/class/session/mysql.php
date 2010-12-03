@@ -13,6 +13,12 @@
 class Aleafs_Lib_Session_Mysql
 {
 
+    /* {{{ 静态常量 */
+
+    const MAX_LENGTH    = 512;
+
+    /* }}} */
+
 	/* {{{ 静态变量 */
 
 	private static $attrMap	= array(
@@ -86,13 +92,17 @@ class Aleafs_Lib_Session_Mysql
 	 */
 	public function set($key, $data, $attr = null)
     {
+        $data   = json_encode($data);
+        // TODO: 数据压缩
+        if (strlen($data) > self::MAX_LENGTH) {
+            throw new Aleafs_Lib_Exception(sprintf('Large session data length than %d', self::MAX_LENGTH));
+        }
+
         if (empty($this->readed)) {
             $this->get($key, $lala);
         }
 
-        $column = array(
-            'sessval'   => json_encode($data),
-        );
+        $column = array();
         foreach ((array)$attr AS $k => $v) {
             if (empty(self::$attrMap[$k])) {
                 continue;
@@ -100,6 +110,7 @@ class Aleafs_Lib_Session_Mysql
 
             $column[self::$attrMap[$k]] = $v;
         }
+        $column['sessval']  = $data;
 
         $this->mysql->clear()->table($this->table);
         if ($this->exists) {
