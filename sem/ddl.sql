@@ -11,6 +11,8 @@ CREATE TABLE useracct (
 	userid int(10) unsigned not null auto_increment PRIMARY KEY,
 	usertype smallint(5) unsigned not null default 0,
 	userstat smallint(5) unsigned not null default 0,
+	checkip tinyint(1) unsigned not null default 0,
+	sglogin tinyint(1) unsigned not null default 0,
 	password char(32) not null default '',
 	username varchar(64) not null default '',
 	addtime datetime not null default '0000-00-00 00:00:00',
