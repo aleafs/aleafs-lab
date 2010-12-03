@@ -1,4 +1,12 @@
 
+CREATE TABLE web_session (
+	sesskey varchar(32) not null default '',
+	actime int(10) unsigned not null default 0,
+	ipaddr int(10) unsigned not null default 0,
+	sessval varchar(1024) binary,
+	UNIQUE KEY uk_sess_key (sesskey)
+) ENGINE = MEMORY DEFAULT CHARSET=UTF8;
+
 CREATE TABLE useracct (
 	userid int(10) unsigned not null auto_increment PRIMARY KEY,
 	usertype smallint(5) unsigned not null default 0,
