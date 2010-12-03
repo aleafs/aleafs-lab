@@ -19,6 +19,12 @@ h4 {
 	margin:0;
 	padding:0;
 }
+a {
+	color:#000000;
+}
+a:hover {
+	color:#EF660F;
+}
 .wrapper {
 	width:990px;
 	position:relative;
@@ -91,21 +97,19 @@ h4 {
 .main p {
 	margin: 5px 0 5px 0;
 }
-.left_menu {
-	padding-left:30px;
+.pageLeft {
+	padding-left:50px;
 	float:left;
-	width:180px;
-	border:1px solid #000000;
-}
-.left_menu li {
+	width:160px;
+	line-height: 24px;
 	font-size:14px;
-	font-weight:bold;
 	text-align:left;
-	line-height:24px;
 }
 .content {
 	float:right;
 	text-align:left;
+	width:760px;
+	min-height:320px;
 }
 .banner1 {
 	height: 150px;
