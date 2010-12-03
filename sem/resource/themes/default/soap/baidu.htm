@@ -57,6 +57,78 @@
 				</xsd:sequence>
 			</xsd:complexType>
 			
+			<xsd:element name="AddKrTaskInput" type="tns:AddKrTaskInput" />
+			<xsd:complexType name="AddKrTaskInput">
+				<xsd:sequence>
+					<xsd:element name="keywords" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+			
+			<xsd:element name="AddKrTaskOutput" type="tns:AddKrTaskOutput" />
+			<xsd:complexType name="AddKrTaskOutput">
+				<xsd:sequence>
+					<xsd:element name="status" type="xsd:int" />
+				</xsd:sequence>
+			</xsd:complexType>
+			
+			<xsd:element name="DelKrTaskInput" type="tns:DelKrTaskInput" />
+			<xsd:complexType name="DelKrTaskInput">
+				<xsd:sequence>
+					<xsd:element name="taskid" type="xsd:int" />
+				</xsd:sequence>
+			</xsd:complexType>
+			
+			<xsd:element name="DelKrTaskOutput" type="tns:DelKrTaskOutput" />
+			<xsd:complexType name="DelKrTaskOutput">
+				<xsd:sequence>
+					<xsd:element name="status" type="xsd:int" />
+				</xsd:sequence>
+			</xsd:complexType>
+			
+			<xsd:element name="KrResInput" type="tns:KrResInput" />
+			<xsd:complexType name="KrResInput">
+				<xsd:sequence>
+					<xsd:element name="taskid" type="xsd:int" />
+				</xsd:sequence>
+			</xsd:complexType>
+			
+			<xsd:element name="KrResOutput" type="tns:KrResOutput" />
+			<xsd:complexType name="KrResOutput">
+				<xsd:sequence>
+					<xsd:element name="keywords" type="tns:KrStruct" minOccurs="0" maxOccurs="unbounded" />
+				</xsd:sequence>
+			</xsd:complexType>
+			
+			<xsd:complexType name="KrStruct">
+				<xsd:sequence>
+					<xsd:element name="keyword" type="xsd:string" />
+					<xsd:element name="pv" type="xsd:int" />
+				</xsd:sequence>
+			</xsd:complexType>
+			
+			<xsd:element name="KrTaskInput" type="tns:KrTaskInput" />
+			<xsd:complexType name="KrTaskInput">
+				<xsd:sequence>
+					<xsd:element name="username" type="xsd:string" />
+				</xsd:sequence>
+			</xsd:complexType>
+			
+			<xsd:element name="KrTaskOutput" type="tns:KrTaskOutput" />
+			<xsd:complexType name="KrTaskOutput">
+				<xsd:sequence>
+					<xsd:element name="keywords" type="tns:KrTaskStruct" minOccurs="0" maxOccurs="unbounded" />
+				</xsd:sequence>
+			</xsd:complexType>
+			
+			<xsd:complexType name="KrTaskStruct">
+				<xsd:sequence>
+					<xsd:element name="keywords" type="xsd:string" />
+					<xsd:element name="taskid" type="xsd:int" />
+					<xsd:element name="status" type="xsd:int" />
+					<xsd:element name="addtime" type="xsd:dateTime" />
+				</xsd:sequence>
+			</xsd:complexType>
+			
 		</xsd:schema>
 	</wsdl:types>
 
@@ -79,6 +151,38 @@
 	<wsdl:message name="QKeywords">
 		<wsdl:part name="QKeywords" element="tns:QKeywords" ></wsdl:part>
 	</wsdl:message>
+	
+	<wsdl:message name="AddKrTaskInput">
+		<wsdl:part name="AddKrTaskInput" element="tns:AddKrTaskInput" ></wsdl:part>
+	</wsdl:message>
+	
+	<wsdl:message name="AddKrTaskOutput">
+		<wsdl:part name="AddKrTaskOutput" element="tns:AddKrTaskOutput" ></wsdl:part>
+	</wsdl:message>
+	
+	<wsdl:message name="DelKrTaskInput">
+		<wsdl:part name="DelKrTaskInput" element="tns:DelKrTaskInput" ></wsdl:part>
+	</wsdl:message>
+	
+	<wsdl:message name="DelKrTaskOutput">
+		<wsdl:part name="DelKrTaskOutput" element="tns:DelKrTaskOutput" ></wsdl:part>
+	</wsdl:message>
+	
+	<wsdl:message name="KrResInput">
+		<wsdl:part name="KrResInput" element="tns:KrResInput" ></wsdl:part>
+	</wsdl:message>
+	
+	<wsdl:message name="KrResOutput">
+		<wsdl:part name="KrResOutput" element="tns:KrResOutput" ></wsdl:part>
+	</wsdl:message>
+	
+	<wsdl:message name="KrTaskInput">
+		<wsdl:part name="KrTaskInput" element="tns:KrTaskInput" ></wsdl:part>
+	</wsdl:message>
+	
+	<wsdl:message name="KrTaskOutput">
+		<wsdl:part name="KrTaskOutput" element="tns:KrTaskOutput" ></wsdl:part>
+	</wsdl:message>
 
 	<wsdl:portType name="BaiduAd">
 		<wsdl:operation name="adrank">
@@ -88,6 +192,22 @@
 		<wsdl:operation name="keyquality">
 			<wsdl:input message="tns:QKeywords" ></wsdl:input>
 			<wsdl:output message="tns:QKeywords" ></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="addkrtask">
+			<wsdl:input message="tns:AddKrTaskInput" ></wsdl:input>
+			<wsdl:output message="tns:AddKrTaskOutput" ></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="delkrtask">
+			<wsdl:input message="tns:DelKrTaskInput" ></wsdl:input>
+			<wsdl:output message="tns:DelKrTaskOutput" ></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="getkrres">
+			<wsdl:input message="tns:KrResInput" ></wsdl:input>
+			<wsdl:output message="tns:KrResOutput" ></wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="getkrtask">
+			<wsdl:input message="tns:KrTaskInput" ></wsdl:input>
+			<wsdl:output message="tns:KrTaskOutput" ></wsdl:output>
 		</wsdl:operation>
 	</wsdl:portType>
 
@@ -106,6 +226,50 @@
 		</wsdl:operation>
 		<wsdl:operation name="keyquality">
 			<soap:operation soapAction="$webroot/soap/baidu/keyquality" />
+			<wsdl:input>
+				<soap:header message="tns:AuthHeader" part="AuthHeader" use="literal" />
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:header message="tns:ResHeader" part="ResHeader" use="literal" />
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="addkrtask">
+			<soap:operation soapAction="$webroot/soap/baidu/addkrtask" />
+			<wsdl:input>
+				<soap:header message="tns:AuthHeader" part="AuthHeader" use="literal" />
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:header message="tns:ResHeader" part="ResHeader" use="literal" />
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="delkrtask">
+			<soap:operation soapAction="$webroot/soap/baidu/delkrtask" />
+			<wsdl:input>
+				<soap:header message="tns:AuthHeader" part="AuthHeader" use="literal" />
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:header message="tns:ResHeader" part="ResHeader" use="literal" />
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="getkrtask">
+			<soap:operation soapAction="$webroot/soap/baidu/getkrtask" />
+			<wsdl:input>
+				<soap:header message="tns:AuthHeader" part="AuthHeader" use="literal" />
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:header message="tns:ResHeader" part="ResHeader" use="literal" />
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="getkrres">
+			<soap:operation soapAction="$webroot/soap/baidu/getkrres" />
 			<wsdl:input>
 				<soap:header message="tns:AuthHeader" part="AuthHeader" use="literal" />
 				<soap:body use="literal" />
