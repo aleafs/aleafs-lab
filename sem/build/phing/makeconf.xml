@@ -59,6 +59,13 @@
 				</replacetokens>
 			</filterchain>
 		</copy>
+
+		<copy file="build/tpl/session.ini" todir="config" overwrite="true">
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+				</replacetokens>
+			</filterchain>
+		</copy>
 	</target>
 
 	<target name="-unittest" description="Make configure files for unit test.">
@@ -87,6 +94,13 @@
 		</copy>
 
 		<copy file="build/tpl/trial_user.ini" todir="test/unit/ini/" overwrite="true">
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+				</replacetokens>
+			</filterchain>
+		</copy>
+
+		<copy file="build/tpl/session.ini" todir="test/unit/ini/" overwrite="true">
 			<filterchain>
 				<replacetokens begintoken="##" endtoken="##">
 				</replacetokens>
