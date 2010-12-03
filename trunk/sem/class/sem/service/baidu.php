@@ -13,6 +13,22 @@
 
 class Aleafs_Sem_Service_Baidu extends Aleafs_Sem_Service
 {
+	//各操作所需权限，一个操作可以需要多个权限
+	private static $NeedPri = array(
+		"adrank" => array(array('pm_stat'   => Aleafs_Sem_User::STAT_NORMAL,
+                							 'pm_func'   => 'BASE')),
+		"keyquality" =>  array(array('pm_stat'   => Aleafs_Sem_User::STAT_NORMAL,
+                							 'pm_func'   => 'BASE')),
+	    "addkrtask" =>  array(array('pm_stat'   => Aleafs_Sem_User::STAT_NORMAL,
+                							 'pm_func'   => 'KR')),
+		"delkrtask" =>  array(array('pm_stat'   => Aleafs_Sem_User::STAT_NORMAL,
+	                							 'pm_func'   => 'KR')),
+		"getkrtask" =>  array(array('pm_stat'   => Aleafs_Sem_User::STAT_NORMAL,
+	                							 'pm_func'   => 'KR')),
+		"getkrres" =>  array(array('pm_stat'   => Aleafs_Sem_User::STAT_NORMAL,
+	                							 'pm_func'   => 'KR')),
+	);
+	
 	/**
 	 * 对外接口，获取一个广告的位置
 	 *
@@ -22,7 +38,7 @@ class Aleafs_Sem_Service_Baidu extends Aleafs_Sem_Service
 	public function adrank($params)
 	{
 		$this->setSoapHeader('soap/baidu');
-        if (empty($this->authenticated)) {
+        if (!$this->hasPrivileges(self::$NeedPri,  "adrank")) {
             return array("rank" => 0, "cmatch" => 0);
         }
         
@@ -50,7 +66,7 @@ class Aleafs_Sem_Service_Baidu extends Aleafs_Sem_Service
 	public function keyquality($params)
 	{
 		$this->setSoapHeader('soap/baidu');
-        if (empty($this->authenticated)) {
+        if (!$this->hasPrivileges(self::$NeedPri,  "keyquality")) {
             return array();
         }     
         //file_put_contents("webpage.txt", gettype($params->keywords)."\n".gettype($params->keywords[0])."\n");
@@ -70,6 +86,111 @@ class Aleafs_Sem_Service_Baidu extends Aleafs_Sem_Service
         }
         
         return $arrRet;
+	}
+	
+	/**
+	 * 增加一个KR任务
+	 *
+	 * @param object $params
+	 * @return int 0 or 1
+	 */
+	public function addkrtask($params)
+	{
+		$arrRet = array("status" => 0);
+		if (!$this->hasPrivileges(self::$NeedPri,  "addkrtask")) {
+        	$this->setSoapHeader('soap/baidu');
+            return $arrRet;
+        }
+        
+        $this->setSoapHeader('soap/baidu');
+		 
+		$arrInfo = array("username" => $this->username);
+		$arrInfo['keywords'] = $params->keywords;
+		$arrInfo['status'] = 0;
+		
+		$arrRet['status'] = Aleafs_Sem_Kr::addKrTask($arrInfo);
+		return $arrRet;
+	}
+	
+	/**
+	 * 删除一个KR任务
+	 *
+	 * @param object $params
+	 * @return int 0 or 1
+	 */
+	public function delkrtask($params)
+	{	
+        $arrRet = array("status" => 0);
+        
+		if (!$this->hasPrivileges(self::$NeedPri,  "delkrtask")) {
+            $this->setSoapHeader('soap/baidu');
+            return $arrRet;
+        }
+        
+        $this->setSoapHeader('soap/baidu');
+        
+		$intTaskId = intval($params -> taskid);
+	
+		$arrRet['status'] = Aleafs_Sem_Kr::deleteKrTask($intTaskId, $this->username);
+		return $arrRet;
+	}
+	
+	/**
+	 * 得到用户的所有KR任务
+	 *
+	 * @param object $params
+	 * @return array
+	 */
+	public function getkrtask($params)
+	{
+		$arrRet = array();
+		
+        if (!$this->hasPrivileges(self::$NeedPri,  "getkrtask")) {
+        	$this->setSoapHeader('soap/baidu');
+            return $arrRet;
+        }
+        
+        $this->setSoapHeader('soap/baidu');
+        
+		$strUserName = $params->username;
+		if ($strUserName != $this->username)
+		{
+			return $arrRet;
+		}
+		
+		$arrRes = Aleafs_Sem_Kr::getKrTaskByUsername($strUserName);
+		
+		foreach ($arrRes as $row)
+		{
+			$arrTmp = array();
+			$arrTmp['taskid'] = intval($row['autokid']);
+			$arrTmp['status'] = intval($row['status']);
+			$arrTmp['keywords'] = $row['keywords'];
+			$arrTmp['addtime'] = str_replace(" ", "T" , $row['addtime']);
+			
+			$arrRet[] = $arrTmp;
+		}
+		
+		return $arrRet;
+	}
+	
+	/**
+	 * 得到一个KR任务的结果
+	 *
+	 * @param object $params
+	 * @return array
+	 */
+	public function getkrres($params)
+	{
+		if (!$this->hasPrivileges(self::$NeedPri,  "getkrres")) {
+			$this->setSoapHeader('soap/baidu');
+            return array();
+        }
+        
+        $this->setSoapHeader('soap/baidu');
+        
+		$intTaskId = intval($params -> taskid);
+		return Aleafs_Sem_Kr::getKrRes($intTaskId);
 	}
 	
 	/**
