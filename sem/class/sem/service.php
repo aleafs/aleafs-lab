@@ -41,6 +41,10 @@ class Aleafs_Sem_Service
     protected $permissions      = array();
 
     protected $errno    = self::E_NO_AUTHENTICATE;
+    
+    protected $username = "";
+    
+    protected $appname = "";
 
     /* }}} */
 
@@ -153,6 +157,9 @@ class Aleafs_Sem_Service
             $perms  = Aleafs_Sem_User::getPermission($appuser, $appname);
         }
 
+        $this->username = $appuser;
+        $this->appname = $appname;
+        
         $this->errno    = self::E_RESPONSE_OK;
         $this->permissions      = $perms;
         $this->authenticated	= true;
@@ -176,5 +183,53 @@ class Aleafs_Sem_Service
     }
     /* }}} */
 
+/**
+	 * 判断一个操作是否有权限进行
+	 *
+	 * @param String $op
+	 * @return bool
+	 */
+	protected  function hasPrivileges($NeedPri,  $op)
+	{
+		 //未经过权限获取操作
+		 if (empty($this->authenticated)) {
+		 	return false;
+		 }
+		// 不需要权限判断
+		if (empty($NeedPri[$op])) {
+			return true;
+		}
+		//判断是否具有所需权限
+		foreach ($NeedPri[$op] as $need) {
+			$bolOne = false;
+			
+			foreach ($this->permissions AS $row) {
+	            if ($row['pm_func'] == $need['pm_func']  && $row['pm_stat'] == $need['pm_stat'])
+	            {
+	            	$intBalance = intval(Aleafs_Sem_Comfunc::balance($row['enddate'], date('Y-m-d')));
+	            	//有权限过期
+	            	if ($intBalance < 1)
+	            	{
+	            		$this->errno    = self::E_ACCESS_DENIED;
+	            		return false;
+	            	} 
+	            	else 
+	            	{
+	            		$bolOne = true;
+	            		break;
+	            	}
+	            }
+			}
+			//有权限未找到
+			if (!$bolOne) 
+			{
+				$this->errno    = self::E_ACCESS_DENIED;
+				return false;
+			}
+            
+        }
+        return true;	
+	}
+	
 }
 
