@@ -19,6 +19,9 @@ class Aleafs_Sem_MysqlSessionTest extends Aleafs_Sem_TestShell
 	{
 		parent::setUp();
         self::registerDefault(__DIR__ . '/ini/global.ini');
+
+        $mysql  = new Aleafs_Lib_Db_Mysql('mysql');
+        $mysql->clear()->table('web_session')->where('sesskey', 'unittest')->delete();
 	}
 
 	protected function tearDown()
@@ -29,6 +32,30 @@ class Aleafs_Sem_MysqlSessionTest extends Aleafs_Sem_TestShell
 	public function test_should_session_mysql_store_works_fine()
     {
         $store  = new Aleafs_Lib_Session_Mysql('mysql/web_session');
+        $this->assertNull($store->get('unittest', $attr));
+        $this->assertEquals(array(), $attr);
+
+        $data   = array(
+            'a' => 'b',
+            'c' => decbin(10),
+        );
+        $attr   = array(
+            Aleafs_Lib_Session::TS  => time(),
+            Aleafs_Lib_Session::IP  => 1,
+        );
+        $this->assertEquals(1, $store->set('unittest', $data, array_merge($attr, array(
+            'i_am_not_exists'   => 'vip',
+        ))));
+        $this->assertEquals($data, $store->get('unittest', $newa));
+        $this->assertEquals($newa, $attr);
+
+        $this->assertEquals(1, $store->set('unittest', $data + array(Aleafs_Lib_Session::IP => 2), $attr));
+        $this->assertEquals(1, $store->delete('unittest'));
+        $this->assertNull($store->get('unittest', $attr));
+
+        $this->assertEquals(1, $store->set('unittest', $data, $attr));
+        $store->gc(time() + 10);
+        $this->assertNull($store->get('unittest', $attr));
 	}
 
 }
