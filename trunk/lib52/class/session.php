@@ -168,7 +168,7 @@ class Aleafs_Lib_Session
         self::checkInit();
 
         // XXX: GC 概率
-        self::$store->gc(time() -> self::$config->get('session.expire', 1440));
+        self::$store->gc(time() - self::$config->get('session.expire', 1440));
 
         return self::flush();
     }
