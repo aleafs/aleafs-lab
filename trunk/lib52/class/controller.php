@@ -13,6 +13,16 @@
 class Aleafs_Lib_Controller
 {
 
+    /* {{{ 成员变量 */
+
+    private $module = null;
+
+    private $action = null;
+
+    private $params = null;
+
+    /* }}} */
+
     /* {{{ public void __construct() */
     /**
      * 构造函数
@@ -44,6 +54,10 @@ class Aleafs_Lib_Controller
             throw new Aleafs_Lib_Exception(sprintf('Undefined action named as "%s"', $action));
         }
 
+        $class  = explode('_', get_class($this));
+        $this->module   = strtolower(end($class));
+        $this->action   = $action;
+
         return $this->$method($param, $post);
     }
     /* }}} */
@@ -57,6 +71,10 @@ class Aleafs_Lib_Controller
      */
     public function redirect($module, $action, $param = null)
     {
+        if (0 === strcasecmp($module, $this->module) && 0 === strcasecmp($action, $this->action)) {
+            return;
+        }
+
         header(sprintf('Location: %s/%s',
             rtrim(Aleafs_Lib_Context::get('webroot'), '/'),
             ltrim(Aleafs_Lib_Parser_Url::build($module, $action, $param), '/')
