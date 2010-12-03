@@ -27,61 +27,77 @@ class Aleafs_Sem_Controller_Webui extends Aleafs_Lib_Controller
     }
     /* }}} */
 
-	/* {{{ protected void actionIndex() */
-	/**
-	 * 默认动作
-	 *
-	 * @access protected
-	 * @return void
-	 */
-	protected function actionIndex($param, $post = null)
-	{
-		$render = new Aleafs_Lib_Render_Html();
-		$render->assign('webroot',  Aleafs_Lib_Context::get('webroot'));
-        $render->assign('title',    '网络推广好助手');
-		$render->render('index', 'webui', true);
-	}
-	/* }}} */
-
-	/* {{{ protected void actionAbout() */
-	/**
-	 * 关于
-	 *
-	 * @access protected
-	 * @return void
-	 */
-	protected function actionAbout($param, $post = null)
-	{
-		$render = new Aleafs_Lib_Render_Html();
+    /* {{{ protected void actionIndex() */
+    /**
+     * 默认动作
+     *
+     * @access protected
+     * @return void
+     */
+    protected function actionIndex($param, $post = null)
+    {
+        $render = new Aleafs_Lib_Render_Html();
         $render->assign('webroot',  Aleafs_Lib_Context::get('webroot'));
-        $render->assign('title',    '关于');
-		$render->render('about', 'webui', true);
-	}
+        $render->assign('title',    '网络推广好助手');
+        $render->render('index', 'webui', true);
+    }
     /* }}} */
 
-	/* {{{ protected void actionFaq() */
-	/**
-	 * 常见问题
-	 *
-	 * @access protected
-	 * @return void
-	 */
-	protected function actionFaq($param, $post = null)
-	{
-		$render = new Aleafs_Lib_Render_Html();
+    /* {{{ protected void actionProduct() */
+    /**
+     * 产品简介
+     *
+     * @access protected
+     * @return void
+     */
+    protected function actionProduct($param, $post = null)
+    {
+        $render = new Aleafs_Lib_Render_Html();
+        $render->assign('webroot',  Aleafs_Lib_Context::get('webroot'));
+        $render->assign('title',    '产品功能');
+        $render->render('product', 'webui', true);
+    }
+    /* }}} */
+
+    /* {{{ protected void actionFaq() */
+    /**
+     * 常见问题
+     *
+     * @access protected
+     * @return void
+     */
+    protected function actionFaq($param, $post = null)
+    {
+        $render = new Aleafs_Lib_Render_Html();
         $render->assign('webroot',  Aleafs_Lib_Context::get('webroot'));
         $render->assign('title',    '常见问题');
-		$render->render('faq', 'webui', true);
-	}
+        $render->render('faq', 'webui', true);
+    }
     /* }}} */
 
-	/* {{{ protected void actionDownload() */
-	/**
-	 * 软件下载
-	 *
-	 * @access protected
-	 * @return void
-	 */
+    /* {{{ protected void actionAbout() */
+    /**
+     * 关于
+     *
+     * @access protected
+     * @return void
+     */
+    protected function actionAbout($param, $post = null)
+    {
+        $render = new Aleafs_Lib_Render_Html();
+        $render->assign('webroot',  Aleafs_Lib_Context::get('webroot'));
+        $render->assign('title',    '关于');
+        $render->render('about', 'webui', true);
+    }
+    /* }}} */
+
+    /* {{{ protected void actionDownload() */
+    /**
+     * 软件下载
+     *
+     * @access protected
+     * @return void
+     */
     protected function actionDownload($param, $post = null)
     {
         if (empty($param['machine'])) {
