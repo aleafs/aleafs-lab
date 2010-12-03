@@ -87,20 +87,18 @@ class Aleafs_Lib_Session
 
         self::$name = self::$config->get('session.name', 'PHPSESSID');
         self::$ssid = trim(Aleafs_Lib_Cookie::get(self::$name));
-        if (empty(self::$ssid) || !self::cookieExpire(self::$ssid)) {
+        if (false === self::verify(self::$ssid)) {
             self::$data = array();
             self::$attr = array();
             self::$ssid = self::generate();
             Aleafs_Lib_Cookie::set(self::$name, self::$ssid, self::$config->get('cookie.expire', 0));
         } else {
-            $object = json_decode(self::$store->get(self::$ssid), true);
-            self::$attr = isset($object['attr']) ? (array)$object['attr'] : array();
-            if (self::$attr[self::TS] < time() - self::$config->get('session.expire', 1440)) {
+            self::$data = (array)self::$store->get(self::$ssid, self::$attr);
+            $expire = time() - self::$config->get('session.expire', 1440);
+            if (empty(self::$attr[self::TS]) || self::$attr[self::TS] < $expire) {
                 self::$store->delete(self::$ssid);
                 self::$data = array();
                 self::$attr = array();
-            } else {
-                self::$data = isset($object['data']) ? (array)$object['data'] : array();
             }
         }
 
@@ -266,17 +264,16 @@ class Aleafs_Lib_Session
     }
     /* }}} */
 
-    /* {{{ private static Boolean cookieExpire() */
+    /* {{{ private static Boolean verify() */
     /**
-     * 检查sessID的cookie是否过期
+     * 校验COOKIE是否合法
      *
      * @access private static
-     * @param  String  $sid
      * @return Boolean true or false
      */
-    private static function cookieExpire($sid)
+    private static function verify($sid)
     {
-        return false;
+        return (32 == strlen(trim($sid))) ? true : false;
     }
     /* }}} */
 

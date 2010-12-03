@@ -26,7 +26,11 @@ class Aleafs_Lib_Session_Mysql
 
 	private $mysql	= null;
 
-	private $table	= null;
+    private $table	= null;
+
+    private $readed = false;
+
+    private $exists = false;
 
 	/* }}} */
 
@@ -34,12 +38,13 @@ class Aleafs_Lib_Session_Mysql
 	/**
 	 * 构造函数
 	 *
-	 * @access public
+     * @access public
+     * @param  String $names : mysql/table
 	 * @return void
 	 */
-	public function __construct($ini)
+	public function __construct($names)
 	{
-		list($mysql, $this->table) = explode(':', $ini, 2);
+		list($mysql, $this->table) = explode('/', $names, 2);
 		$this->mysql	= new Aleafs_Lib_Db_Mysql($mysql);
 	}
 	/* }}} */
@@ -51,14 +56,24 @@ class Aleafs_Lib_Session_Mysql
 	 * @access public
 	 * @return Mixture
 	 */
-	public function get($key)
-	{
+	public function get($key, &$attr)
+    {
+        $attr = array();
 		$data = $this->mysql->clear()->table($this->table)
 			->where('sesskey', $key)
-			->select('sessval', 'actime', 'ipaddr')->getRow();
-		if (empty($data)) {
-			return null;
-		}
+            ->select('sessval', 'actime', 'ipaddr')->getRow();
+        $this->readed  = true;
+        if (empty($data)) {
+            $this->exists  = false;
+            return null;
+        }
+
+        $this->exists  = true;
+        foreach (self::$attrMap AS $key => $val) {
+            $attr[$key] = isset($data[$val]) ? $data[$val] : null;
+        }
+
+        return json_decode($data['sessval'], true);
 	}
 	/* }}} */
 
@@ -69,8 +84,32 @@ class Aleafs_Lib_Session_Mysql
 	 * @access public
 	 * @return Boolean true or false
 	 */
-	public function set($key, $val, $attr = null)
-	{
+	public function set($key, $data, $attr = null)
+    {
+        if (empty($this->readed)) {
+            $this->get($key, $lala);
+        }
+
+        $column = array(
+            'sessval'   => json_encode($data),
+        );
+        foreach ((array)$attr AS $k => $v) {
+            if (empty(self::$attrMap[$k])) {
+                continue;
+            }
+
+            $column[self::$attrMap[$k]] = $v;
+        }
+
+        $this->mysql->clear()->table($this->table);
+        if ($this->exists) {
+            $this->mysql->where('sesskey', $key)->update($column);
+        } else {
+            $column['sesskey'] = $key;
+            $this->mysql->insert($column);
+        }
+
+        return $this->mysql->affectedRows();
 	}
 	/* }}} */
 
