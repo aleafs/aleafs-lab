@@ -42,8 +42,12 @@ class Aleafs_Sem_User
      * @access public static
      * @return String
      */
-    public static function username($appuser, $appname)
+    public static function username($appuser, $appname = '')
     {
+        if (empty($appname)) {
+            return trim($appuser);
+        }
+
         return sprintf('%s/%s', strtolower(trim($appname)), trim($appuser));
     }
     /* }}} */
