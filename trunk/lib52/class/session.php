@@ -251,7 +251,7 @@ class Aleafs_Lib_Session
      */
     private static function checkInit()
     {
-        return (!self::$init) && self::init('session');
+        return (!self::$inited) && self::init('session');
     }
     /* }}} */
 
