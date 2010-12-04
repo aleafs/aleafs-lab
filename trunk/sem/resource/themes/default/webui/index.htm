@@ -2,7 +2,6 @@
 <link type="text/css" href="css/smoothness/jquery-ui-1.8.6.custom.css" rel="stylesheet" />	
 <link type="text/css" href="css/thickbox.css" rel="stylesheet" />	
 <script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
-<!--script type="text/javascript" src="js/jquery-ui-1.8.6.custom.min.js"></script-->
 <script type="text/javascript" src="js/thickbox.js"></script>
 <script type="text/javascript">
 var	tb_pathToImage = "$webroot/images/loadingAnimation.gif";
@@ -31,12 +30,6 @@ var	tb_pathToImage = "$webroot/images/loadingAnimation.gif";
 		width:120px;
 		height:32px;
 	}
-	#div_download p {
-		text-align:left;
-		font-size:14px;
-		padding: 10px;
-		line-height:22px;
-	}
 </style>
 </head>
 <body>
@@ -63,12 +56,17 @@ var	tb_pathToImage = "$webroot/images/loadingAnimation.gif";
 		</div>
 
 		<div class="banner2">
-			<a title="下载助推宝" href="#TB_inline?height=76&width=400&inlineId=div_download" class="thickbox" id="softdown"></a>
+			<a title="下载助推宝" href="#TB_inline?height=90&width=400&inlineId=div_download" class="thickbox" id="softdown"></a>
 			<div id="div_download" style="display:none">
-				<p>
-				Windows 32bit(2000/XP/Vista/Win7)：<a onclick="javascript: pageTracker._trackPageview(\"/download/x86\")" href="$webroot/webui/download/machine/x86" target="_blank">下载</a></p>
-				<p>
-				Windows 64bit(Vista/Win7)：<a onclick="javascript:pageTracker._trackPageview(\"/download/x64\")" href="$webroot/webui/download/machine/x64" target="_blank">下载</a></p>
+				<p style="font-size:14px;padding:20px 10px 0 10px;">
+				Windows 32bit(2000/XP/Vista/Win7)：
+				<a onclick="javascript: pageTracker._trackPageview(\"download\")" href="$webroot/webui/download/machine/x86" target="_blank">下载</a>
+				</p>
+
+				<p style="font-size:14px;padding:20px 10px 0 10px;">
+				Windows 64bit(Vista/Win7)：
+				<a onclick="javascript:pageTracker._trackPageview(\"download\")" href="$webroot/webui/download/machine/x64" target="_blank">下载</a>
+				</p>
 			</div>
 		</div>
 
