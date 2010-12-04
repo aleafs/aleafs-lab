@@ -123,15 +123,6 @@ a:hover {
 	background:url("../images/banner_2.png") no-repeat;
 	position:relative;
 }
-.banner2 a.download {
-	display:block;
-	position:absolute;
-	padding:10px;
-	top:25px;
-	left:69px;
-	width:120px;
-	height:32px;
-}
 #message {
 	color: #FFFFFF;
 	list-style-type:none;
