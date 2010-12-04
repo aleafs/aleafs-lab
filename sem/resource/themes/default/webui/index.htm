@@ -20,6 +20,22 @@ $('#softdown').click(function(){
 });	
 });
 </script>
+<style type="text/css">
+	#functions {
+		margin: -1px 0 0 16px;
+		padding-top: 10px;
+		width: 960px;
+	}
+	.clk_td {
+		width:192px;
+	}
+	.clk_td div {
+		cursor:pointer;
+		margin:15px;
+		height:130px;
+		width:130px;
+	}
+</style>
 </head>
 <body>
 	<div class="wrapper">
@@ -51,7 +67,19 @@ $('#softdown').click(function(){
 		<div class="neck">
 			<h4>核心功能</h4>
 		</div>
-		<div class="bottom"></div>
+		<div class="bottom">
+			<div id="functions">
+				<table cellspacing="0" cellpadding="0" border="0">
+					<tr>
+						<td class="clk_td"><div></div></td>
+						<td class="clk_td"><div></div></td>
+						<td class="clk_td"><div></div></td>
+						<td class="clk_td"><div></div></td>
+						<td class="clk_td"><div></div></td>
+					</tr>
+				</table>
+			</div>
+		</div>
 		<div id="dialog" title="下载" >
 			<p style="text-align:left;font-size:14pt;font-family:Arial,Helvetica,sans-serif,"宋体";">
 			Windows 32bit(2000/XP/Vista/Win7)：<a onclick="javascript: pageTracker._trackPageview(\"/download/x86\")" href="$webroot/webui/download/machine/x86" target="_blank">下载</a><br/><br/>
