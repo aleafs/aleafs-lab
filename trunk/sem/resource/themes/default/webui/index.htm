@@ -1,8 +1,11 @@
 {element header}
 <link type="text/css" href="css/smoothness/jquery-ui-1.8.6.custom.css" rel="stylesheet" />	
+<link type="text/css" href="css/thickbox.css" rel="stylesheet" />	
 <script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
 <script type="text/javascript" src="js/jquery-ui-1.8.6.custom.min.js"></script>
+<script type="text/javascript" src="js/thickbox.js"></script>
 <script type="text/javascript">
+var	tb_pathToImage = "$webroot/images/loadingAnimation.gif";
 $(function(){
 // Dialog			
 $('#dialog').dialog({
@@ -29,8 +32,8 @@ $('#softdown').click(function(){
 	.clk_td {
 		width:192px;
 	}
-	.clk_td div {
-		cursor:pointer;
+	.clk_td a {
+		display:block;
 		margin:15px;
 		height:130px;
 		width:130px;
@@ -71,7 +74,7 @@ $('#softdown').click(function(){
 			<div id="functions">
 				<table cellspacing="0" cellpadding="0" border="0">
 					<tr>
-						<td class="clk_td"><div></div></td>
+						<td class="clk_td"><a title="自动竞价" class="thickbox" href="$webroot/images/thumbs/auto.png"></a></td>
 						<td class="clk_td"><div></div></td>
 						<td class="clk_td"><div></div></td>
 						<td class="clk_td"><div></div></td>
