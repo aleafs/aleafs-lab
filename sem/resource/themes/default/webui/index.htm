@@ -2,26 +2,10 @@
 <link type="text/css" href="css/smoothness/jquery-ui-1.8.6.custom.css" rel="stylesheet" />	
 <link type="text/css" href="css/thickbox.css" rel="stylesheet" />	
 <script type="text/javascript" src="js/jquery-1.4.2.min.js"></script>
-<script type="text/javascript" src="js/jquery-ui-1.8.6.custom.min.js"></script>
+<!--script type="text/javascript" src="js/jquery-ui-1.8.6.custom.min.js"></script-->
 <script type="text/javascript" src="js/thickbox.js"></script>
 <script type="text/javascript">
 var	tb_pathToImage = "$webroot/images/loadingAnimation.gif";
-$(function(){
-// Dialog			
-$('#dialog').dialog({
-autoOpen: false,
-width: 400,
-modal: true,
-draggable: false,
-resizable: false
-});
-				
-// Dialog Link
-$('#softdown').click(function(){
-	$('#dialog').dialog('open');
-	return false;
-});	
-});
 </script>
 <style type="text/css">
 	#functions {
@@ -37,6 +21,21 @@ $('#softdown').click(function(){
 		margin:15px;
 		height:130px;
 		width:130px;
+	}
+	#softdown {
+		display:block;
+		position:absolute;
+		padding:10px;
+		top:25px;
+		left:69px;
+		width:120px;
+		height:32px;
+	}
+	#div_download p {
+		text-align:left;
+		font-size:14px;
+		padding: 10px;
+		line-height:22px;
 	}
 </style>
 </head>
@@ -64,7 +63,13 @@ $('#softdown').click(function(){
 		</div>
 
 		<div class="banner2">
-			<a href="#" class="download" id="softdown"></a>
+			<a title="下载助推宝" href="#TB_inline?height=76&width=400&inlineId=div_download" class="thickbox" id="softdown"></a>
+			<div id="div_download" style="display:none">
+				<p>
+				Windows 32bit(2000/XP/Vista/Win7)：<a onclick="javascript: pageTracker._trackPageview(\"/download/x86\")" href="$webroot/webui/download/machine/x86" target="_blank">下载</a></p>
+				<p>
+				Windows 64bit(Vista/Win7)：<a onclick="javascript:pageTracker._trackPageview(\"/download/x64\")" href="$webroot/webui/download/machine/x64" target="_blank">下载</a></p>
+			</div>
 		</div>
 
 		<div class="neck">
@@ -82,12 +87,6 @@ $('#softdown').click(function(){
 					</tr>
 				</table>
 			</div>
-		</div>
-		<div id="dialog" title="下载" >
-			<p style="text-align:left;font-size:14pt;font-family:Arial,Helvetica,sans-serif,"宋体";">
-			Windows 32bit(2000/XP/Vista/Win7)：<a onclick="javascript: pageTracker._trackPageview(\"/download/x86\")" href="$webroot/webui/download/machine/x86" target="_blank">下载</a><br/><br/>
-			Windows 64bit(Vista/Win7)：<a onclick="javascript:pageTracker._trackPageview(\"/download/x64\")" href="$webroot/webui/download/machine/x64" target="_blank">下载</a><br/>
-			</p>
 		</div>
 		{element footer}
 <!--COMPLETE-->
