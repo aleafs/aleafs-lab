@@ -5,6 +5,13 @@
 		<title>助推宝<!--{if !empty($title)}-->&nbsp;-&nbsp;$title<!--{/if}--></title>
 	</head>
 	<body>
-		</body>
+		<div>
+			<form method="post" action="$webroot/login/public">
+				<div>用户名：<input id="username" name="username" value="${username}" type="text" /></div>
+				<div>密&nbsp;码：<input id="password" name="password" type="password" /></div>
+				<div><input type="submit" name="submit" value="登录" /></div>
+			</form>
+		</div>
+	</body>
 </html>
 <!--COMPLETE-->
