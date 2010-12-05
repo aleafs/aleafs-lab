@@ -19,7 +19,7 @@ class Aleafs_Sem_Options
 
     private static $data    = array();
 
-    private static $table   = 'options';
+    private static $table   = null;
 
     private static $mysql   = null;
 
@@ -58,38 +58,65 @@ class Aleafs_Sem_Options
         $key = strtolower(trim($key));
         if (!isset(self::$data[$key])) {
             self::init();
-            self::$data[$key] = self::$mysql->where('cfgname', $key)
-                ->select('cfgdata')->getOne();
+            $data = self::$mysql->where('cfgname', $key)->select('cfgdata')->getOne();
+            if (!empty($data)) {
+                list($prefix, $data) = explode(':', $data, 2);
+                switch (strtoupper($prefix)) {
+                case 'O':
+                    $data   = json_decode($data);
+                    break;
+
+                case 'A':
+                    $data   = json_decode($data, true);
+                    break;
+
+                default:
+                    break;
+                }
+            }
+            self::$data[$key] = $data;
         }
 
         return self::$data[$key];
     }
     /* }}} */
 
-    /* {{{ public static Integer set() */
+    /* {{{ public static Boolean set() */
     /**
      * 设置信息
      *
      * @access public static
-     * @return Integer
+     * @return Boolean true or false
      */
     public static function set($key, $data, $desc = null)
     {
         self::init();
 
-        $key = strtolower(trim($key));
-        $now = date('Y-m-d H:i:s');
+        $key    = strtolower(trim($key));
+        $now    = date('Y-m-d H:i:s');
+        if (is_object($data)) {
+            $data   = 'O:' . json_encode($data);
+        } elseif (is_array($data)) {
+            $data   = 'A:' . json_encode($data);
+        } else {
+            $data   = 'S:' . $data;
+        }
+        $data   = self::$mysql->escape($data, false);
 
         $sql = sprintf(
             "INSERT INTO %s (cfgname, cfgdata, addtime, modtime) VALUES ('%s', '%s', '%s', '%s')",
-            self::$table, self::$mysql->escape($key), self::$mysql->escape($data), $now, $now
+            self::$table, self::$mysql->escape($key, false), $data, $now, $now
         );
         $sql.= sprintf(
-            " ON DUPLICATE KEY UPDATE cfgdata='%s', modtime='%s'",
-            self::$mysql->escape($data), $now
+            " ON DUPLICATE KEY UPDATE cfgdata='%s', modtime='%s'", $data, $now
         );
 
-        return self::$mysql->query($sql);
+        if (!self::$mysql->query($sql)) {
+            return false;
+        }
+
+        unset(self::$data[$key]);
+        return true;
     }
     /* }}} */
 
