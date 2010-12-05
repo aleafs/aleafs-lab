@@ -15,11 +15,12 @@ class Aleafs_Sem_Account
 
 	/* {{{ 静态常量 */
 
-	const NOT_LOGIN	= 101;
-	const ERR_PWD	= 102;
-	const CHECK_IP	= 201;
-	const KICK_OFF	= 202;
-    const REPUT_PWD	= 203;
+    const STATUS_OK = 0;
+	const NOT_LOGIN	= 1;
+	const ERR_PWD	= 2;
+	const CHECK_IP	= 3;
+	const KICK_OFF	= 4;
+    const REPUT_PWD	= 5;
 
     /* XXX:这个一定不要修改 */
     const SAFE_SALT = 'e82e1ee05f3b1361f682beecaeda257f';
@@ -61,12 +62,13 @@ class Aleafs_Sem_Account
 	 * @return Boolean true or false
 	 */
 	public static function isLogin()
-	{
+    {
+        self::$status   = self::STATUS_OK;
 		if (!Aleafs_Lib_Session::get('isLogin')) {
-			self::$status	= self::NOT_LOGIN;
+            self::$status	= self::NOT_LOGIN;
 		}
 
-		return true;
+        return self::$status;
 	}
 	/* }}} */
 
