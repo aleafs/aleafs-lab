@@ -55,34 +55,22 @@ INSERT INTO user_permission (pm_func, perm_se, begdate, enddate, se_name) VALUES
 SELECT pm_stat,begdate,enddate FROM useracct LEFT JOIN user_permission ON a.userid = b.userid WHERE apitoken = ? AND perm_se = 'baidu' AND se_name = ?
 
 -- 客户端与账户绑定表
-CREATE TABLE agent_machine (
-	agentid int(10) unsigned not null auto_increment PRIMARY KEY,
+CREATE TABLE agent_session (
+	autoid int(10) unsigned not null auto_increment PRIMARY KEY,
 	userid int(10) unsigned not null default 0,
 	aclstat smallint(5) unsigned not null default 0,
+	addtime datetime not null default '0000-00-00 00:00:00',
+	heartbeat int(10) unsigned not null default 0,
+	ipaddr int(10) unsigned not null default 0,
+	prov_name varchar(10) not null default '',
+	city_name varchar(10) not null default '',
 	se_name char(10) not null default '',
 	machine varchar(64) not null default '',
 	nodename varchar(100) not null default '',
-	addtime datetime not null default '0000-00-00 00:00:00',
-	modtime datetime not null default '0000-00-00 00:00:00',
-	KEY idx_machine_uid (userid, machine, se_name)
+	KEY idx_mac_uid (userid, machine, se_name),
+	KEY idx_mac_heart (heartbeat),
+	KEY idx_mac_prov (prov_name, city_name)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
-
--- 客户端在线情况
--- 可根据prov_name 来解决分地域排名问题
-CREATE TABLE agent_session (
-	sessid char(32) not null default '' PRIMARY KEY,
-	userid int(10) unsigned not null default 0,
-	heartbeat int(10) unsigned not null default 0,
-	addtime datetime not null default '0000-00-00 00:00:00',
-	prov_name varchar(10) not null default '',
-	city_name varchar(10) not null default '',
-	ipaddr varchar(15) not null default '',
-	machine varchar(64) not null default '',
-	nodename varchar(100) not null default '',
-	KEY idx_agentsess_beat (heartbeat),
-	KEY idx_agentsess_prov (prov_name)
-) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
-
 
 ---- 以下为各搜索引擎使用的表
 -- Q值
