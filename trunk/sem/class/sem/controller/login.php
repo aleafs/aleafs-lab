@@ -39,6 +39,9 @@ class Aleafs_Sem_Controller_Login extends Aleafs_Lib_Controller
 		$render = new Aleafs_Lib_Render_Html();
 		$render->assign('webroot',  Aleafs_Lib_Context::get('webroot'));
         $render->assign('title',    '用户登录');
+        $render->assign('username', htmlspecialchars(Aleafs_Lib_Cookie::get('username')));
+        $render->assign('appname',  htmlspecialchars(Aleafs_Lib_Cookie::get('appname')));
+
         if (!empty($param['msg'])) {
             $render->assign('message',  Aleafs_Sem_Account::getMessage($param['msg']));
         }
@@ -91,6 +94,9 @@ class Aleafs_Sem_Controller_Login extends Aleafs_Lib_Controller
 
         Aleafs_Lib_Session::attr(Aleafs_Lib_Session::TS, time());
         Aleafs_Lib_Session::attr(Aleafs_Lib_Session::IP, Aleafs_Lib_Context::userip(true));
+
+        Aleafs_Lib_Cookie::set('username',  $post['username']);
+        Aleafs_Lib_Cookie::set('appname',   $post['appname']);
 
         $url    = Aleafs_Lib_Session::get('redirect');
         $this->redirect($url);
