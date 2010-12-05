@@ -25,9 +25,9 @@ class Aleafs_Sem_Controller_Webui extends Aleafs_Lib_Controller
     {
         parent::__construct();
 
-        if (rand(1, 100) <= 20) {
+        if (rand(1, 100) <= 10) {
             Aleafs_Sem_Options::set(
-                'soft_download', 1 + (int)Aleafs_Sem_Options::get('soft_download')
+                'soft_download', rand(1, 3) + (int)Aleafs_Sem_Options::get('soft_download')
             );
         }
     }
