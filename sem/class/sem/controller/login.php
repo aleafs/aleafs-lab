@@ -40,7 +40,7 @@ class Aleafs_Sem_Controller_Login extends Aleafs_Lib_Controller
 		$render->assign('webroot',  Aleafs_Lib_Context::get('webroot'));
         $render->assign('title',    '用户登录');
         if (!empty($param['msg'])) {
-            $render->assign('message',  $param['msg']);
+            $render->assign('message',  Aleafs_Sem_Account::getMessage($param['msg']));
         }
 
 		$render->render(empty($param['tpl']) ? 'default' : $param['tpl'], 'login', true);

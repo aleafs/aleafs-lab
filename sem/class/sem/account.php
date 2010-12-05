@@ -13,33 +13,33 @@
 class Aleafs_Sem_Account
 {
 
-	/* {{{ 静态常量 */
+    /* {{{ 静态常量 */
 
     const STATUS_OK = 0;
-	const NOT_LOGIN	= 1;
-	const ERR_PWD	= 2;
-	const CHECK_IP	= 3;
-	const KICK_OFF	= 4;
+    const NOT_LOGIN	= 1;
+    const ERR_PWD	= 2;
+    const CHECK_IP	= 3;
+    const KICK_OFF	= 4;
     const REPUT_PWD	= 5;
 
     /* XXX:这个一定不要修改 */
     const SAFE_SALT = 'e82e1ee05f3b1361f682beecaeda257f';
 
-	/* }}} */
+    /* }}} */
 
-	/* {{{ 静态变量 */
+    /* {{{ 静态变量 */
 
-	private static $message	= array(
-		self::NOT_LOGIN	=> '请输入用户名和密码登录',
-		self::ERR_PWD	=> '用户名或者密码错误',
-		self::CHECK_IP	=> '请重新输入密码进行身份验证',
-		self::KICK_OFF	=> '您的账户已在别处登录',
-		self::REPUT_PWD	=> '请重新输入密码进行身份验证',
-	);
+    private static $message	= array(
+        self::NOT_LOGIN	=> '请输入用户名和密码登录',
+        self::ERR_PWD	=> '用户名或者密码错误',
+        self::CHECK_IP	=> '请重新输入密码进行身份验证',
+        self::KICK_OFF	=> '您的账户已在别处登录',
+        self::REPUT_PWD	=> '请重新输入密码进行身份验证',
+    );
 
-	private static $status	= 0;
+    private static $status	= 0;
 
-	/* }}} */
+    /* }}} */
 
     /* {{{ public static String password() */
     /**
@@ -54,23 +54,23 @@ class Aleafs_Sem_Account
     }
     /* }}} */
 
-	/* {{{ public static Boolean isLogin() */
-	/**
-	 * 判断用户是否登录
-	 *
-	 * @access public static
-	 * @return Boolean true or false
-	 */
-	public static function isLogin()
+    /* {{{ public static Boolean isLogin() */
+    /**
+     * 判断用户是否登录
+     *
+     * @access public static
+     * @return Boolean true or false
+     */
+    public static function isLogin()
     {
         self::$status   = self::STATUS_OK;
-		if (!Aleafs_Lib_Session::get('isLogin')) {
+        if (!Aleafs_Lib_Session::get('isLogin')) {
             self::$status	= self::NOT_LOGIN;
-		}
+        }
 
         return self::$status;
-	}
-	/* }}} */
+    }
+    /* }}} */
 
     /* {{{ public static Object  getUser() */
     /**
@@ -91,19 +91,19 @@ class Aleafs_Sem_Account
     }
     /* }}} */
 
-	/* {{{ public static String getMessage() */
-	/**
-	 * 获取用户的登录消息
-	 *
-	 * @access public static
-	 * @return String
-	 */
-	public static function getMessage($code = null)
+    /* {{{ public static String getMessage() */
+    /**
+     * 获取用户的登录消息
+     *
+     * @access public static
+     * @return String
+     */
+    public static function getMessage($code = null)
     {
         $code   = empty($code) ? self::$status : (int)$code;
-		return empty(self::$message[$code]) ? '' : self::$message[$code];
-	}
-	/* }}} */
+        return empty(self::$message[$code]) ? '' : self::$message[$code];
+    }
+    /* }}} */
 
 }
 
