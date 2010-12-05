@@ -406,7 +406,7 @@ abstract class Aleafs_Lib_Database
             return null;
         }
 
-        $temp   = $this->_fetch($res);
+        $temp   = (array)$this->_fetch($res);
         return reset($temp);
     }
     /* }}} */
