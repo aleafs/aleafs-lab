@@ -48,7 +48,7 @@ class Aleafs_Sem_User
             return trim($appuser);
         }
 
-        return sprintf('%s/%s', strtolower(trim($appname)), trim($appuser));
+        return sprintf('%s@%s', trim($appuser), strtolower(trim($appname)));
     }
     /* }}} */
 
