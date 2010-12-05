@@ -39,11 +39,6 @@ class Aleafs_Sem_Controller_Login extends Aleafs_Lib_Controller
 		$render = new Aleafs_Lib_Render_Html();
 		$render->assign('webroot',  Aleafs_Lib_Context::get('webroot'));
         $render->assign('title',    '用户登录');
-
-        if (!empty($param['url'])) {
-            $render->assign('redirect', $param['url']);
-        }
-
         if (!empty($param['msg'])) {
             $render->assign('message',  $param['msg']);
         }
@@ -62,12 +57,7 @@ class Aleafs_Sem_Controller_Login extends Aleafs_Lib_Controller
     protected function actionLogout($param, $post = null)
     {
         Aleafs_Lib_Session::destroy();
-        if (empty($param['url'])) {
-            $this->redirect('webui', 'index');
-        } else {
-            // XXX: 死循环风险
-            header(sprintf('Location: %s', $param['url']));
-        }
+        $this->redirect(empty($param['url']) ? 'webui/index' : $param['url']);
     }
     /* }}} */
 
@@ -83,14 +73,16 @@ class Aleafs_Sem_Controller_Login extends Aleafs_Lib_Controller
         $un = isset($post['username']) ? $post['username'] : '';
         $pw = isset($post['password']) ? $post['password'] : '';
         $se = isset($post['_appname']) ? $post['_appname'] : '';
+
+        $url    = Aleafs_Lib_Parse_Url::build('login', 'index', $param);
         if (empty($un) || empty($pw)) {
-            $this->redirect('login', 'index', $param);
+            $this->redirect($url);
             return;
         }
 
         $un = Aleafs_Sem_User::username($un, $se);
         if (false === ($un = Aleafs_Sem_Account::getUser($un, $pw))) {
-            $this->redirect('login', 'index', $param);
+            $this->redirect($url);
             return;
         }
 
@@ -100,8 +92,8 @@ class Aleafs_Sem_Controller_Login extends Aleafs_Lib_Controller
         Aleafs_Lib_Session::attr(Aleafs_Lib_Session::TS, time());
         Aleafs_Lib_Session::attr(Aleafs_Lib_Session::IP, Aleafs_Lib_Context::userip(true));
 
-        // TODO: 通过传入解决
-        $this->redirect('admin', 'index');
+        $url    = Aleafs_Lib_Session::get('redirect');
+        $this->redirect($url);
     }
     /* }}} */
 

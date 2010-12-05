@@ -42,10 +42,7 @@ class Aleafs_Sem_Controller_Admin extends Aleafs_Lib_Controller
                 'redirect',
                 rtrim(Aleafs_Lib_Parser_Url::build('admin', $action, $param), '/')
             );
-            $this->redirect('login', 'index', array(
-                'tpl'   => 'admin',
-                'msg'   => $msg,
-            ));
+            $this->redirect('login/index/tpl/admin/msg/' . $msg);
             return;
         }
 
