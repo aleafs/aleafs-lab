@@ -37,11 +37,14 @@ class Aleafs_Sem_Controller_Admin extends Aleafs_Lib_Controller
      */
     public function execute($action, $param, $post = null)
     {
-        if (true !== Aleafs_Sem_Account::isLogin()) {
+        if (Aleafs_Sem_Account::STATUS_OK !== ($msg = Aleafs_Sem_Account::isLogin())) {
+            Aleafs_Lib_Session::set(
+                'redirect',
+                rtrim(Aleafs_Lib_Parser_Url::build('admin', $action, $param), '/')
+            );
             $this->redirect('login', 'index', array(
                 'tpl'   => 'admin',
-                'url'   => Aleafs_Lib_Parser_Url::build('admin', $action, $param),
-                'msg'   => Aleafs_Sem_Account::getMessage(),
+                'msg'   => $msg,
             ));
             return;
         }
