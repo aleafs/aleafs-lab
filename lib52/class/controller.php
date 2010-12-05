@@ -69,16 +69,28 @@ class Aleafs_Lib_Controller
      * @access public
      * @return void
      */
-    public function redirect($module, $action, $param = null)
+    public function redirect($url)
     {
-        if (0 === strcasecmp($module, $this->module) && 0 === strcasecmp($action, $this->action)) {
-            return;
+        $root   = rtrim(Aleafs_Lib_Context::get('webroot'), '/');
+        $host   = preg_replace('/^https?:\/\//i', '', $root);
+        $url    = trim($url);
+        if (false !== ($pos = strpos($url, $host))) {
+            $url    = new Aleafs_Lib_Parser_Url(substr($url, $pos));
+            if (0 === strcasecmp($url->module, $this->module) &&
+                0 === strcasecmp($url->action, $this->action))
+            {
+                return;
+            }
+            $url    = sprintf('%s/%s', $root, ltrim(Aleafs_Lib_Parser_Url::build(
+                $url->module, $url->action, $url->param
+            )));
         }
 
-        header(sprintf('Location: %s/%s',
-            rtrim(Aleafs_Lib_Context::get('webroot'), '/'),
-            ltrim(Aleafs_Lib_Parser_Url::build($module, $action, $param), '/')
-        ));
+        if (!preg_match('/^https?:\/\//i', $url)) {
+            $url    = 'http://' . $url;
+        }
+
+        header(sprintf('Location: %s', $url));
     }
     /* }}} */
 
