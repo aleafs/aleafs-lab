@@ -40,6 +40,7 @@ class Aleafs_Sem_Controller_Webui extends Aleafs_Lib_Controller
         $render->assign('webroot',  Aleafs_Lib_Context::get('webroot'));
         $render->assign('title',    '网络推广好助手');
         $render->assign('thumbs',   false);
+        $render->assign('downcnt',  number_format(Aleafs_Sem_Options::get('soft_download'), 0));
         $render->render('index', 'webui', true);
     }
     /* }}} */
@@ -156,6 +157,11 @@ class Aleafs_Sem_Controller_Webui extends Aleafs_Lib_Controller
 
         $query .= sprintf(" ON DUPLICATE KEY UPDATE downcnt=downcnt+1,modtime='%s',uagent='%s'", $time, $uagent);
         $mysql->query($query);
+
+        // 伪造下载数
+        Aleafs_Sem_Options::set(
+            'soft_download', (int)Aleafs_Sem_Options::get('soft_download') + rand(1, 10)
+        );
     }
     /* }}} */
 
