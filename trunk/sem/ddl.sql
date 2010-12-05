@@ -7,6 +7,18 @@ CREATE TABLE web_session (
 	UNIQUE KEY uk_sess_key (sesskey)
 ) ENGINE = MEMORY DEFAULT CHARSET=UTF8;
 
+CREATE TABLE sem_options (
+	addtime datetime not null default '0000-00-00 00:00:00',
+	modtime datetime not null default '0000-00-00 00:00:00',
+	inorder int(10) unsigned not null default 0,
+	cfgtype tinyint(2) unsigned not null default 0,
+	cfgnode varchar(10) not null default '',
+	cfgname varchar(64) not null default '',
+	cfgdesc varchar(255) not null default '',
+	cfgdata text,
+	UNIQUE KEY uk_opt_name (cfgname)
+) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
+
 CREATE TABLE useracct (
 	userid int(10) unsigned not null auto_increment PRIMARY KEY,
 	usertype smallint(5) unsigned not null default 0,
