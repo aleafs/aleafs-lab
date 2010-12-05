@@ -36,6 +36,13 @@ class Aleafs_Sem_Controller_Webui extends Aleafs_Lib_Controller
      */
     protected function actionIndex($param, $post = null)
     {
+        // XXX: 13%的概率
+        if (rand(1, 100) <= 13) {
+            Aleafs_Sem_Options::set(
+                'soft_download', rand(1, 10) + (int)Aleafs_Sem_Options::get('soft_download')
+            );
+        }
+
         $render = new Aleafs_Lib_Render_Html();
         $render->assign('webroot',  Aleafs_Lib_Context::get('webroot'));
         $render->assign('title',    '网络推广好助手');
@@ -158,9 +165,8 @@ class Aleafs_Sem_Controller_Webui extends Aleafs_Lib_Controller
         $query .= sprintf(" ON DUPLICATE KEY UPDATE downcnt=downcnt+1,modtime='%s',uagent='%s'", $time, $uagent);
         $mysql->query($query);
 
-        // 伪造下载数
         Aleafs_Sem_Options::set(
-            'soft_download', (int)Aleafs_Sem_Options::get('soft_download') + rand(1, 10)
+            'soft_download', (int)Aleafs_Sem_Options::get('soft_download') + 1
         );
     }
     /* }}} */
