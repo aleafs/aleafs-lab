@@ -19,6 +19,8 @@
 		<property name="mysql.master.server1" value="mysql://db_write:123456@10.232.36.110:9902" />
 		<property name="mysql.slave.server1" value="mysql://db_read:123456@10.232.36.110:9902" />
 
+		<property name="software.version" value="3.1.5" />
+
 		<phingcall target="-copyfile" />
 
 	</target>
@@ -37,6 +39,8 @@
 					<token key="mysql.log.url" value="${mysql.log.url}" />
 					<token key="mysql.master.server1" value="${mysql.master.server1}" />
 					<token key="mysql.slave.server1" value="${mysql.slave.server1}" />
+
+					<token key="software.version" value="${software.version}" />
 				</replacetokens>
 			</filterchain>
 		</copy>

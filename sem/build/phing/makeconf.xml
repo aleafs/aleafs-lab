@@ -39,6 +39,8 @@
 					<token key="global.log.url" value="${global.log.url}" />
 					<token key="global.url.server" value="${global.url.server}" />
 					<token key="global.url.prefix" value="${global.url.prefix}" />
+
+					<token key="software.version" value="${software.version}" />
 				</replacetokens>
 			</filterchain>
 		</copy>
