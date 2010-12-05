@@ -173,6 +173,7 @@ class Aleafs_Sem_Dispatcher
             ini_set('display_errors', 'Off');
         }
 
+        Aleafs_Sem_Options::init('mysql', 'sem_options');
         Aleafs_Lib_Render_Html::init(array(
             'tpl_path'  => $this->config->get('themes.source'),
             'obj_path'  => $this->config->get('themes.object'),
