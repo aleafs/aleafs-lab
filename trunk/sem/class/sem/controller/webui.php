@@ -39,6 +39,7 @@ class Aleafs_Sem_Controller_Webui extends Aleafs_Lib_Controller
         $render = new Aleafs_Lib_Render_Html();
         $render->assign('webroot',  Aleafs_Lib_Context::get('webroot'));
         $render->assign('title',    '网络推广好助手');
+        $render->assign('thumbs',   false);
         $render->render('index', 'webui', true);
     }
     /* }}} */
