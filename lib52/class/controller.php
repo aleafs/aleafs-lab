@@ -87,7 +87,7 @@ class Aleafs_Lib_Controller
         }
 
         if (!preg_match('/^https?:\/\//i', $url)) {
-            $url    = 'http://' . $url;
+            $url    = sprintf('%s/%s', $root, ltrim($url, '/'));
         }
 
         header(sprintf('Location: %s', $url));
