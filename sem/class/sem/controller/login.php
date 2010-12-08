@@ -77,7 +77,7 @@ class Aleafs_Sem_Controller_Login extends Aleafs_Lib_Controller
         $pw = isset($post['password']) ? $post['password'] : '';
         $se = isset($post['_appname']) ? $post['_appname'] : '';
 
-        $url    = Aleafs_Lib_Parse_Url::build('login', 'index', $param);
+        $url    = Aleafs_Lib_Parser_Url::build('login', 'index', $param);
         if (empty($un) || empty($pw)) {
             $this->redirect($url);
             return;
