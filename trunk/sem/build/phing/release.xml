@@ -7,6 +7,8 @@
 		<phingcall target="-cleanup" />
 		<phingcall target="-checkout" />
 
+		<svnlastrevision propertyName="svn.revision" workingcopy="build/src" />
+
 		<phingcall target="-config" >
 			<property name="rpm.config.mode" value="release" />
 		</phingcall>
@@ -76,6 +78,11 @@
 				<include name="**/*" />
 				<exclude name="_htaccess_*" />
 			</fileset>
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="svn.revision" value="${svn.revision}"/>
+				</replacetokens>
+			</filterchain>
 		</copy>
 
 		<copy file="build/src/webroot/_htaccess_apache" tofile="${rpm.tmp.dir}/public_html/.htaccess" overwrite="true" />
