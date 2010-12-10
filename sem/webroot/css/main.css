@@ -7,7 +7,7 @@ body,div,span {
 	text-align:center;
 }
 body {
-	background:url("../images/top_bg.gif") repeat-x scroll 0 0 #F1F1F1;
+	background:url("../images/top_bg.gif?##svn.revision##") repeat-x scroll 0 0 #F1F1F1;
 	margin-top:0;
 }
 img {
@@ -40,10 +40,10 @@ a:hover {
 	width : 343px;
 	height: 92px;
 	margin-top:14px;
-	background: url("../images/logo.png") no-repeat;
+	background: url("../images/logo.png?##svn.revision##") no-repeat;
 }
 .index {
-	background: url("../images/logo2.png") no-repeat;
+	background: url("../images/logo2.png?##svn.revision##") no-repeat;
 }
 .top_r {
 	float:right;
@@ -52,7 +52,7 @@ a:hover {
 	width: 647px;
 	height: 25px;
 	margin-top:1px;
-	background:url("../images/btr.png") no-repeat;
+	background:url("../images/btr.png?##svn.revision##") no-repeat;
 }
 .navi {
 	width:647px;
@@ -77,7 +77,7 @@ a:hover {
 }
 .current {
 	color:#FFFFFF;
-	background:url("../images/navi_bg.png") no-repeat;
+	background:url("../images/navi_bg.png?##svn.revision##") no-repeat;
 }
 .main {
 	width: 970px;
@@ -114,13 +114,13 @@ a:hover {
 .banner1 {
 	height: 150px;
 	width : 100%;
-	background:url("../images/banner_1.png") no-repeat;
+	background:url("../images/banner_1.png?##svn.revision##") no-repeat;
 	position:relative;
 }
 .banner2 {
 	height: 139px;
 	width : 100%;
-	background:url("../images/banner_2.png") no-repeat;
+	background:url("../images/banner_2.png?##svn.revision##") no-repeat;
 	position:relative;
 }
 #message {
@@ -141,7 +141,7 @@ a:hover {
 	height : 43px;
 	width : 100%;
 	text-align: left;
-	background:url("../images/neck_bg.png") no-repeat;
+	background:url("../images/neck_bg.png?##svn.revision##") no-repeat;
 }
 .neck h4 {
 	padding:17px 0 0 40px;
@@ -149,7 +149,7 @@ a:hover {
 .bottom {
 	height : 196px;
 	width : 100%;
-	background:url("../images/bottom.png") no-repeat;
+	background:url("../images/bottom.png?##svn.revision##") no-repeat;
 }
 .foot {
 	margin-top:18px;
