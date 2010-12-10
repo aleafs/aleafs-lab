@@ -78,14 +78,23 @@
 				<include name="**/*" />
 				<exclude name="_htaccess_*" />
 			</fileset>
+		</copy>
+
+		<copy file="build/src/webroot/_htaccess_apache" tofile="${rpm.tmp.dir}/public_html/.htaccess" overwrite="true" />
+		<reflexive>
+			<fileset dir="${rpm.tmp.dir}">
+				<include name="**/*.js" />
+				<include name="**/*.css" />
+				<include name="**/*.htm" />
+				<include name="**/*.html" />
+			</fileset>
 			<filterchain>
 				<replacetokens begintoken="##" endtoken="##">
 					<token key="svn.revision" value="${svn.revision}"/>
 				</replacetokens>
 			</filterchain>
-		</copy>
+		</reflexive>
 
-		<copy file="build/src/webroot/_htaccess_apache" tofile="${rpm.tmp.dir}/public_html/.htaccess" overwrite="true" />
 		<exec dir="${rpm.tmp.dir}" command="tar -cvzf ../release.tar.gz *" />
 		<delete dir="build/rpm/release" verbose="false" quiet="true" includeemptydirs="true" />
 	</target>
