@@ -11,6 +11,14 @@ var	tb_pathToImage = "$webroot/images/loadingAnimation.gif?##svn.revision##";
 		padding-top: 10px;
 		width: 960px;
 	}
+	#functions h1 {
+		font-size: 16px;
+		font-weight:bold;
+		margin-top: 120px;
+		margin-left: 15px;
+		color: #333333;
+		width:130px;
+	}
 	.clk_td {
 		width:192px;
 	}
@@ -83,19 +91,42 @@ var	tb_pathToImage = "$webroot/images/loadingAnimation.gif?##svn.revision##";
 			<h4>核心功能</h4>
 		</div>
 		<div class="bottom">
-			<!--{if $thumbs}-->
 			<div id="functions">
 				<table cellspacing="0" cellpadding="0" border="0">
 					<tr>
-						<td class="clk_td"><a title="自动竞价" class="thickbox" href="$webroot/images/thumbs/auto.png?##svn.revision##"></a></td>
-						<td class="clk_td"><a title="出价优化" class="thickbox" href="$webroot/images/thumbs/bid.png?##svn.revision##"></a></td>
-						<td class="clk_td"><a title="排名保持" class="thickbox" href="$webroot/images/thumbs/keep.png?##svn.revision##"></a></td>
-						<td class="clk_td"><a title="平均排名" class="thickbox" href="$webroot/images/thumbs/rank.png?##svn.revision##"></a></td>
-						<td class="clk_td"><a title="质量度优化" class="thickbox" href="$webroot/images/thumbs/optimize.png?##svn.revision##"></a></td>
+						<td class="clk_td">
+							<!--{if $thumbs}-->
+							<a title="自动竞价" class="thickbox" href="$webroot/images/thumbs/auto.png?##svn.revision##"></a>
+							<!--{/if}-->
+							<h1>自动竞价</h1>
+						</td>
+						<td class="clk_td">
+							<!--{if $thumbs}-->
+							<a title="出价优化" class="thickbox" href="$webroot/images/thumbs/bid.png?##svn.revision##"></a>
+							<!--{/if}-->
+							<h1>出价优化</h1>
+						</td>
+						<td class="clk_td">
+							<!--{if $thumbs}-->
+							<a title="排名保持" class="thickbox" href="$webroot/images/thumbs/keep.png?##svn.revision##"></a>
+							<!--{/if}-->
+							<h1>排名保持</h1>
+						</td>
+						<td class="clk_td">
+							<!--{if $thumbs}-->
+							<a title="平均排名" class="thickbox" href="$webroot/images/thumbs/rank.png?##svn.revision##"></a>
+							<!--{/if}-->
+							<h1 style="margin-left:25px;">平均排名</h1>
+						</td>
+						<td class="clk_td">
+							<!--{if $thumbs}-->
+							<a title="质量度优化" class="thickbox" href="$webroot/images/thumbs/optimize.png?##svn.revision##"></a>
+							<!--{/if}-->
+							<h1 style="margin-left:25px;">质量度优化</h1>
+						</td>
 					</tr>
 				</table>
 			</div>
-			<!--{/if}-->
 		</div>
 		{element footer}
 <!--COMPLETE-->
