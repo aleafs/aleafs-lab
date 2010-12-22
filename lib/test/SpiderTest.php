@@ -8,11 +8,10 @@
 // | Author: pengchun <pengchun@taobao.com>									|
 // +------------------------------------------------------------------------+
 
-use \Edp\Myfox\Spider;
 
 require_once(__DIR__ . '/../class/TestShell.php');
 
-class SpiderTest extends \Aleafs\Lib\TestShell
+class SpiderTest extends \Aleafs\Lib\LibTestShell
 {
 
     private $test_script;
