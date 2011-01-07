@@ -20,8 +20,8 @@ class Apc
     const EXPIRE_TIME	= 1200;		  /**<  seconds    */
     const COMPRESS_SIZE	= 4096;		  /**<  bytes      */
 
-    const SERIALIZE		= 'serialize';
-    const UNSERIALIZE	= 'unserialize';
+    const SERIALIZE		= 'igbinary_serialize';
+    const UNSERIALIZE	= 'igbinary_unserialize';
 
     /* }}} */
 
@@ -65,13 +65,39 @@ class Apc
     public function __destruct()
     {
         foreach (self::$data AS $key => &$val) {
-            if (empty($val['write'])) {
+            if (empty($val['w'])) {
                 continue;
             }
-            if (apc_store($key, $val['value'], $val['time'])) {
-                unset($val['write']);
+            if (apc_store($this->name($key), $this->pack($val['v']), $val['t'])) {
+                unset($val['w']);
             }
         }
+    }
+    /* }}} */
+
+    /* {{{ public Boolean add() */
+    /**
+     * 添加数据
+     *
+     * @access public
+     * @param  String $key
+     * @param  Mixture $value
+     * @param  Integer $expire (default null)
+     */
+    public function add($key, $value, $expire = null)
+    {
+        $expire = is_null($expire) ? self::EXPIRE_TIME : (int)$expire;
+        if (!apc_add($this->name($key), $this->pack($value), $expire)) {
+            return false;
+        }
+
+        self::$data[$key] = array(
+            'w' => false,
+            't' => $expire,
+            'v' => $value,
+        );
+
+        return true;
     }
     /* }}} */
 
@@ -86,14 +112,10 @@ class Apc
      */
     public function set($key, $value, $expire = null)
     {
-        $expire = is_null($expire) ? self::EXPIRE_TIME : (int)$expire;
-        self::$data[$this->name($key)] = array(
-            'write' => true,
-            'time'  => $expire,
-            'value' => $this->pack(array(
-                'ttl'   => time() + $expire,
-                'val'   => $value,
-            )),
+        self::$data[$key] = array(
+            'w' => true,
+            'v' => $value,
+            't' => (null === $expire) ? self::EXPIRE_TIME : (int)$expire,
         );
 
         return true;
@@ -108,26 +130,18 @@ class Apc
      * @param  String $key
      * @return Mixture
      */
-    public function get($key, $ttl = null)
+    public function get($key)
     {
-        $key    = $this->name($key);
         if (isset(self::$data[$key])) {
-            $data = self::$data[$key]['value'];
-        } else {
-            $data = apc_fetch($this->name($key));
+            return self::$data[$key]['v'];
         }
+
+        $data = apc_fetch($this->name($key));
         if (false === $data) {
             return null;
         }
 
-        $ttl  = empty($ttl) ? time() : (int)$ttl;
-        $data = $this->unpack($data);
-        if ($data['ttl'] < $ttl) {
-            $this->delete($key);
-            return null;
-        }
-
-        return $data['val'];
+        return $this->unpack($data);
     }
     /* }}} */
 
@@ -141,10 +155,8 @@ class Apc
      */
     public function delete($key)
     {
-        $key    = $this->name($key);
         unset(self::$data[$key]);
-
-        return apc_delete($key);
+        return apc_delete($this->name($key));
     }
     /* }}} */
 
