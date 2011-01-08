@@ -58,7 +58,7 @@ class Dict
      * @access public
      * @return void
      */
-    public function __construct($file, $bucket = 0)
+    public function __construct($file, $bucket = 1)
     {
         if (!is_file($file) && !self::create($file, (int)$bucket)) {
             throw new \Aleafs\Lib\Exception(sprintf(
@@ -93,7 +93,7 @@ class Dict
         }
 
         $rec = $this->find($key);
-        if (empty($rec) || $rec['scrap']) {
+        if (empty($rec) || !empty($rec['scrap']) || !isset($rec['data'])) {
             return false;
         }
 
@@ -116,37 +116,31 @@ class Dict
             return false;
         }
 
-        $rec    = $this->find($key);
         $value  = $this->pack($value);
         $vlen   = strlen($value);
-        if (!empty($rec) && $rec['vlen'] >= $vlen) {
+        $rec    = $this->find($key);
+        if (!empty($rec) && isset($rec['vlen']) && $rec['vlen'] >= $vlen) {
             return $this->fset($rec['off'] + 10, pack(
                 'CI', 0, strlen($value)
-            ) . $key . $value);
+            ) . $key . $value, $vlen);
         }
 
-        return (bool)file_put_contents($this->dfile, pack(
-            'IICCI', empty($rec['loff']) ? 0 : $rec['loff'],
-            empty($rec['roff']) ? 0 : $rec['roff'], $klen, 0, $vlen
-        ) . $key . $value, FILE_APPEND);
+        $value  = pack(
+            'IICCI',
+            empty($rec['loff']) ? 0 : $rec['loff'],
+            empty($rec['roff']) ? 0 : $rec['roff'],
+            $klen, 0, $vlen
+        ) . $key . $value;
+        $vlen   = 14 + $vlen + $klen;
+        $off    = $this->slab($vlen);
+        if (!$this->fset($off, $value, $vlen) || !$this->fset($rec['pos'], $off, 4)) {
+            return false;
+        }
+        $this->fsize += $off;
+
+        return true;
     }
     /* }}} */
-
-    public function reset()
-    {
-    }
-
-    public function next()
-    {
-    }
-
-    public function lock()
-    {
-    }
-
-    public function optimize()
-    {
-    }
 
     /* {{{ private static Boolean create() */
     /**
@@ -157,17 +151,18 @@ class Dict
      * @param  integer $bucket
      * @return Boolean true or false
      */
-    private static function create($file, $bucket = 0)
+    private static function create($file, $bucket = 1)
     {
         $dr = dirname($file);
         if (!is_dir($dr) && !mkdir($dr, 0755, true)) {
             return false;
         }
 
+        $bucket = max(1, (int)$bucket);
         return (bool)file_put_contents($file, pack(
-            'a3IIIIIa9', self::DICT_TAGNAME, self::DICT_VERSION,
-            max(0, (int)$bucket), self::DICT_HASH_PRI, 32, 0, ''
-        ), LOCK_EX);
+            'a3I5a9', self::DICT_TAGNAME, self::DICT_VERSION,
+            $bucket, self::DICT_HASH_PRI, 32 + ($bucket << 2), 0, ''
+        ) . str_repeat(pack('I', 0), $bucket), LOCK_EX);
     }
     /* }}} */
 
@@ -220,12 +215,13 @@ class Dict
             $type   = self::TYPE_OBJECT;
         }
 
+        $gzip   = 0;
         if (self::$compress && strlen($data) > self::MIN_GZIP_LEN) {
             $data   = gzcompress($data);
-            $type   |= 1;
+            $gzip   = 1;
         }
 
-        return pack('I', $type) . $data;
+        return pack('CC', $gzip, $type) . $data;
     }
     /* }}} */
 
@@ -238,15 +234,14 @@ class Dict
      */
     private static function unpack($data)
     {
-        if (strlen($data) < 4) {
+        if (strlen($data) < 2) {
             return false;
         }
 
-        $type   = unpack('I', substr($data, 0, 4));
-        $type   = reset($type);
-        $data   = substr($data, 4);
+        list($gzip, $type) = unpack('CC', substr($data, 0, 2));
+        $data   = substr($data, 2);
 
-        if ($type = ($type & 0x0001) > 0) {
+        if ($gzip > 0) {
             $data   = gzuncompress($data);
         }
 
@@ -290,17 +285,31 @@ class Dict
      * @access private
      * @return Boolean true or false
      */
-    private function fset($off, $data)
+    private function fset($off, $data, $len = -1)
     {
         if (false === ($fd = fopen($this->dfile, 'wb'))) {
             return false;
         }
 
-        fseek($fd, $off, SEEK_SET);
-        $rt = strlen($data) == fwrite($fd, $data) ? true : false;
+        $len = ($len < 1) ? strlen($len) : (int)$len;
+        fseek($fd, min($off, $this->fsize), SEEK_SET);
+        $ret = ($len == fwrite($fd, $data, $len)) ? true : false;
         fclose($fd);
 
-        return $rt;
+        return $ret;
+    }
+    /* }}} */
+
+    /* {{{ private Integer slab() */
+    /**
+     * 获取可利用的空间偏移量
+     *
+     * @access private
+     * @return Integer
+     */
+    private function slab($len)
+    {
+        return $this->fsize;
     }
     /* }}} */
 
@@ -344,7 +353,7 @@ class Dict
             $off = $pos;
         }
 
-        return $this->tree($off, $key);
+        return $this->tree($off, $key, $pos);
     }
     /* }}} */
 
@@ -355,26 +364,31 @@ class Dict
      * @access private
      * @return Mixture
      */
-    private function tree($off, $key = '')
+    private function tree($off, $key = '', $pos = 0)
     {
+        if ($off < 32) {    // 叶子
+            return array('pos' => $pos);
+        }
+
         $len = 14 + self::MAX_KEY_LEN;
         $buf = $this->fget($off, $len);
-        if ($len != strlen($buf)) {
-            return false;
+        if (strlen($buf) < 14) {
+            return array('pos' => $pos);
         }
 
         list($loff, $roff, $klen, $scrap, $vlen) = unpack('IICCI', substr($buf, 0, 14));
         $idx = substr($buf, 14, $klen);
         $cmp = (strlen($key) == 0) ? 0 : strcmp($key, $idx);
-        if ($cmp > 0 && $roff > 0) {
+        if ($cmp > 0) {
             return $this->tree($roff, $key);
         }
 
-        if ($cmp < 0 && $loff > 0) {
+        if ($cmp < 0) {
             return $this->tree($loff, $key);
         }
 
         return array(
+            'pos'   => $pos,
             'off'   => $off,
             'loff'  => $loff,
             'roff'  => $roff,
