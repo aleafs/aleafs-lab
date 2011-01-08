@@ -366,11 +366,11 @@ class Dict
         list($loff, $roff, $klen, $scrap, $vlen) = unpack('IICCI', substr($buf, 0, 14));
         $idx = substr($buf, 14, $klen);
         $cmp = (strlen($key) == 0) ? 0 : strcmp($key, $idx);
-        if ($cmp > 0) {
+        if ($cmp > 0 && $roff > 0) {
             return $this->tree($roff, $key);
         }
 
-        if ($cmp < 0) {
+        if ($cmp < 0 && $loff > 0) {
             return $this->tree($loff, $key);
         }
 
