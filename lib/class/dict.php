@@ -21,6 +21,11 @@ class Dict
     const DICT_VERSION  = 100;
     const DICT_HASH_PRI = 5381;
     const MAX_KEY_LEN   = 0xFF;
+    const MIN_GZIP_LEN  = 1024;
+
+    const TYPE_SCALAR   = 2;
+    const TYPE_ARRAY    = 4;
+    const TYPE_OBJECT   = 8;
 
     /* }}} */
 
@@ -37,6 +42,8 @@ class Dict
     private $bucket;
 
     private $locked;
+
+    private $compress   = false;
 
     /* }}} */
 
@@ -59,16 +66,45 @@ class Dict
         if (false === $this->init()) {
             throw new \Aleafs\Lib\Exception('Dict head check failed');
         }
+        $this->compress = function_exists('gzcompress') ? true : false;
     }
     /* }}} */
 
-    public function set($key, $value)
-    {
-    }
-
+    /* {{{ public Mixture get() */
+    /**
+     * 获取记录
+     *
+     * @access public
+     * @return Mixture
+     */
     public function get($key)
     {
+        $key = trim($key);
+        $len = strlen($key);
+        if (0 == $len || $len > self::MAX_KEY_LEN) {
+            return false;
+        }
+
+        $rec = $this->find($key);
     }
+    /* }}} */
+
+    /* {{{ public Boolean set() */
+    /**
+     * 添加/更新键值对
+     *
+     * @access public
+     * @return Boolean true or false
+     */
+    public function set($key, $value)
+    {
+        $key = trim($key);
+        $len = strlen($key);
+        if (0 == $len || $len > self::MAX_KEY_LEN) {
+            return false;
+        }
+    }
+    /* }}} */
 
     public function reset()
     {
@@ -139,6 +175,67 @@ class Dict
     }
     /* }}} */
 
+    /* {{{ private static string pack() */
+    /**
+     * 数据打包
+     *
+     * @access private static
+     * @return string
+     */
+    private static function pack($data)
+    {
+        if (is_scalar($data)) {
+            $type   = self::TYPE_SCALAR;
+        } elseif (is_array($data)) {
+            $data   = json_encode($data);
+            $type   = self::TYPE_ARRAY;
+        } else {
+            $data   = json_encode($data);
+            $type   = self::TYPE_OBJECT;
+        }
+
+        if ($this->compress && strlen($data) > self::MIN_GZIP_LEN) {
+            $data   = gzcompress($data);
+            $type   |= 1;
+        }
+
+        return pack('I', $type) . $data;
+    }
+    /* }}} */
+
+    /* {{{ private static Mixture unpack() */
+    /**
+     * 数据解包
+     *
+     * @access private static
+     * @return Mixture
+     */
+    private static function unpack($data)
+    {
+        if (strlen($data) < 4) {
+            return false;
+        }
+
+        $type   = unpack('I', substr($data, 0, 4));
+        $type   = reset($type);
+        $data   = substr($data, 4);
+
+        if ($type = ($type & 0x0001) > 0) {
+            $data   = gzuncompress($data);
+        }
+
+        if (self::TYPE_ARRAY == $type) {
+            return json_decode($data, true);
+        }
+
+        if (self::TYPE_OBJECT == $type) {
+            return json_decode($data);
+        }
+
+        return $data;
+    }
+    /* }}} */
+
     /* {{{ private string read() */
     /**
      * 读取文件
@@ -157,6 +254,41 @@ class Dict
             $off = ($off < 1) ? 0 : (int)$off,
             min(max(0, (int)$len), $this->fsize - $off)
         );
+    }
+    /* }}} */
+
+    /* {{{ private integer hash() */
+    /**
+     * 获取KEY的hash值
+     *
+     * @access private
+     * @return Integer
+     */
+    private function hash($key)
+    {
+        if ($this->bucket < 1) {
+            return 0;
+        }
+
+        $si = $this->prime;
+        // time33 算法
+        for ($i = 0, $len = strlen($key); $i < $len; $i++) {
+            $si = ($si << 5) + $si + ord(substr($key, $i, 1));
+        }
+
+        return $si % $this->bucket;
+    }
+    /* }}} */
+
+    /* {{{ private Mixture find() */
+    /**
+     * 根据KEY找所在记录
+     *
+     * @access private
+     * @return Mixture
+     */
+    private function find($key)
+    {
     }
     /* }}} */
 
