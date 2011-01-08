@@ -20,12 +20,18 @@ class Dict
     const DICT_TAGNAME  = 'RBD';
     const DICT_VERSION  = 100;
     const DICT_HASH_PRI = 5381;
-    const MAX_KEY_LEN   = 0xFF;
+    const MAX_KEY_LEN   = 0xFC;
     const MIN_GZIP_LEN  = 1024;
 
     const TYPE_SCALAR   = 2;
     const TYPE_ARRAY    = 4;
     const TYPE_OBJECT   = 8;
+
+    /* }}} */
+
+    /* {{{ 静态变量 */
+
+    private static $compress;
 
     /* }}} */
 
@@ -42,8 +48,6 @@ class Dict
     private $bucket;
 
     private $locked;
-
-    private $compress   = false;
 
     /* }}} */
 
@@ -66,7 +70,10 @@ class Dict
         if (false === $this->init()) {
             throw new \Aleafs\Lib\Exception('Dict head check failed');
         }
-        $this->compress = function_exists('gzcompress') ? true : false;
+
+        if (null === self::$compress) {
+            self::$compress = function_exists('gzcompress') ? true : false;
+        }
     }
     /* }}} */
 
@@ -86,6 +93,11 @@ class Dict
         }
 
         $rec = $this->find($key);
+        if (empty($rec) || $rec['scrap']) {
+            return false;
+        }
+
+        return $this->unpack($rec['data']);
     }
     /* }}} */
 
@@ -98,11 +110,25 @@ class Dict
      */
     public function set($key, $value)
     {
-        $key = trim($key);
-        $len = strlen($key);
-        if (0 == $len || $len > self::MAX_KEY_LEN) {
+        $key    = trim($key);
+        $klen   = strlen($key);
+        if (0 == $klen || $klen > self::MAX_KEY_LEN) {
             return false;
         }
+
+        $rec    = $this->find($key);
+        $value  = $this->pack($value);
+        $vlen   = strlen($value);
+        if (!empty($rec) && $rec['vlen'] >= $vlen) {
+            return $this->fset($rec['off'] + 10, pack(
+                'CI', 0, strlen($value)
+            ) . $key . $value);
+        }
+
+        return (bool)file_put_contents($this->dfile, pack(
+            'IICCI', empty($rec['loff']) ? 0 : $rec['loff'],
+            empty($rec['roff']) ? 0 : $rec['roff'], $klen, 0, $vlen
+        ) . $key . $value, FILE_APPEND);
     }
     /* }}} */
 
@@ -154,7 +180,7 @@ class Dict
      */
     private function init()
     {
-        $os = $this->read(0, 32);
+        $os = $this->fget(0, 32);
         if (32 != strlen($os)) {
             return false;
         }
@@ -194,7 +220,7 @@ class Dict
             $type   = self::TYPE_OBJECT;
         }
 
-        if ($this->compress && strlen($data) > self::MIN_GZIP_LEN) {
+        if (self::$compress && strlen($data) > self::MIN_GZIP_LEN) {
             $data   = gzcompress($data);
             $type   |= 1;
         }
@@ -236,14 +262,14 @@ class Dict
     }
     /* }}} */
 
-    /* {{{ private string read() */
+    /* {{{ private string fget() */
     /**
      * 读取文件
      *
      * @access private
      * @return string
      */
-    private function read($off, $len)
+    private function fget($off, $len)
     {
         if (empty($this->fsize)) {
             $this->fsize = filesize($this->dfile);
@@ -254,6 +280,27 @@ class Dict
             $off = ($off < 1) ? 0 : (int)$off,
             min(max(0, (int)$len), $this->fsize - $off)
         );
+    }
+    /* }}} */
+
+    /* {{{ private Boolean fset() */
+    /**
+     * 写入文件
+     *
+     * @access private
+     * @return Boolean true or false
+     */
+    private function fset($off, $data)
+    {
+        if (false === ($fd = fopen($this->dfile, 'wb'))) {
+            return false;
+        }
+
+        fseek($fd, $off, SEEK_SET);
+        $rt = strlen($data) == fwrite($fd, $data) ? true : false;
+        fclose($fd);
+
+        return $rt;
     }
     /* }}} */
 
@@ -289,6 +336,54 @@ class Dict
      */
     private function find($key)
     {
+        $pos = 32 + ($this->hash($key) << 2);
+        $buf = $this->fget($pos, 4);
+        if (4 == strlen($buf)) {
+            list($off) = unpack('I', $buf);
+        } else {
+            $off = $pos;
+        }
+
+        return $this->tree($off, $key);
+    }
+    /* }}} */
+
+    /* {{{ private Mixture tree() */
+    /**
+     * 二叉树中搜索
+     *
+     * @access private
+     * @return Mixture
+     */
+    private function tree($off, $key = '')
+    {
+        $len = 14 + self::MAX_KEY_LEN;
+        $buf = $this->fget($off, $len);
+        if ($len != strlen($buf)) {
+            return false;
+        }
+
+        list($loff, $roff, $klen, $scrap, $vlen) = unpack('IICCI', substr($buf, 0, 14));
+        $idx = substr($buf, 14, $klen);
+        $cmp = (strlen($key) == 0) ? 0 : strcmp($key, $idx);
+        if ($cmp > 0) {
+            return $this->tree($roff, $key);
+        }
+
+        if ($cmp < 0) {
+            return $this->tree($loff, $key);
+        }
+
+        return array(
+            'off'   => $off,
+            'loff'  => $loff,
+            'roff'  => $roff,
+            'klen'  => $klen,
+            'scrap' => $scrap,
+            'vlen'  => $vlen,
+            'key'   => $idx,
+            'data'  => $scrap ? false : $this->fget($off + 14 + $klen),
+        );
     }
     /* }}} */
 

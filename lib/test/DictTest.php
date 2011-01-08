@@ -33,7 +33,10 @@ class DictTest extends \Aleafs\Lib\LibTestShell
 		$file	= __DIR__ . '/temp/test_create.dict';
 		@unlink($file);
 
-		$dict	= new Dict($file);
+        $dict	= new Dict($file);
+        $this->assertFalse($dict->get('key1'));
+        $this->assertTrue($dict->set('key1', 2));
+        $this->assertEquals(2, $dict->get('key1'));
 	}
 	/* }}} */
 
