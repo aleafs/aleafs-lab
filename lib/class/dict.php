@@ -133,7 +133,7 @@ class Dict
         $vlen   = strlen($value);
         $rec    = $this->find($key);
         if (!empty($rec) && isset($rec['vlen']) && $rec['vlen'] >= $vlen) {
-            return $this->fset($rec['off'] + 10, pack(
+            return $this->fset($rec['off'] + 12, pack(
                 'CI', 0, strlen($value)
             ) . $key . $value, $vlen);
         }
@@ -251,7 +251,9 @@ class Dict
             return false;
         }
 
-        list(,$gzip, $type) = unpack('CC', substr($data, 0, 2));
+        list($gzip, $type) = array_values(unpack(
+            'Cgzip/Ctype', substr($data, 0, 2)
+        ));
         $data   = substr($data, 2);
 
         if ($gzip > 0) {
@@ -300,7 +302,7 @@ class Dict
      */
     private function fset($off, $data, $len = -1)
     {
-        if (false === ($fd = fopen($this->dfile, 'wb'))) {
+        if (false === ($fd = fopen($this->dfile, 'rb+'))) {
             return false;
         }
 
@@ -308,6 +310,7 @@ class Dict
         fseek($fd, $off, SEEK_SET);
         flock($fd, LOCK_EX);
         $ret = ($len == fwrite($fd, $data, $len)) ? true : false;
+        fflush($fd);
         flock($fd, LOCK_UN);
         fclose($fd);
 
@@ -365,7 +368,8 @@ class Dict
         $ptr = 32 + ($this->hash($key) << 2);
         $buf = $this->fget($ptr, 4);
         if (4 == strlen($buf)) {
-            list(, $off) = unpack('I', $buf);
+            $off = unpack('Ioff', $buf);
+            $off = $off['off'];
         } else {
             $off = $ptr;
         }
@@ -393,7 +397,9 @@ class Dict
             return array('ptr' => $ptr);
         }
 
-        list(,$loff, $roff, $klen, $scrap, $vlen) = unpack('IIICI', substr($buf, 0, 17));
+        list($loff, $roff, $klen, $scrap, $vlen) = array_values(unpack(
+            'Iloff/Iroff/Iklen/Cscrap/Ivlen', substr($buf, 0, 17)
+        ));
         $idx = substr($buf, 17, $klen);
         $cmp = (strlen($key) == 0) ? 0 : strcmp($key, $idx);
         if ($cmp > 0) {
@@ -404,8 +410,16 @@ class Dict
             return $this->tree($loff, $key, $off);
         }
 
+        $data   = null;
+        if (!$scrap) {
+            $ln = $klen + $vlen - self::MAX_KEY_LEN;
+            $data   = substr($buf, 17 + $klen);
+            if ($ln > 0) {
+                $data .= $this->fget($off + $len, $ln);
+            }
+        }
         return array(
-            'ptr'   => $ptr,    // parent node pointer to current node
+            'ptr'   => $ptr,
             'off'   => $off,
             'loff'  => $loff,
             'roff'  => $roff,
@@ -413,7 +427,7 @@ class Dict
             'scrap' => $scrap,
             'vlen'  => $vlen,
             'key'   => $idx,
-            'data'  => $scrap ? false : $this->fget($off + 17 + $klen),
+            'data'  => $data,
         );
     }
     /* }}} */
