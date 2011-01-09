@@ -139,14 +139,14 @@ class Dict
         }
 
         $value  = pack(
-            'IICCI',
+            'IIICI',
             empty($rec['loff']) ? 0 : $rec['loff'],
             empty($rec['roff']) ? 0 : $rec['roff'],
             $klen, 0, $vlen
         ) . $key . $value;
-        $vlen   = 14 + $vlen + $klen;
+        $vlen   = 17 + $vlen + $klen;
         $off    = $this->slab($vlen);
-        if (!$this->fset($off, $value, $vlen) || !$this->fset($rec['pos'], pack('I', $off), 4)) {
+        if (!$this->fset($off, $value, $vlen) || !$this->fset($rec['ptr'], pack('I', $off), 4)) {
             return false;
         }
         $this->fsize += $vlen;
@@ -362,15 +362,15 @@ class Dict
      */
     private function find($key)
     {
-        $pos = 32 + ($this->hash($key) << 2);
-        $buf = $this->fget($pos, 4);
+        $ptr = 32 + ($this->hash($key) << 2);
+        $buf = $this->fget($ptr, 4);
         if (4 == strlen($buf)) {
             list(, $off) = unpack('I', $buf);
         } else {
-            $off = $pos;
+            $off = $ptr;
         }
 
-        return $this->tree($off, $key, $pos);
+        return $this->tree($off, $key, $ptr);
     }
     /* }}} */
 
@@ -381,31 +381,31 @@ class Dict
      * @access private
      * @return Mixture
      */
-    private function tree($off, $key = '', $pos = 0)
+    private function tree($off, $key, $ptr = 0)
     {
-        if ($off < 32) {    // 叶子
-            return array('pos' => $pos);
+        if (empty($off)) {
+            return array('ptr' => $ptr);
         }
 
-        $len = 14 + self::MAX_KEY_LEN;
+        $len = 17 + self::MAX_KEY_LEN;
         $buf = $this->fget($off, $len);
-        if (strlen($buf) < 14) {
-            return array('pos' => $pos);
+        if (strlen($buf) < 17) {
+            return array('ptr' => $ptr);
         }
 
-        list(,$loff, $roff, $klen, $scrap, $vlen) = unpack('IICCI', substr($buf, 0, 14));
-        $idx = substr($buf, 14, $klen);
+        list(,$loff, $roff, $klen, $scrap, $vlen) = unpack('IIICI', substr($buf, 0, 17));
+        $idx = substr($buf, 17, $klen);
         $cmp = (strlen($key) == 0) ? 0 : strcmp($key, $idx);
         if ($cmp > 0) {
-            return $this->tree($roff, $key);
+            return $this->tree($roff, $key, $off + 4);
         }
 
         if ($cmp < 0) {
-            return $this->tree($loff, $key);
+            return $this->tree($loff, $key, $off);
         }
 
         return array(
-            'pos'   => $pos,
+            'ptr'   => $ptr,    // parent node pointer to current node
             'off'   => $off,
             'loff'  => $loff,
             'roff'  => $roff,
@@ -413,7 +413,7 @@ class Dict
             'scrap' => $scrap,
             'vlen'  => $vlen,
             'key'   => $idx,
-            'data'  => $scrap ? false : $this->fget($off + 14 + $klen),
+            'data'  => $scrap ? false : $this->fget($off + 17 + $klen),
         );
     }
     /* }}} */
