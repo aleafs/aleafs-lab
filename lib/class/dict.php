@@ -17,15 +17,15 @@ class Dict
 
     /* {{{ 静态常量 */
 
-    const DICT_TAGNAME  = 'RBD';
+    const DICT_TAGNAME  = 'XDB';
     const DICT_VERSION  = 100;
     const DICT_HASH_PRI = 5381;
     const MAX_KEY_LEN   = 0xFC;
     const MIN_GZIP_LEN  = 1024;
 
-    const TYPE_SCALAR   = 2;
-    const TYPE_ARRAY    = 4;
-    const TYPE_OBJECT   = 8;
+    const TYPE_SCALAR   = 0;
+    const TYPE_ARRAY    = 1;
+    const TYPE_OBJECT   = 2;
 
     /* }}} */
 
@@ -74,6 +74,19 @@ class Dict
         if (null === self::$compress) {
             self::$compress = function_exists('gzcompress') ? true : false;
         }
+    }
+    /* }}} */
+
+    /* {{{ public void __destruct() */
+    /**
+     * 析构函数
+     *
+     * @access public
+     * @return void
+     */
+    public function __destruct()
+    {
+        $this->fset(12, pack('I', $this->fsize), 4);
     }
     /* }}} */
 
@@ -133,10 +146,10 @@ class Dict
         ) . $key . $value;
         $vlen   = 14 + $vlen + $klen;
         $off    = $this->slab($vlen);
-        if (!$this->fset($off, $value, $vlen) || !$this->fset($rec['pos'], $off, 4)) {
+        if (!$this->fset($off, $value, $vlen) || !$this->fset($rec['pos'], pack('I', $off), 4)) {
             return false;
         }
-        $this->fsize += $off;
+        $this->fsize += $vlen;
 
         return true;
     }
@@ -160,7 +173,7 @@ class Dict
 
         $bucket = max(1, (int)$bucket);
         return (bool)file_put_contents($file, pack(
-            'a3I5a9', self::DICT_TAGNAME, self::DICT_VERSION,
+            'a3CI4a12', self::DICT_TAGNAME, self::DICT_VERSION,
             $bucket, self::DICT_HASH_PRI, 32 + ($bucket << 2), 0, ''
         ) . str_repeat(pack('I', 0), $bucket), LOCK_EX);
     }
@@ -180,7 +193,7 @@ class Dict
             return false;
         }
 
-        $os = unpack('a3tag/Iver/Ibucket/Iprime/Ifsize/Ilock/a9reversed', $os);
+        $os = unpack('a3tag/Cver/Ibucket/Iprime/Ifsize/Ilock/a12reversed', $os);
         if (0 !== strcasecmp(self::DICT_TAGNAME, $os['tag'])) {
             return false;
         }
@@ -238,7 +251,7 @@ class Dict
             return false;
         }
 
-        list($gzip, $type) = unpack('CC', substr($data, 0, 2));
+        list(,$gzip, $type) = unpack('CC', substr($data, 0, 2));
         $data   = substr($data, 2);
 
         if ($gzip > 0) {
@@ -257,7 +270,7 @@ class Dict
     }
     /* }}} */
 
-    /* {{{ private string fget() */
+    /* {{{ private Mixture fget() */
     /**
      * 读取文件
      *
@@ -292,8 +305,10 @@ class Dict
         }
 
         $len = ($len < 1) ? strlen($len) : (int)$len;
-        fseek($fd, min($off, $this->fsize), SEEK_SET);
+        fseek($fd, $off, SEEK_SET);
+        flock($fd, LOCK_EX);
         $ret = ($len == fwrite($fd, $data, $len)) ? true : false;
+        flock($fd, LOCK_UN);
         fclose($fd);
 
         return $ret;
@@ -329,7 +344,9 @@ class Dict
         $si = $this->prime;
         // time33 算法
         for ($i = 0, $len = strlen($key); $i < $len; $i++) {
-            $si = ($si << 5) + $si + ord(substr($key, $i, 1));
+            $si += ($si << 5);
+            $si ^= ord(substr($key, $i, 1));
+            $si &= 0x7fffffff;
         }
 
         return $si % $this->bucket;
@@ -348,7 +365,7 @@ class Dict
         $pos = 32 + ($this->hash($key) << 2);
         $buf = $this->fget($pos, 4);
         if (4 == strlen($buf)) {
-            list($off) = unpack('I', $buf);
+            list(, $off) = unpack('I', $buf);
         } else {
             $off = $pos;
         }
@@ -376,7 +393,7 @@ class Dict
             return array('pos' => $pos);
         }
 
-        list($loff, $roff, $klen, $scrap, $vlen) = unpack('IICCI', substr($buf, 0, 14));
+        list(,$loff, $roff, $klen, $scrap, $vlen) = unpack('IICCI', substr($buf, 0, 14));
         $idx = substr($buf, 14, $klen);
         $cmp = (strlen($key) == 0) ? 0 : strcmp($key, $idx);
         if ($cmp > 0) {
