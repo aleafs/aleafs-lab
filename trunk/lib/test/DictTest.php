@@ -37,6 +37,13 @@ class DictTest extends \Aleafs\Lib\LibTestShell
         $this->assertFalse($dict->get('key1'));
         $this->assertTrue($dict->set('key1', 2));
         $this->assertEquals(2, $dict->get('key1'));
+
+        $data   = array(
+            'a' => 1,
+            'b' => array(1,'2',3.000000000000000001),
+        );
+        $this->assertTrue($dict->set('key2', $data));
+        $this->assertEquals($data, $dict->get('key2'));
 	}
 	/* }}} */
 
