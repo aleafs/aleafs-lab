@@ -106,7 +106,7 @@ class Dict
         }
 
         $rec = $this->find($key);
-        if (empty($rec) || !empty($rec['scrap']) || !isset($rec['data'])) {
+        if (empty($rec) || empty($rec['vlen']) || !isset($rec['data'])) {
             return false;
         }
 
@@ -438,9 +438,8 @@ class Dict
 
         $data   = null;
         if (!empty($vlen)) {
-            $ln = $klen + $vlen - self::MAX_KEY_LEN;
-            $data   = substr($buf, 20 + $klen);
-            if ($ln > 0) {
+            $data   = substr($buf, 20 + $klen, $vlen);
+            if ($ln = ($klen + $vlen - self::MAX_KEY_LEN) > 0) {
                 $data .= $this->fget($off + $len, $ln);
             }
         }
