@@ -132,22 +132,50 @@ class Dict
         $value  = $this->pack($value);
         $vlen   = strlen($value);
         $rec    = $this->find($key);
-        if (!empty($rec) && isset($rec['vlen']) && $rec['vlen'] >= $vlen) {
-            return $this->fset($rec['off'] + 12, pack('CI', 0, $vlen) . $key . $value, $vlen);
+        if (!empty($rec) && isset($rec['mlen']) && $rec['mlen'] >= $vlen) {
+            return $this->fset($rec['off'] + 12, pack('II', $vlen, $rec['mlen']) . $key . $value);
         }
 
         $value  = pack(
-            'IIICI',
+            'IIIII',
             empty($rec['loff']) ? 0 : $rec['loff'],
             empty($rec['roff']) ? 0 : $rec['roff'],
-            $klen, 0, $vlen
+            $klen, $vlen, $vlen
         ) . $key . $value;
-        $vlen   = 17 + $vlen + $klen;
+        $vlen   = 20 + $vlen + $klen;
         $off    = $this->slab($vlen);
         if (!$this->fset($off, $value, $vlen) || !$this->fset($rec['ptr'], pack('I', $off), 4)) {
             return false;
         }
         $this->fsize += $vlen;
+
+        return true;
+    }
+    /* }}} */
+
+    /* {{{ public Boolean delete() */
+    /**
+     * 删除一条记录
+     *
+     * @access public
+     * @return Boolean true or false
+     */
+    public function delete($key)
+    {
+        $key    = trim($key);
+        $klen   = strlen($key);
+        if (0 == $klen || $klen > self::MAX_KEY_LEN) {
+            return false;
+        }
+
+        $rec    = $this->find($key);
+        if (empty($rec) || !isset($rec['off'])) {
+            return false;
+        }
+
+        if (!$this->fset($rec['off'] + 12, pack('I', 0), 4)) {
+            return false;
+        }
 
         return true;
     }
@@ -389,16 +417,16 @@ class Dict
             return array('ptr' => $ptr);
         }
 
-        $len = 17 + self::MAX_KEY_LEN;
+        $len = 20 + self::MAX_KEY_LEN;
         $buf = $this->fget($off, $len);
-        if (strlen($buf) < 17) {
+        if (strlen($buf) < 20) {
             return array('ptr' => $ptr);
         }
 
-        list($loff, $roff, $klen, $scrap, $vlen) = array_values(unpack(
-            'Iloff/Iroff/Iklen/Cscrap/Ivlen', substr($buf, 0, 17)
+        list($loff, $roff, $klen, $vlen, $mlen) = array_values(unpack(
+            'Iloff/Iroff/Iklen/Ivlen/Imlen', substr($buf, 0, 20)
         ));
-        $idx = substr($buf, 17, $klen);
+        $idx = substr($buf, 20, $klen);
         $cmp = (strlen($key) == 0) ? 0 : strcmp($key, $idx);
         if ($cmp > 0) {
             return $this->tree($roff, $key, $off + 4);
@@ -409,21 +437,22 @@ class Dict
         }
 
         $data   = null;
-        if (!$scrap) {
+        if (!empty($vlen)) {
             $ln = $klen + $vlen - self::MAX_KEY_LEN;
-            $data   = substr($buf, 17 + $klen);
+            $data   = substr($buf, 20 + $klen);
             if ($ln > 0) {
                 $data .= $this->fget($off + $len, $ln);
             }
         }
+
         return array(
             'ptr'   => $ptr,
             'off'   => $off,
             'loff'  => $loff,
             'roff'  => $roff,
             'klen'  => $klen,
-            'scrap' => $scrap,
             'vlen'  => $vlen,
+            'mlen'  => $mlen,
             'key'   => $idx,
             'data'  => $data,
         );
