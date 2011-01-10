@@ -20,20 +20,22 @@ class DictTest extends \Aleafs\Lib\LibTestShell
     protected function setUp()
     {
         parent::setUp();
+
+        $this->dfile    = __DIR__ . '/temp/unittest.xdb';
+        if (is_file($this->dfile)) {
+            @unlink($this->dfile);
+        }
     }
 
     protected function tearDown()
     {
         parent::tearDown();
-	}
+    }
 
-	/* {{{ public void test_should_create_dict_works_fine() */
-	public function test_should_create_dict_works_fine()
-	{
-		$file	= __DIR__ . '/temp/test_create.dict';
-		@unlink($file);
-
-        $dict	= new Dict($file);
+    /* {{{ public void test_should_create_dict_works_fine() */
+    public function test_should_create_dict_works_fine()
+    {
+        $dict	= new Dict($this->dfile);
         $this->assertFalse($dict->get('key1'));
         $this->assertTrue($dict->set('key1', 2));
         $this->assertEquals(2, $dict->get('key1'));
@@ -45,15 +47,45 @@ class DictTest extends \Aleafs\Lib\LibTestShell
         $this->assertTrue($dict->set('key2', $data));
         $this->assertEquals($data, $dict->get('key2'));
 
-        // xxx: 测试新值较短的情况
-        $this->assertTrue($dict->set('key2', 100));
-        $this->assertEquals(100, $dict->get('key2'));
-
         // xxx: 二进制数据
         $this->assertTrue($dict->set('key3', md5('test binary data', true)));
         $this->assertEquals(md5('test binary data', true), $dict->get('key3'));
-	}
-	/* }}} */
+
+        // xxx: delete
+        $this->assertTrue($dict->delete('key2'));
+        $this->assertEquals(false, $dict->get('key2'));
+
+        $this->assertTrue($dict->set('key2', ''));
+        $this->assertEquals('', $dict->get('key2'));
+    }
+    /* }}} */
+
+    /* {{{ public void test_should_data_compress_works_fine() */
+    public function test_should_data_compress_works_fine()
+    {
+        $dict   = new Dict($this->dfile);
+        $data   = str_repeat('a', 1 + Dict::MIN_GZIP_LEN);
+        $this->assertTrue($dict->set('key1', $data));
+        $this->assertEquals($data, $dict->get('key1'));
+    }
+    /* }}} */
+
+    /* {{{ public void test_should_data_update_works_fine() */
+    public function test_should_data_update_works_fine()
+    {
+        $dict   = new Dict($this->dfile);
+        $this->assertTrue($dict->set('key2', 'abcd'));
+        $this->assertEquals('abcd', $dict->get('key2'));
+
+        // xxx: 调大
+        $this->assertTrue($dict->set('key2', 'abcde'));
+        $this->assertEquals('abcde', $dict->get('key2'));
+
+        // xxx: 调小
+        $this->assertTrue($dict->set('key2', 'abc'));
+        $this->assertEquals('abc', $dict->get('key2'));
+    }
+    /* }}} */
 
 }
 
