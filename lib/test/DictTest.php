@@ -44,6 +44,14 @@ class DictTest extends \Aleafs\Lib\LibTestShell
         );
         $this->assertTrue($dict->set('key2', $data));
         $this->assertEquals($data, $dict->get('key2'));
+
+        // xxx: 测试新值较短的情况
+        $this->assertTrue($dict->set('key2', 100));
+        $this->assertEquals(100, $dict->get('key2'));
+
+        // xxx: 二进制数据
+        $this->assertTrue($dict->set('key3', md5('test binary data', true)));
+        $this->assertEquals(md5('test binary data', true), $dict->get('key3'));
 	}
 	/* }}} */
 

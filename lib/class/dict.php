@@ -133,9 +133,7 @@ class Dict
         $vlen   = strlen($value);
         $rec    = $this->find($key);
         if (!empty($rec) && isset($rec['vlen']) && $rec['vlen'] >= $vlen) {
-            return $this->fset($rec['off'] + 12, pack(
-                'CI', 0, strlen($value)
-            ) . $key . $value, $vlen);
+            return $this->fset($rec['off'] + 12, pack('CI', 0, $vlen) . $key . $value, $vlen);
         }
 
         $value  = pack(
