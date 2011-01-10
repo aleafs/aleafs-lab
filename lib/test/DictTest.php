@@ -67,6 +67,11 @@ class DictTest extends \Aleafs\Lib\LibTestShell
         $data   = str_repeat('a', 1 + Dict::MIN_GZIP_LEN);
         $this->assertTrue($dict->set('key1', $data));
         $this->assertEquals($data, $dict->get('key1'));
+
+        // xxx : 不压缩，但value需要二次fget
+        $data   = str_repeat('a', 21 + Dict::MAX_KEY_LEN);
+        $this->assertTrue($dict->set('key1', $data));
+        $this->assertEquals($data, $dict->get('key1'));
     }
     /* }}} */
 

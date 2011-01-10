@@ -20,7 +20,7 @@ class Dict
     const DICT_TAGNAME  = 'XDB';
     const DICT_VERSION  = 100;
     const DICT_HASH_PRI = 5381;
-    const MAX_KEY_LEN   = 0xFC;
+    const MAX_KEY_LEN   = 0xEC;
     const MIN_GZIP_LEN  = 1024;
 
     const TYPE_SCALAR   = 0;
@@ -178,6 +178,18 @@ class Dict
         }
 
         return true;
+    }
+    /* }}} */
+
+    /* {{{ public Boolean optimize() */
+    /**
+     * 字典优化
+     *
+     * @access public
+     * @return Boolean true or false
+     */
+    public function optimize()
+    {
     }
     /* }}} */
 
@@ -439,7 +451,7 @@ class Dict
         $data   = null;
         if (!empty($vlen)) {
             $data   = substr($buf, 20 + $klen, $vlen);
-            if ($ln = ($klen + $vlen - self::MAX_KEY_LEN) > 0) {
+            if (($ln = $klen + $vlen - self::MAX_KEY_LEN) > 0) {
                 $data .= $this->fget($off + $len, $ln);
             }
         }
