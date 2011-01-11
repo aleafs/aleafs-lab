@@ -89,6 +89,12 @@ class DictTest extends \Aleafs\Lib\LibTestShell
         // xxx: 调小
         $this->assertTrue($dict->set('key2', 'abc'));
         $this->assertEquals('abc', $dict->get('key2'));
+
+        $this->assertTrue($dict->truncate());
+        $this->assertFalse($dict->get('key2'));
+
+        $this->assertTrue($dict->set('key2', 'abc'));
+        $this->assertEquals('abc', $dict->get('key2'));
     }
     /* }}} */
 

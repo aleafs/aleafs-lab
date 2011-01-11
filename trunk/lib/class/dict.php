@@ -193,6 +193,25 @@ class Dict
     }
     /* }}} */
 
+    /* {{{ public Boolean truncate() */
+    /**
+     * 清空字典
+     *
+     * @access public
+     * @return Boolean true or false
+     */
+    public function truncate()
+    {
+        if (!unlink($this->dfile) || !self::create($this->dfile, $this->bucket)) {
+            return false;
+        }
+
+        $this->init();
+
+        return true;
+    }
+    /* }}} */
+
     /* {{{ private static Boolean create() */
     /**
      * 写入头信息

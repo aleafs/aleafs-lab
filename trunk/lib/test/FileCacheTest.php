@@ -12,7 +12,7 @@ class FileCacheTest extends \Aleafs\Lib\LibTestShell
     protected function setUp()
     {
 		parent::setUp();
-		$this->cache	= new File('test', __DIR__ . '/filecache');
+		$this->cache	= new File('filecache', __DIR__ . '/temp');
 		$this->shell	= 0;
     }
 
@@ -49,30 +49,6 @@ class FileCacheTest extends \Aleafs\Lib\LibTestShell
 		$this->assertTrue($this->cache->delete('i_am_not_exists'));
 		$this->assertTrue($this->cache->delete('key1'));
 		$this->assertEquals(null, $this->cache->get('key1'));
-	}
-
-	public function test_should_exception_throw_out_when_write_error()
-	{
-		$cache	= new File('readonly', __DIR__ . '/filecache');
-		$cache->cleanAllCache();
-
-		@mkdir(__DIR__ . '/filecache/readonly', 0444, true);
-
-		$error	= error_reporting();
-		error_reporting($error - E_WARNING);
-		try {
-			$cache->set('key1', 'val1');
-			$this->assertTrue(false);
-		} catch (\Exception $e) {
-			$this->assertTrue($e instanceof \Aleafs\Lib\Exception);
-			$this->assertContains(
-				'Derectory "' . __DIR__ . '/filecache/readonly/',
-				$e->getMessage()
-			);
-		}
-
-		@chmod(__DIR__ . '/filecache/readonly', 0744);
-		error_reporting($error);
 	}
 
 	public function test_should_expire_works_fine()
