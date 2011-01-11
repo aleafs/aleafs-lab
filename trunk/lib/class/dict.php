@@ -255,6 +255,7 @@ class Dict
             return false;
         }
 
+        $this->fsize = filesize($this->dfile);
         if ($this->fsize != $os['fsize']) {
             return false;
         }

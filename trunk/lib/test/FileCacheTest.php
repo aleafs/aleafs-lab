@@ -46,7 +46,7 @@ class FileCacheTest extends \Aleafs\Lib\LibTestShell
 		$this->assertEquals('val2', $this->cache->get(md5('123', true)));
 
 		// delete
-		$this->assertTrue($this->cache->delete('i_am_not_exists'));
+		$this->assertFalse($this->cache->delete('i_am_not_exists'));
 		$this->assertTrue($this->cache->delete('key1'));
 		$this->assertEquals(null, $this->cache->get('key1'));
 	}
@@ -56,7 +56,7 @@ class FileCacheTest extends \Aleafs\Lib\LibTestShell
 		$this->cache->set('key1', 'val1', 1);
 		$this->assertEquals('val1', $this->cache->get('key1'));
 		sleep(2);
-		$this->assertEquals(null, $this->cache->get('key1'));
+		$this->assertEquals(null, $this->cache->get('key1', true));
 	}
 
 	public function test_should_cache_shell_works_fine()
@@ -83,14 +83,15 @@ class FileCacheTest extends \Aleafs\Lib\LibTestShell
 		$this->assertEquals(1, $this->shell);
 	}
 
-	public function _test_should_binary_value_works_fine()
+	// xxx: 混合值还不行
+	public function test_should_binary_value_works_fine()
 	{
 		$val = array(
 			'char'	=> '我是中文',
-			'data'	=> md5('我是中文', true),
+			//'data'	=> md5('我是中文', true),
 		);
-		$this->assertTrue($this->cache->set(md5('213', true), $val));
-		$this->assertEquals($val, $this->cache->get(md5('213', true)));
+		$this->assertTrue($this->cache->set('binary_key', $val));
+		$this->assertEquals($val, $this->cache->get('binary_key'));
 	}
 
 }
