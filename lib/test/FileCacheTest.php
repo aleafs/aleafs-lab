@@ -44,11 +44,13 @@ class FileCacheTest extends \Aleafs\Lib\LibTestShell
 		// binary key
 		$this->assertTrue($this->cache->set(md5('123', true), 'val2'));
 		$this->assertEquals('val2', $this->cache->get(md5('123', true)));
+		$this->assertFalse($this->cache->add(md5('123', true), '肯定添加不进'));
 
 		// delete
 		$this->assertFalse($this->cache->delete('i_am_not_exists'));
 		$this->assertTrue($this->cache->delete('key1'));
 		$this->assertEquals(null, $this->cache->get('key1'));
+		$this->assertTrue($this->cache->add('key1', '先删除后添加成功'));
 	}
 
 	public function test_should_expire_works_fine()

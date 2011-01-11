@@ -94,6 +94,23 @@ class File
     }
     /* }}} */
 
+    /* {{{ public Boolean add() */
+    /**
+     * 添加数据
+     *
+     * @access public
+     * @return Boolean true or false
+     */
+    public function add($key, $value, $expire = null)
+    {
+        if (null !== $this->get($key)) {
+            return false;
+        }
+
+        return $this->set($key, $value, $expire);
+    }
+    /* }}} */
+
     /* {{{ public Boolean delete() */
     /**
      * 删除缓存数据
