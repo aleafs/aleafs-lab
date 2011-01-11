@@ -12,6 +12,7 @@
 
 namespace Aleafs\Lib\Cache;
 
+use \Aleafs\Lib\Dict;
 use \Aleafs\Lib\Exception;
 
 class File
@@ -25,11 +26,9 @@ class File
 
     /* {{{ 成员变量 */
 
-    private $path   = '/tmp/acache';
+    private $dict   = null;
 
-    private $mode   = 0744;
-
-    private $prefix = '';
+    private $time   = null;
 
     /* }}} */
 
@@ -41,15 +40,13 @@ class File
      * @param  String $prefix
      * @return void
      */
-    public function __construct($prefix, $path = null, $mode = 0744)
+    public function __construct($prefix, $path = null)
     {
-        $this->prefix   = (string)$prefix;
-        $this->mode     = $mode;
-        if (!empty($path)) {
-            $this->path = trim((string)$path);
-        } else {
-            $this->path = '/tmp/acache';
-        }
+        $this->time = time();
+        $this->dict = new Dict(sprintf('%s/%s',
+            empty($path) ? '/tmp/acache' : rtrim(trim($path), '/'),
+            urlencode(trim($prefix, '/'))
+        ), 2048);
     }
     /* }}} */
 
@@ -61,20 +58,20 @@ class File
      * @param  String $key
      * @return Mixture
      */
-    public function get($key)
+    public function get($key, $tm = false)
     {
-        $res = $this->getfile($key, false);
-        if (!is_file($res)) {
+        $rs = $this->dict->get($key);
+        if (empty($rs)) {
             return null;
         }
 
-        $ret = json_decode(file_get_contents($res), true);
-        if (empty($ret) || empty($ret['ttl']) || $ret['ttl'] < time()) {
-            unlink($res);
+        $tm = $tm ? time() : $this->time;
+        if (empty($rs['t']) || $rs['t'] < $tm) {
+            $this->dict->delete($key);
             return null;
         }
 
-        return $ret['val'];
+        return isset($rs['d']) ? $rs['d'] : null;
     }
     /* }}} */
 
@@ -90,16 +87,10 @@ class File
      */
     public function set($key, $value, $expire = null)
     {
-        $now = time();
-        return file_put_contents(
-            $this->getfile($key, true),
-            json_encode(array(
-                'now'   => $now,
-                'ttl'   => $now + ($expire ? $expire : self::EXPIRE),
-                'val'   => $value,
-            )),
-            LOCK_EX, null
-        ) ? true : false;
+        return $this->dict->set($key, array(
+            't' => $this->time + ($expire ? $expire : self::EXPIRE),
+            'd' => $value,
+        ));
     }
     /* }}} */
 
@@ -113,12 +104,7 @@ class File
      */
     public function delete($key)
     {
-        $res = $this->getfile($key, false);
-        if (is_file($res) && !unlink($res)) {
-            return false;
-        }
-
-        return true;
+        return $this->dict->delete($key);
     }
     /* }}} */
 
@@ -155,87 +141,7 @@ class File
      */
     public function cleanAllCache()
     {
-        return self::rmdir(sprintf(
-            '%s/%s',
-            rtrim($this->path, '/'),
-            trim($this->prefix, '/')
-        ));
-    }
-    /* }}} */
-
-    /* {{{ private String getfile() */
-    /**
-     * 根据KEY获取存储的完整文件名
-     *
-     * @access private
-     * @param  String  $key
-     * @param  Boolean $create : default false
-     * @return String
-     */
-    private function getfile($key, $create = false)
-    {
-        $ret = sprintf(
-            '%s/%s/%s',
-            rtrim($this->path, '/'),
-            trim($this->prefix, '/'),
-            trim($this->hash($key), '/')
-        );
-
-        if ($create && !is_file($ret)) {
-            $dir = dirname($ret);
-            if (!is_dir($dir) && !mkdir($dir, $this->mode, true)) {
-                throw new Exception(sprintf('Derectory "%s" not exists, and created failed.', $dir));
-            }
-        }
-
-        return $ret;
-    }
-    /* }}} */
-
-    /* {{{ private static String hash() */
-    /**
-     * 根据KEY计算存储的文件名
-     *
-     * @access private static
-     * @param  String $key
-     * @return String
-     */
-    private static function hash($key)
-    {
-        return implode('/', str_split(bin2hex($key), 3));
-    }
-    /* }}} */
-
-    /* {{{ private static Boolean rmdir() */
-    /**
-     * 完全清理一个目录
-     *
-     * @access private static
-     * @param  String $dir
-     * @return Boolean true or false
-     */
-    private static function rmdir($dir)
-    {
-        if (!is_dir($dir)) {
-            return true;
-        }
-
-        if (false === ($ret = glob($dir . '/*'))) {
-            return false;
-        }
-
-        foreach ($ret AS $sub) {
-            if (is_dir($sub)) {
-                if (!self::rmdir($sub)) {
-                    return false;
-                }
-            } else {
-                if (!unlink($sub)) {
-                    return false;
-                }
-            }
-        }
-        return rmdir($dir);
+        return $this->dict->truncate();
     }
     /* }}} */
 
