@@ -37,7 +37,7 @@ class Cache
 
     private $handle;
 
-    private $dversion   = null;
+    private $dversion   = '';
 
     /* }}} */
 
@@ -92,9 +92,9 @@ class Cache
      * @access public
      * @return Mixture
      */
-    public function get($key, $tm = false)
+    public function get($key)
     {
-        return $this->unpack($this->handle->get($key, $tm));
+        return $this->unpack($this->handle->get($key));
     }
     /* }}} */
 
