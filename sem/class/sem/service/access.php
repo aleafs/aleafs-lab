@@ -13,7 +13,15 @@
 
 class Aleafs_Sem_Service_Access extends Aleafs_Sem_Service
 {
-
+	//各操作所需权限，一个操作可以需要多个权限
+	private static $NeedPri = array(
+		"permission" => array(array('pm_stat'   => Aleafs_Sem_User::STAT_NORMAL,
+                							 'pm_func'   => 'BASE')),
+		"version" =>  array(array('pm_stat'   => Aleafs_Sem_User::STAT_NORMAL,
+                							 'pm_func'   => 'BASE')),
+	);
+	
+	
     /* {{{ public Mixture permission() */
     /**
      * 获取用户权限列表
@@ -23,19 +31,30 @@ class Aleafs_Sem_Service_Access extends Aleafs_Sem_Service
      */
     public function permission()
     {
-        $this->setSoapHeader('soap/access');
-        if (empty($this->authenticated)) {
-            return array();
+        if (!$this->hasPrivileges(self::$NeedPri, "permission")) {
+        	$this->errno = self::E_ACCESS_DENIED;
+            $this->setSoapHeader('soap/access');
+            return array(array(
+            	'status' => '',
+                'unit'      => '',
+                'type'      => 0,
+                'begdate'   => '0000-00-00',
+                'enddate'   => '0000-00-00',
+                'balance'   => 0,
+            ));
         }
 
+        $this->setSoapHeader('soap/access');
+        
         $perms  = array();
         foreach ($this->permissions AS $row) {
             $perms[] = array(
+            	'status' => $row['pm_stat'],
                 'unit'      => $row['pm_func'],
                 'type'      => (int)$row['pm_type'],
                 'begdate'   => $row['begdate'],
                 'enddate'   => $row['enddate'],
-                'balance'   => (int)self::balance($row['enddate'], date('Y-m-d')),
+                'balance'   => (int)Aleafs_Sem_Comfunc::balance($row['enddate'], date('Y-m-d')),
             );
         }
 
@@ -51,11 +70,14 @@ class Aleafs_Sem_Service_Access extends Aleafs_Sem_Service
      */
     public function version()
     {
-        $this->setSoapHeader('soap/access');
-        if (empty($this->authenticated)) {
-            return array();
+        if (!$this->hasPrivileges(self::$NeedPri, "version")) {
+        	$this->errno = self::E_ACCESS_DENIED;
+            $this->setSoapHeader('soap/access');
+        	return array("software" => "", "version" => "");
         }
 
+        $this->setSoapHeader('soap/access');
+        
         $arrRet = array("software" => "windows");
 
         $config = Aleafs_Lib_Configer::instance('default');
@@ -81,26 +103,6 @@ class Aleafs_Sem_Service_Access extends Aleafs_Sem_Service
             'function'  => $ua->software,
             'args'      => $ua->version,
         );
-    }
-    /* }}} */
-
-    /* {{{ private static Integer balance() */
-    /**
-     * 计算授权余额
-     *
-     * @access private static
-     * @return Integer
-     */
-    private static function balance($end, $beg = null)
-    {
-        $beg = strtotime(empty($beg) ? date('Y-m-d') : $beg);
-        $end = strtotime($end);
-
-        if ($end < $beg) {
-            return 0;
-        }
-
-        return 1 + (int)($end - $beg) / 86400;
     }
     /* }}} */
 
