@@ -76,6 +76,8 @@ class Aleafs_Sem_Service
     /* {{{ public void AuthHeader() */
     /**
      * 验证头信息
+     * 
+     * machine字段为授权码
      *
      * @access public
      * @return void
@@ -126,7 +128,13 @@ class Aleafs_Sem_Service
      */
     private function authenticate($appname, $appuser, $machine, $nodename)
     {
-        $perms  = Aleafs_Sem_User::getPermission($appuser, $appname);
+        $arrPass = Aleafs_Sem_user::getUserInfo($appuser, array('password'));
+        if (empty($arrPass) || $arrPass['password'] != $machine)
+        {
+        	return;
+        }
+        
+    	$perms  = Aleafs_Sem_User::getPermission($appuser, $appname);
         if (empty($perms)) {
             $trials = Aleafs_Lib_Configer::instance('trial');
             $days   = $trials->get(sprintf('%s.%s', $appname, $appuser), 0);
