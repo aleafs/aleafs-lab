@@ -54,7 +54,68 @@ class Aleafs_Sem_Service_Baidu extends Aleafs_Sem_Service
         $arrAdList = $this->_getAdList($strWebPage);
         //file_put_contents("showurl.txt", count($arrAdList[0])."\t".count($arrAdList[1])."\t".count($arrAdList[2])."\n".$params->keyword."\n".$params->showurl. "\n" . $params->showurl[0]. "\n" .$params->showurl[1]);
 
-        return $this->_getAdPos($params->keyword, $arrShowUrl, $arrAdList);
+        return $this->_getAdPos($params->keyword, $arrShowUrl, $arrAdList, false);
+	}
+	
+	/**
+	 * 对外接口，获取一个广告的位置，包括竞争对手和集团客户
+	 *
+	 * @param class $params
+	 * @return array
+	 */
+	public function adrankext($params)
+	{
+		$this->setSoapHeader('soap/baidu');
+		
+		$arrResult = array("ad" => array("rank" => 0, "cmatch" => 0),
+									"compete" => array("rank" => 0, "cmatch" => 0),
+									"group" => array("rank" => 0, "cmatch" => 0));
+		
+        if (!$this->hasPrivileges(self::$NeedPri,  "adrank")) {
+            return $arrResult;
+        }
+        
+        $strWebPage = $this->_uncompress($params->webpage);
+        $arrShowUrl = array();
+        if (is_array($params->showurl)) {
+        	$arrShowUrl = $params->showurl;
+        } else {
+        	$arrShowUrl = array($params->showurl);
+        }
+        
+        $arrCompeteUrl = array();
+        if (is_array($params->competeurl) && (!empty($params->competeurl)))
+        {
+        	$arrCompeteUrl = $params->competeurl;
+        } else if (!empty($params->competeurl)){
+        	$arrCompeteUrl = array($params->competeurl);
+        }
+        
+		$arrGroupUrl = array();
+        if (is_array($params->groupurl) && (!empty($params->groupurl)))
+        {
+        	$arrGroupUrl = $params->groupurl;
+        } else if (!empty($params->groupurl)){
+        	$arrGroupUrl = array($params->groupurl);
+        }
+        
+        //file_put_contents("webpage.txt", gettype($params->showurl)."\n".count($arrShowUrl)."\t".$arrShowUrl[0]."\n".$strWebPage);
+        $arrAdList = $this->_getAdList($strWebPage);
+        //file_put_contents("showurl.txt", count($arrAdList[0])."\t".count($arrAdList[1])."\t".count($arrAdList[2])."\n".$params->keyword."\n".$params->showurl. "\n" . $params->showurl[0]. "\n" .$params->showurl[1]);
+
+        $arrResult['ad'] = $this->_getAdPos($params->keyword, $arrShowUrl, $arrAdList, false);
+        
+        if (!empty($arrCompeteUrl))
+        {
+        	$arrResult['compete'] = $this->_getAdPos($params->keyword, $arrCompeteUrl, $arrAdList, true);
+        }
+        
+		if (!empty($arrGroupUrl))
+        {
+        	$arrResult['group'] = $this->_getAdPos($params->keyword, $arrGroupUrl, $arrAdList, true);
+        }
+        
+        return $arrResult;
 	}
 	
 	/**
@@ -201,18 +262,18 @@ class Aleafs_Sem_Service_Baidu extends Aleafs_Sem_Service
 	 * @param array $arrAdList
 	 * @return array
 	 */
-	private function _getAdPos($keyword, $arrUrl, $arrAdList)
+	private function _getAdPos($keyword, $arrUrl, $arrAdList, $bolIgnoreCase)
 	{
 		//cmatch: 1 pp 2 ppim 3 im
 		//rank: 第一位为1
 		$arrRet = array("rank" => 0, "cmatch" => 0);
 		
 		foreach ($arrUrl as $strUrl) {
-			$ret = $this->_getAdPosOneUrl($keyword, $strUrl, $arrAdList, $arrRet);
-			if ($ret >= 0) {
-				if ($ret > 0)  {
+			$ret = $this->_getAdPosOneUrl($keyword, $strUrl, $arrAdList,  $bolIgnoreCase, $arrRet);
+			
+			if ($ret > 0)  {
 					$arrRet = array("rank" => 0, "cmatch" => 0);
-				}
+			} else if ($ret == 0) {
 				break;
 			}
 		}
@@ -229,7 +290,7 @@ class Aleafs_Sem_Service_Baidu extends Aleafs_Sem_Service
 	 * @param reference array $arrRet
 	 * @return int 0 success  1 存在多个匹配  -1 无匹配
 	 */
-	private function _getAdPosOneUrl($keyword, $strUrl, $arrAdList, &$arrRet)
+	private function _getAdPosOneUrl($keyword, $strUrl, $arrAdList, $bolIgnoreCase, &$arrRet)
 	{
 		//cmatch: 1 pp 2 ppim 3 im
 		//rank: 第一位为1
@@ -242,7 +303,13 @@ class Aleafs_Sem_Service_Baidu extends Aleafs_Sem_Service
 			$intCount = 0;
 			foreach ($value as $ad) {
 				$intCount ++;
-				if (strpos($ad, $strUrl) !== false) 
+				if ($bolIgnoreCase)
+				{
+					$bolFind = stripos($ad, $strUrl);
+				} else {
+					$bolFind = strpos($ad, $strUrl);
+				}
+				if ($bolFind !== false) 
 				{
 					$intMatchNum ++;
 					$arrRet['cmatch'] = $key + 1;
