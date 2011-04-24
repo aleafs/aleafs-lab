@@ -1,13 +1,32 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<table>
-	<version>1000</version>
-	<columns>
+<table version="1000">
+	<title>示例数据表</title>
+	<backup>1</backup>
+
+	<route type="numsplit">
+		<field name="thedate" type="date" filter="" />
+		<field name="cid" type="int" filter="" />
+	</route>
+
+	<split>
+		<threshold>2000000</threshold>
+		<thift>0.20</thift>
+	</split>
+
+	<load type="replace">
+		<![CDATA[
+		LOAD DATA LOCAL INFILE "${FILE}" INTO TABLE ...
+		]]>
+	</load>
+
+	<struct>
 		<default>
-			<column store="cid" type="int(10) unsigned" default="0">category_id</column>
-			<column store="cid" type="int(10) unsigned" default="0">category_id</column>
-			<column store="cid" type="int(10) unsigned" default="0">category_id</column>
-			<column store="cid" type="int(10) unsigned" default="0">category_id</column>
-			<column store="cid" type="int(10) unsigned" default="0">category_id</column>
+			<field name="thedate" type="date" default="0000-00-00">thedate</field>
+			<index name="idx_sample_cid">cid</index>
 		</default>
-	</columns>
+
+		<condition>
+			<on field="cid" equals="1" />
+		</condition>
+	</struct>
 </table>
