@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<table>
+	<version>1000</version>
+	<columns>
+		<default>
+			<column store="cid" type="int(10) unsigned" default="0">category_id</column>
+			<column store="cid" type="int(10) unsigned" default="0">category_id</column>
+			<column store="cid" type="int(10) unsigned" default="0">category_id</column>
+			<column store="cid" type="int(10) unsigned" default="0">category_id</column>
+			<column store="cid" type="int(10) unsigned" default="0">category_id</column>
+		</default>
+	</columns>
+</table>
