@@ -1,0 +1,48 @@
+<project name="init" basedir="." default="-init" description="Initating phing environment">
+
+	<target name="-cleanup">
+		<delete file="${prop.file}" verbose="false" quiet="true" />
+	</target>
+
+	<target name="-init">
+		<php expression="realpath(&quot;${env.PWD}&quot;)" returnProperty="dir.root" />
+		<property name="run.mode" value="dev" />
+		<property name="run.user" value="${env.USER}" />
+		<property name="run.home" value="${env.HOME}" />
+
+		<property name="global.log.url" value="log://debug.notice.warn.error/${run.home}/sem-${run.mode}.log" />
+		<property name="global.timeout" value="60" />
+		<property name="global.url.server" value="http://edp2.corp.alimama.com" />
+		<property name="global.url.prefix" value="${run.user}/sem" />
+
+		<property name="mysql.log.url" value="log://debug.notice.warn.error/${run.home}/mysql-${run.mode}.log" />
+		<property name="mysql.master.server1" value="mysql://db_write:123456@10.232.36.110:9902" />
+		<property name="mysql.slave.server1" value="mysql://db_read:123456@10.232.36.110:9902" />
+
+		<property name="software.version" value="3.1.5" />
+
+		<phingcall target="-copyfile" />
+
+	</target>
+
+	<target name="-copyfile">
+		<copy file="build/tpl/default.properties" tofile="./${prop.file}" overwrite="true">
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="dir.root" value="${dir.root}" />
+					<token key="run.mode" value="${run.mode}" />
+					<token key="global.log.url" value="${global.log.url}" />
+					<token key="global.timeout" value="${global.timeout}" />
+					<token key="global.url.prefix" value="${global.url.prefix}" />
+					<token key="global.url.server" value="${global.url.server}" />
+
+					<token key="mysql.log.url" value="${mysql.log.url}" />
+					<token key="mysql.master.server1" value="${mysql.master.server1}" />
+					<token key="mysql.slave.server1" value="${mysql.slave.server1}" />
+
+					<token key="software.version" value="${software.version}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+	</target>
+</project>
