@@ -1,7 +1,5 @@
 <?xml version="1.0" ?>
-<project name="Aleafs Sem App" basedir="." default="unittest"
-	description="Aleafs Sem App">
-	<!-- Sets the DSTAMP, TSTAMP and TODAY properties -->
+<project name="Myfox" basedir="." default="unittest" description="Myfox">
 	<tstamp>
 		<format property="FULLDATE" pattern="%Y%m/%d" />
 		<format property="FULLDATE1" pattern="%Y_%m_%d" />
@@ -9,13 +7,8 @@
 		<format property="FULLTIME1" pattern="%H_%M_%S" />
 	</tstamp>
 
-	<!-- build property file name -->
-	<property name="prop.file" value="${host.name}-${host.arch}-${host.domain}.properties" />
+	<property name="prop.file" value="ignore-${host.name}-${host.arch}-${host.domain}.properties" />
 	<echo message="properties file: ${prop.file}" />
-	<!-- fix for windows -->
-	<condition property="prop.file" value="${env.COMPUTERNAME}.properties">
-		<os family="windows" />
-	</condition>
 
 	<available file="${prop.file}" property="test_ini_file_exists"	value="Yes" />
 
@@ -28,7 +21,6 @@
 		</else>
 	</if>
 
-	<!-- Load our configuration -->
 	<property file="./${prop.file}" />
 
 	<target name="unittest" description="Run unit test.">
