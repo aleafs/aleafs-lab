@@ -1,0 +1,112 @@
+<project name="makeconf" basedir="." default="-makeconf"
+	description="make all config files">
+
+	<target name="-makeconf" description="Make all config files">
+		<phingcall target="-cleanup" />
+		<phingcall target="-dev" />
+		<phingcall target="-unittest" />
+	</target>
+
+	<target name="-cleanup" description="delete old config files.">
+		<phingcall target="-cleanup-dev" />
+		<phingcall target="-cleanup-unittest" />
+	</target>
+
+	<target name="-cleanup-dev" description="Delete all config files.">
+		<delete>
+			<fileset dir="config/">
+				<include name="*.ini" />
+			</fileset>
+		</delete>
+	</target>
+
+	<target name="-cleanup-unittest" description="Delete all config files.">
+		<delete>
+			<fileset dir="test/unit/ini/">
+				<include name="*.ini" />
+			</fileset>
+		</delete>
+	</target>
+
+	<target name="-dev" description="Make configure files for development">
+		<phingcall target="-cleanup-dev" />
+		<copy file="build/tpl/global.ini" todir="config" overwrite="true">
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="dir.root" value="${dir.root}" />
+					<token key="run.mode" value="${run.mode}" />
+					<token key="global.timeout" value="${global.timeout}" />
+					<token key="global.log.url" value="${global.log.url}" />
+					<token key="global.url.server" value="${global.url.server}" />
+					<token key="global.url.prefix" value="${global.url.prefix}" />
+
+					<token key="software.version" value="${software.version}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+
+		<copy file="build/tpl/mysql.ini" todir="config" overwrite="true">
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="mysql.log.url" value="${mysql.log.url}" />
+					<token key="mysql.master.server1" value="${mysql.master.server1}" />
+					<token key="mysql.slave.server1" value="${mysql.slave.server1}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+
+		<copy file="build/tpl/trial_user.ini" todir="config" overwrite="true">
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+				</replacetokens>
+			</filterchain>
+		</copy>
+
+		<copy file="build/tpl/session.ini" todir="config" overwrite="true">
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+				</replacetokens>
+			</filterchain>
+		</copy>
+	</target>
+
+	<target name="-unittest" description="Make configure files for unit test.">
+		<phingcall target="-cleanup-unittest" />
+		<copy file="build/tpl/global.ini" todir="test/unit/ini/" overwrite="true">
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="dir.root" value="${dir.root}" />
+					<token key="run.mode" value="unittest" />
+					<token key="global.timeout" value="${global.timeout}" />
+					<token key="global.log.url" value="${global.log.url}" />
+					<token key="global.url.server" value="${global.url.server}" />
+					<token key="global.url.prefix" value="${global.url.prefix}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+
+		<copy file="build/tpl/mysql.ini" todir="test/unit/ini/" overwrite="true">
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+					<token key="mysql.log.url" value="${mysql.log.url}" />
+					<token key="mysql.master.server1" value="mysql://db_write:123456@edp.corp.alimama.com:9901" />
+					<token key="mysql.slave.server1" value="mysql://db_read:123456@edp.corp.alimama.com:9901" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+
+		<copy file="build/tpl/trial_user.ini" todir="test/unit/ini/" overwrite="true">
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+				</replacetokens>
+			</filterchain>
+		</copy>
+
+		<copy file="build/tpl/session.ini" todir="test/unit/ini/" overwrite="true">
+			<filterchain>
+				<replacetokens begintoken="##" endtoken="##">
+				</replacetokens>
+			</filterchain>
+		</copy>
+	</target>
+</project>
