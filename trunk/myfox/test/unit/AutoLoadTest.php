@@ -1,9 +1,11 @@
 <?php
-namespace Aleafs\Lib;
+/* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 
-require_once(__DIR__ . '/../class/TestShell.php');
+use \Myfox\Lib\AutoLoad;
 
-class AutoLoadTest extends LibTestShell
+require_once(__DIR__ . '/../../lib/TestShell.php');
+
+class AutoLoadTest extends \Myfox\Lib\TestShell
 {
 
 	protected function setUp()
@@ -56,7 +58,7 @@ class AutoLoadTest extends LibTestShell
 		try {
 			$case1 = new \Com\I\Am\Not\Exists();
 		} catch (\Exception $e) {
-			$this->assertTrue($e instanceof \Aleafs\Lib\Exception, 'Exception Type doesn\'t match,');
+            $this->assertTrue($e instanceof \Myfox\Lib\Exception, 'Exception Type doesn\'t match,');
 			$this->assertContains(
 				sprintf('File "%s/autoload/com/i/am/not/exists.php', strtr(__DIR__, '\\', '/')),
 				strtr($e->getMessage(), '\\', '/'),
@@ -71,7 +73,7 @@ class AutoLoadTest extends LibTestShell
 		try {
 			$case1 = new \I\Am\Not\Exists();
 		} catch (\Exception $e) {
-			$this->assertTrue($e instanceof \Aleafs\Lib\Exception, 'Exception Type doesn\'t match,');
+			$this->assertTrue($e instanceof \Myfox\Lib\Exception, 'Exception Type doesn\'t match,');
 			$this->assertContains(
 				'Class "I\Am\Not\Exists" Not Found',
 				$e->getMessage(),
@@ -86,7 +88,7 @@ class AutoLoadTest extends LibTestShell
 		try {
 			$case1 = new \Com\Aleafs\AutoLoadTestCaseClassNameNotMatched();
 		} catch (\Exception $e) {
-			$this->assertTrue($e instanceof \Aleafs\Lib\Exception, 'Exception Type doesn\'t match,');
+			$this->assertTrue($e instanceof \Myfox\Lib\Exception, 'Exception Type doesn\'t match,');
 			$this->assertTrue(
 				(bool)preg_match(
 					'/^Class "(.+?)" NOT FOUND IN "(.+?)"/is',
