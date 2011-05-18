@@ -106,7 +106,7 @@ class Router
         foreach (Table::instance($tbname)->get('route_fields') AS $val) {
             list($column, $type) = array_values($val);
             if (!isset($field[$column])) {
-                throw new \Exception('Column "%s" required for table "%s"', $column, $tbname);
+                throw new \Myfox\Lib\Exception('Column "%s" required for table "%s"', $column, $tbname);
             }
 
             if (self::ROUTE_TYPE_DATE == $type) {
