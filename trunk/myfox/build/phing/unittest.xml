@@ -16,11 +16,8 @@
 
 		<coverage-setup database="build/code_coverage/coverage.db">
 			<fileset dir="./">
-				<exclude name="test/**" />
-				<exclude name="build/**" />
-				<exclude name="class/lib/**/*.php" />
-				<exclude name="class/sem/dispatcher.php" />
-				<include name="class/**/*.php" />
+				<include name="lib/**/*.php" />
+				<include name="app/**/*.php" />
 			</fileset>
 		</coverage-setup>
 
@@ -29,7 +26,6 @@
 			<batchtest>
 				<fileset dir="test/">
 					<include name="**/*Test.php" />
-					<exclude name="SpiderTest.php" />
 				</fileset>
 			</batchtest>
 			<formatter type="xml" todir="build/unit_test" outfile="test.unit.report.xml" />
