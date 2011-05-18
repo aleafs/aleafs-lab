@@ -1,6 +1,14 @@
 <?php
+/* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
+// +------------------------------------------------------------------------+
+// | Author: aleafs <pengchun@taobao.com>									|
+// +------------------------------------------------------------------------+
+//
+// $Id: router.php 18 2010-04-13 15:40:37Z zhangxc83 $
 
-namespace Myfox\App;
+namespace Myfox\App\Model;
+
+use \Myfox\Lib\Mysql;
 
 class Router
 {
@@ -20,6 +28,28 @@ class Router
 
 	private static $db;
 
+	private static $inited	= false;
+
+	/* }}} */
+
+	/* {{{ public static void init() */
+	/**
+	 * 类初始化
+	 *
+	 * @access public static
+	 * @param  Object $db
+	 * @return void
+	 */
+	public static function init($db = null)
+	{
+		if ($db instanceof \Myfox\Lib\Mysql) {
+			self::$db	= $db;
+		} else {
+			self::$db	= \Myfox\Lib\Mysql::instance('default');
+		}
+
+		self::$inited	= true;
+	}
 	/* }}} */
 
 	/* {{{ public static Mixture get() */
@@ -67,6 +97,7 @@ class Router
 	 */
 	private static function load($char)
 	{
+		!self::$inited && self::init();
 		$ln	= self::$db->getRow(sprintf(
 			"SELECT modtime,split_info FROM %s WHERE idxsign = %u AND routes = '%s' AND useflag IN (%d, %d, %d)",
 			'',	self::sign($char), self::$db->escape($char),
