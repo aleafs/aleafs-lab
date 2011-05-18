@@ -10,26 +10,26 @@
 
 namespace Myfox\Lib;
 
+use \Myfox\Lib\Cache\Apc;
+
 class LiveBox
 {
 
     /* {{{ 成员变量 */
 
-    private $host   = array();          /**<  服务器列表      */
+    private $host   = array();      /**<  服务器列表      */
 
-    private $pool   = array();          /**<  带权重的选择池  */
+    private $pool   = array();
 
-    private $offs   = array();          /**<  不可用列表      */
+    private $offs   = array();      /**<  不可用列表      */
 
-    private $maxInt = 0;                /**<  随即查找时最大随机数 */
+    private $sign   = null;         /**<  不可用列表签名      */
 
-    private $sign   = null;       /**<  不可用列表签名      */
+    private $last   = null;         /**<  上次返回的服务器      */
 
-    private $last   = null;       /**<  上次返回的服务器      */
+    private $live   = 300;          /**<  自动存活检查时间      */
 
-    private $live   = 300;        /**<  自动存活检查时间      */
-
-    private $cache  = null;       /**<  缓存服务      */
+    private $cache  = null;         /**<  缓存服务      */
 
     /* }}} */
 
@@ -47,7 +47,7 @@ class LiveBox
         $this->live  = max(0, (int)$live);
 
         if (function_exists('apc_add')) {
-            $this->cache = new Cache\Apc($token);
+            $this->cache = new Apc($token, $this->live);
         } else {
             $this->cache = null;
         }
@@ -56,8 +56,6 @@ class LiveBox
             $this->offs = self::filterOffs($this->cache->get('offs'));
         }
         $this->sign = crc32(json_encode($this->offs));
-
-        return $this;
     }
     /* }}} */
 
@@ -75,13 +73,12 @@ class LiveBox
                 (array)$this->cache->get('offs'),
                 (array)$this->offs
             ));
+            ksort($offs);
 
             if (crc32(json_encode($offs)) != $this->sign) {
                 $this->cache->set('offs', $offs, intval(1.2 * $this->live));
             }
         }
-
-        return true;
     }
     /* }}} */
 
@@ -91,36 +88,12 @@ class LiveBox
      *
      * @access public
      * @param  Mixture $host
-     * @param  Integer $weight (default 1)
      * @return Object $this
      */
-    public function register($host, $weight = 1)
+    public function register($host, $id = null)
     {
-        $this->host[self::sign($host)] = array(
-            'host'  => $host,
-            'weight'=> max(1, (int)$weight),
-            'times' => 0,
-        );
-
-        return $this;
-    }
-    /* }}} */
-
-    /* {{{ public Object unregister() */
-    /**
-     * 注销一台服务器
-     *
-     * @access public
-     * @param  Mixture $host
-     * @return Object $this
-     */
-    public function unregister($host)
-    {
-        $sign = self::sign($host);
-        if (isset($this->host[$sign])) {
-            unset($this->host[$sign]);
-        }
-
+        $this->host[(null === $id) ? count($this->host) : $id] = $host;
+        $this->pool = array();
         return $this;
     }
     /* }}} */
@@ -133,28 +106,29 @@ class LiveBox
      * @param  Mixture $host (default null)
      * @return Object $this
      */
-    public function setOffline($host = null)
+    public function setOffline($id = null)
     {
-        $sign = (null === $host) ? $this->last : self::sign($host);
-        if (isset($this->host[$sign])) {
-            $this->offs[$sign] = time() + $this->live;
-            $this->pool = null;
+        $id = (null === $id) ? $this->last : $id;
+        if (isset($this->host[$id])) {
+            $this->offs[$id] = time() + $this->live;
         }
+        $this->pool = array();
 
         return $this;
     }
     /* }}} */
 
-    /* {{{ public Object cleanAll() */
+    /* {{{ public Object cleanAllCache() */
     /**
      * 清理所有的对象属性
      *
      * @access public
      * @return void
      */
-    public function cleanAll()
+    public function cleanAllCache()
     {
         $this->host = array();
+        $this->pool = array();
         $this->offs = array();
         $this->sign = crc32(json_encode($this->offs));
         $this->last = null;
@@ -167,19 +141,6 @@ class LiveBox
     }
     /* }}} */
 
-    /* {{{ public Boolean useCache() */
-    /**
-     * 是否使用缓存
-     *
-     * @access public
-     * @return Boolean true or false
-     */
-    public function useCache()
-    {
-        return empty($this->cache) ? false : true;
-    }
-    /* }}} */
-
     /* {{{ public Mixture fetch() */
     /**
      * 随机获取一台可用服务器
@@ -189,93 +150,15 @@ class LiveBox
      */
     public function fetch()
     {
-        $this->last = $this->random(array_diff_key($this->host, $this->offs));
-        if (null === $this->last) {
-            throw new Exception('There is no available server.');
-        }
-
-        $server = &$this->host[$this->last];
-        $server['times']++;
-
-        return $server['host'];
-    }
-    /* }}} */
-
-    /* {{{ private Mixture random() */
-    /**
-     * 根据权重随机选出一台服务器
-     *
-     * @access private static
-     * @param  Array $host
-     * @return Mixture
-     */
-    private function random($host)
-    {
         if (empty($this->pool)) {
-            $weight = 0;
-            $hosts  = array_diff_key($this->host, $this->offs);
-
-            $this->pool = array();
-            foreach ($hosts AS $sign => $item) {
-                $weight += (int)$item['weight'];
-                $this->pool[$sign] = $weight;
-            }
-            $this->maxInt = $weight;
+            $this->pool = array_keys(array_diff_key($this->host, $this->offs));
         }
-
         if (empty($this->pool)) {
-            return null;
+            throw new \Myfox\Lib\Exception('There is no available server');
         }
 
-        $index  = array_keys($this->pool);
-        $random = rand(0, $this->maxInt - 1);
-        $sign   = self::search($random, $index, array_values($this->pool));
-        if (null !== $sign) {
-            return $sign;
-        }
-
-        return reset($index);
-
-        $random = rand(0, $weight - 1);
-        foreach ($stacks AS $key => $val) {
-            if ($val > $random) {
-                return $indexs[$key];
-            }
-        }
-
-        return reset($indexs);
-    }
-    /* }}} */
-
-    /* {{{ private static String  search() */
-    /**
-     * 二分法查找对应的服务器
-     *
-     * @access private
-     * @return String
-     */
-    private static function search($mouse, $index, $value, $left = -1, $right = -1)
-    {
-        if ($left == -1 || $right == -1) {
-            $left   = 0;
-            $right  = count($value);
-        }
-
-        $middle = (int)(($left + $right) / 2);
-        $snoopy = $value[$middle];
-        if ((!isset($value[$middle - 1]) || $mouse >= $value[$middle - 1]) && $mouse < $snoopy) {
-            return $index[$middle];
-        }
-
-        if (abs($right - $left) <= 1) {
-            return null;
-        }
-
-        if ($mouse < $snoopy) {
-            return self::search($mouse, $index, $value, $left, $middle);
-        }
-
-        return self::search($mouse, $index, $value, $middle, $right);
+        $this->last = $this->pool[array_rand($this->pool)];
+        return $this->host[$this->last];
     }
     /* }}} */
 
@@ -315,7 +198,6 @@ class LiveBox
             }
             $return[$host] = $time;
         }
-        ksort($return);
 
         return $return;
     }
