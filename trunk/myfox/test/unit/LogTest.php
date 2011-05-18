@@ -3,18 +3,14 @@
 // +--------------------------------------------------------------------+
 // | Log Test Shell														|
 // +--------------------------------------------------------------------+
-// | Copyright (c) 2010 Taobao.com. All Rights Reserved					|
-// +--------------------------------------------------------------------+
-// | Author: pengchun <pengchun@taobao.com>								|
-// +--------------------------------------------------------------------+
 //
 // $Id: LogTest.php 92 2010-06-02 13:20:01Z zhangxc83 $
 
-use \Aleafs\Lib\Log;
+use \Myfox\Lib\Log;
 
-require_once(__DIR__ . '/../class/TestShell.php');
+require_once(__DIR__ . '/../../lib/TestShell.php');
 
-class LogTest extends \Aleafs\Lib\LibTestShell
+class LogTest extends \Myfox\Lib\TestShell
 {
 
     private $file;
