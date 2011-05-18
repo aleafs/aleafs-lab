@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS route_info (
 	useflag tinyint(2) unsigned not null default 0,
 	addtime datetime not null default '0000-00-00 00:00:00',
 	modtime datetime not null default '0000-00-00 00:00:00',
-	tabname varchar(64) not null default '',
+	tbname varchar(64) not null default '',
 	routes varchar(1024) not null default '',
 	split_info text,
 	split_temp text,

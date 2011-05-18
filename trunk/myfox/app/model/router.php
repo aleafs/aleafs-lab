@@ -9,6 +9,7 @@
 namespace Myfox\App\Model;
 
 use \Myfox\Lib\Mysql;
+use \Myfox\App\Model\Table;
 
 class Router
 {
@@ -20,7 +21,10 @@ class Router
 	const FLAG_NORMAL_USE	= 3;	/**<	数据装完，路由生效			*/
 	const FLAG_PRE_RESHIP	= 4;	/**<	等待重装					*/
 	const FLAG_IS_LOCKING	= 5;	/**<	热数据迁移时使用			*/
-	const FLAG_IS_DELETED	= 0;	/**<	废弃路由，等待删除			*/
+    const FLAG_IS_DELETED	= 0;	/**<	废弃路由，等待删除			*/
+
+    const ROUTE_TYPE_INT    = 0;
+    const ROUTE_TYPE_DATE   = 1;
 
 	/* }}} */
 
@@ -62,10 +66,11 @@ class Router
 	 * @return Mixture
 	 */
 	public static function get($tbname, $field = array())
-	{
-		return self::parse(self::load(sprintf(
-			'%s:%s', $tbname, json_encode($field)
-		)));
+    {
+        $tbname = trim($tbname);
+        return self::parse(self::load(
+            $tbname, self::filter($tbname, (array)$field)
+        ));
 	}
 	/* }}} */
 
@@ -88,6 +93,39 @@ class Router
 	}
 	/* }}} */
 
+    /* {{{ private static String filter() */
+    /**
+     * 过滤路由字段
+     *
+     * @access private static
+     * @return String
+     */
+    private static function filter($tbname, $field = array())
+    {
+        $rt = array();
+        foreach (Table::instance($tbname)->get('route_fields') AS $val) {
+            list($column, $type) = array_values($val);
+            if (!isset($field[$column])) {
+                throw new \Exception('Column "%s" required for table "%s"', $column, $tbname);
+            }
+
+            if (self::ROUTE_TYPE_DATE == $type) {
+                $rt[$column]    = date('Ymd', strtotime($field[$column]));
+            } else {
+                $rt[$column]    = 0 + $field[$column];
+            }
+        }
+        ksort($rt);
+
+        $st = array();
+        foreach ($rt AS $k => $v) {
+            $st[]   = sprintf('%s:%s', $v, $k);
+        }
+
+        return implode(';', $st);
+    }
+    /* }}} */
+
 	/* {{{ private static String load() */
 	/**
 	 * 从DB中加载路由数据
@@ -95,20 +133,16 @@ class Router
 	 * @access private static
 	 * @return String
 	 */
-	private static function load($char)
+	private static function load($tbname, $char)
 	{
-		!self::$inited && self::init();
-		$ln	= self::$db->getRow(sprintf(
-			"SELECT modtime,split_info FROM %s WHERE idxsign = %u AND routes = '%s' AND useflag IN (%d, %d, %d)",
-			'',	self::sign($char), self::$db->escape($char),
+        !self::$inited && self::init();
+
+		return (string)self::$db->getCell(sprintf(
+            "SELECT CONCAT(modtime, '|', split_info) FROM %s WHERE tbname='%s' AND routes = '%s' ".
+            ' AND idxsign = %u AND useflag IN (%d, %d, %d)',
+			'', self::$db->escape($tbname), self::$db->escape($char), self::sign($char),
 			self::FLAG_NORMAL_USE, self::FLAG_PRE_RESHIP, self::FLAG_IS_LOCKING
 		));
-
-		if (empty($ln)) {
-			return '';
-		}
-
-		return sprintf('%s|%s', $ln['modtime'], $ln['split_info']);
 	}
 	/* }}} */
 
