@@ -40,6 +40,19 @@ class Url
     }
     /* }}} */
 
+    /* {{{ public Mixture __get() */
+    /**
+     * __get魔术方法
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function __get($key)
+    {
+        return isset($this->$key) ? $this->$key : null;
+    }
+    /* }}} */
+
     /* {{{ public String module() */
     /**
      * 返回module
