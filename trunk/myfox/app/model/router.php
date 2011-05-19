@@ -140,7 +140,7 @@ class Router
 		return (string)self::$db->getCell(sprintf(
             "SELECT CONCAT(modtime, '|', split_info) FROM %s WHERE tbname='%s' AND routes = '%s' ".
             ' AND idxsign = %u AND useflag IN (%d, %d, %d)',
-			'', self::$db->escape($tbname), self::$db->escape($char), self::sign($char),
+			'', self::$db->escape($tbname), self::$db->escape($char), self::sign($char . '|' . $tbname),
 			self::FLAG_NORMAL_USE, self::FLAG_PRE_RESHIP, self::FLAG_IS_LOCKING
 		));
 	}
