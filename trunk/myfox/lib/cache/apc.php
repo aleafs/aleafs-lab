@@ -128,9 +128,9 @@ class Apc
      * @param  String $key
      * @return Mixture
      */
-    public function get($key)
+    public function get($key, $cache = true)
     {
-        if (isset(self::$data[$key])) {
+        if ($cache && isset(self::$data[$key])) {
             return self::$data[$key]['v'];
         }
 
