@@ -92,7 +92,12 @@ class ApcTest extends \Myfox\Lib\TestShell
             'b' => str_pad('a', Apc::COMPRESS_SIZE + 1),
         );
         $this->assertTrue($apc->set('key1', $val));
-        $this->assertEquals($val, $apc->get('key1'));
+
+        // xxx: __destruct only for flush to apc
+        $apc = null;
+
+        $apc = new Apc(__METHOD__, true);
+        $this->assertEquals($val, $apc->get('key1', false));
     }
 
     /* {{{ public Mixture loadShellData() */
