@@ -1,5 +1,5 @@
---
 
+-- 路由表
 DROP TABLE IF EXISTS route_info;
 CREATE TABLE IF NOT EXISTS route_info (
 	autokid int(10) unsigned not null auto_increment,
@@ -15,4 +15,14 @@ CREATE TABLE IF NOT EXISTS route_info (
 	PRIMARY KEY pk_route_id (autokid),
 	KEY idx_route_sign (idxsign, useflag),
 	KEY idx_route_date (thedate, useflag)
+) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
+
+-- 系统状态表
+DROP TABLE IF EXISTS settings;
+CREATE TABLE IF NOT EXISTS settings ()
+ENGINE = MyISAM DEFAULT CHARSET=UTF8;
+
+-- 任务队列表
+DROP TABLE IF EXISTS task_queque;
+CREATE TABLE IF NOT EXISTS task_queque (
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
