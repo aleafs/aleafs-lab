@@ -162,24 +162,6 @@ class LiveBox
     }
     /* }}} */
 
-    /* {{{ private static String  sign() */
-    /**
-     * 服务器签名
-     *
-     * @access private static
-     * @param  Mixture $host
-     * @return String
-     */
-    private static function sign($host)
-    {
-        if (is_scalar($host)) {
-            return strtolower(trim($host));
-        }
-
-        return json_encode($host);
-    }
-    /* }}} */
-
     /* {{{ private static Mixture filterOffs() */
     /**
      * 根据时间过滤不可用列表

@@ -12,9 +12,9 @@ namespace Myfox\App\Tasks;
 class Import extends \Myfox\App\Task
 {
 
-	public function execute()
-	{
-	}
+    public function execute()
+    {
+    }
 
     public function wait()
     {
