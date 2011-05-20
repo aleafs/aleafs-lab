@@ -74,6 +74,27 @@ class ApcTest extends \Myfox\Lib\TestShell
     }
     /* }}} */
 
+    /* {{{ public void test_should_apc_add_works_fine() */
+    public function test_should_apc_add_works_fine()
+    {
+        $apc = new Apc(__METHOD__);
+        $this->assertTrue($apc->add('key1', 'val1'));
+        $this->assertFalse($apc->add('key1', 'val2'));
+    }
+    /* }}} */
+
+    public function test_should_data_compress_works_fine()
+    {
+        $apc = new Apc(__METHOD__, true);
+
+        $val = array(
+            'a' => 1111,
+            'b' => str_pad('a', Apc::COMPRESS_SIZE + 1),
+        );
+        $this->assertTrue($apc->set('key1', $val));
+        $this->assertEquals($val, $apc->get('key1'));
+    }
+
     /* {{{ public Mixture loadShellData() */
     public function loadShellData($key)
     {
