@@ -16,6 +16,8 @@
 
 		<coverage-setup database="build/code_coverage/coverage.db">
 			<fileset dir="./">
+				<include name="lib/blackhole.php" />
+				<include name="lib/exception.php" />
 				<include name="lib/**/*.php" />
 				<include name="app/**/*.php" />
 			</fileset>
