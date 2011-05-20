@@ -18,10 +18,11 @@ date_default_timezone_set('Asia/Shanghai');
 class TestShell extends \PHPUnit_Framework_TestCase
 {
 
-	protected function setUp()
-	{
-		parent::setUp();
-		\Myfox\Lib\AutoLoad::init();
+    protected function setUp()
+    {
+        parent::setUp();
+        \Myfox\Lib\AutoLoad::init();
+        \Myfox\Lib\AutoLoad::register('myfox\\app',    __DIR__ . '/../app');
     }
 
 }

@@ -8,7 +8,7 @@
 //
 // $Id: controller.php 22 2010-04-15 16:28:45Z zhangxc83 $
 
-namespace Myfox\Lib;
+namespace Myfox\App;
 
 class Controller
 {
