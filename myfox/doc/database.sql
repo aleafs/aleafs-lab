@@ -25,4 +25,23 @@ ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 -- 任务队列表
 DROP TABLE IF EXISTS task_queque;
 CREATE TABLE IF NOT EXISTS task_queque (
+	autokid bigint(20) unsigned not null auto_increment,
+	agentid smallint(5) unsigned not null default 0,
+	priority smallint(5) unsigned not null default 0,
+	trytimes tinyint(2) unsigned not null default 0,
+	addtime datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+	begtime datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+	endtime datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+	task_flag tinyint(2) unsigned not null default 0,
+	task_type smallint(5) unsigned not null default 0,
+	adduser varchar(100) not null default '',
+	last_error varchar(200) not null default '',
+	task_info text,
+	PRIMARY KEY pk_queque_id (autokid),
+	KEY idx_queque_flag (task_flag, trytimes, priority),
+	KEY idx_queque_time (addtime)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
+
+-- SELECT ... FROM task_queque WHERE task_flag = ? AND trytimes < ? ORDER BY priority ASC, trytimes ASC, autokid ASC-- SELECT ... FROM task_queque WHERE addtime < ?
+
+
