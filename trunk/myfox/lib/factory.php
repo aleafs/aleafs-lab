@@ -15,64 +15,34 @@ class Factory
 
     /* {{{ 静态变量 */
 
-    private static $alias   = array();        /**<  别名      */
-
-    private static $reg	= array();        /**<  属性池      */
-
-    private static $obj	= array();        /**<  对象池      */
-
-    private static $log = array();
-
-    private static $ini = array();
+    private static $objects = array();
 
     /* }}} */
 
-    /* {{{ public static void alias() */
+    /* {{{ public static Object getObject() */
     /**
-     * 对象别名
+     * 获取一个类的指定实例
      *
-     * @access public static
-     * @return void
-     */
-    public static function alias($class, $name, $arg = null)
-    {
-        $arg = func_get_args();
-        self::$alias[self::objIndex($class, $name)] = array_slice($arg, 2);
-    }
-    /* }}} */
-
-    /* {{{ public static void register()
      * @access public static
      * @param  String $class
      * @param  String $name
-     * @return void
+     * @return Object (refferrence)
      */
-    public static function register($class, $name, $arg = null)
+    public static function &getObject($class)
     {
-        $arg = func_get_args();
-        self::$reg[self::objIndex($class, $name)] = array_slice($arg, 2);
-    }
-    /* }}} */
-
-    /* {{{ public static void unregister() */
-    /**
-     * 注销一个已经注册的对象
-     *
-     * @access public static
-     * @access public static
-     * @param  String $class
-     * @param  String $name
-     * @return void
-     */
-    public static function unregister($class, $name)
-    {
-        $index	= self::objIndex($class, $name);
-        if (isset(self::$reg[$index])) {
-            if (isset(self::$obj[$index])) {
-                unset(self::$obj[$index]);
+        $args   = func_get_args();
+        $class  = array_shift($args);
+        $index  = self::names($class, json_encode($args));
+        if (empty(self::$objects[$index])) {
+            if (!class_exists($class)) {
+                \Myfox\Lib\AutoLoad::callback($class);
             }
-            unset(self::$reg[$index]);
+
+            $rf = new \ReflectionClass($class);
+            self::$objects[$index]  = $rf->newInstanceArgs($args);
         }
+
+        return self::$objects[$index];
     }
     /* }}} */
 
@@ -86,44 +56,11 @@ class Factory
      */
     public static function removeAllObject($reg = false)
     {
-        self::$obj	= array();
-        if ($reg) {
-            self::$reg	= array();
-        }
+        self::$objects  = array();
     }
     /* }}} */
 
-    /* {{{ public static Object getObject() */
-    /**
-     * 获取一个类的指定实例
-     *
-     * @access public static
-     * @param  String $class
-     * @param  String $name
-     * @return Object (refferrence)
-     */
-    public static function &getObject($class, $name)
-    {
-        $index	= self::objIndex($class, $name);
-        if (empty(self::$obj[$index])) {
-            if (empty(self::$reg[$index])) {
-                throw new Exception(sprintf(
-                    'Unregistered object name as "%s" for class "%s"',
-                    $name, $class
-                ));
-            }
-            if (!class_exists($class)) {
-                AutoLoad::callback($class);
-            }
-            $ref = new \ReflectionClass($class);
-            self::$obj[$index] = $ref->newInstanceArgs(self::$reg[$index]);
-        }
-
-        return self::$obj[$index];
-    }
-    /* }}} */
-
-    /* {{{ private static String objIndex() */
+    /* {{{ private static String names() */
     /**
      * 构造对象索引
      *
@@ -132,9 +69,9 @@ class Factory
      * @param  String $name
      * @return String
      */
-    private static function objIndex($class, $name)
+    private static function names($class, $name)
     {
-        return sprintf('%s\%s', self::normalize($class), self::normalize($name));
+        return sprintf('%s:%s', self::normalize($class), self::normalize($name));
     }
     /* }}} */
 
