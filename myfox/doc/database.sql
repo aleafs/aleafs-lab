@@ -5,10 +5,11 @@ CREATE TABLE IF NOT EXISTS route_info (
 	autokid int(10) unsigned not null auto_increment,
 	thedate int(10) unsigned not null default 0,
 	idxsign int(10) unsigned not null default 0,
+	isarchive tinyint(2) unsigned not null default 0,
 	useflag tinyint(2) unsigned not null default 0,
 	addtime datetime not null default '0000-00-00 00:00:00',
 	modtime datetime not null default '0000-00-00 00:00:00',
-	tbname varchar(64) not null default '',
+	tabname varchar(64) not null default '',
 	routes varchar(1024) not null default '',
 	split_info text,
 	split_temp text,
@@ -38,7 +39,8 @@ CREATE TABLE IF NOT EXISTS task_queque (
 	last_error varchar(200) not null default '',
 	task_info text,
 	PRIMARY KEY pk_queque_id (autokid),
-	KEY idx_queque_flag (task_flag, trytimes, priority),
+	KEY idx_queque_flag (agentid, task_flag, trytimes),
+	KEY idx_queque_prio (priority),
 	KEY idx_queque_time (addtime)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
