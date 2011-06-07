@@ -26,6 +26,9 @@ class Router
     const ROUTE_TYPE_INT    = 0;
     const ROUTE_TYPE_DATE   = 1;
 
+    const MIRROR    = 0;            /**<    镜像表 */
+    const SHARDING  = 1;            /**<    分区   */
+
     /* }}} */
 
     /* {{{ 静态变量 */
@@ -71,6 +74,50 @@ class Router
         return self::parse(self::load(
             $tbname, self::filter($tbname, (array)$field)
         ));
+    }
+    /* }}} */
+
+    /* {{{ public static Boolean set() */
+    /**
+     * 计算路由
+     *
+     * @access public static
+     * @param  String $tbname
+     * @param  Mixture $field
+     * @param  Integer $rownum
+     * @return Mixture
+     */
+    public static function set($tbname, $field, $rownum)
+    {
+        $routes = self::filter($tbname, (array)$field);
+        $table  = Table::instance($tbname);
+
+        $chunk  = (int)$table->get('split_threshold');
+        $drift  = $table->get('split_drift');
+
+        $bucket = array();
+        if ($chunk > 0 && self::SHARDING == $table->get('route_type')) {
+            $lf = (int)$chunk * (1 + $drift);
+            while ($rownum > $lf) {
+                $rownum -= $chunk;
+                $bucket[]   = array(
+                    'rows'  => $chunk,
+                );
+            }
+        }
+
+        if ($rownum > 0) {
+            $bucket[]   = array(
+                'rows'  => $rownum,
+            );
+        }
+
+        foreach ($bucket AS $item) {
+        }
+
+        // xxx: write to db
+
+        return $bucket;
     }
     /* }}} */
 
