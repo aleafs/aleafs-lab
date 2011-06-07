@@ -51,6 +51,8 @@ class ConfigTest extends \Myfox\Lib\TestShell
         $config = Config::instance('unittest');
         $this->assertEquals('', $config->get('key2/a'));
         $this->assertEquals(9.87654321, $config->get('key2/b'));
+
+        $loader = new \Myfox\Lib\Config\Ini(__DIR__ . '/ini/config_test.ini');
     }
     /* }}} */
 
