@@ -37,5 +37,22 @@ class ConfigTest extends \Myfox\Lib\TestShell
     }
     /* }}} */
 
+    /* {{{ public void test_should_config_with_ini_works_fine() */
+    public function test_should_config_with_ini_works_fine()
+    {
+        $config = new Config(__DIR__ . '/ini/config_test.ini', 'unittest');
+        $this->assertEquals('abc', $config->get('key1'));
+        $this->assertEquals(array(
+            'a' => 1.23456789,
+            'b' => 9.87654321,
+        ), $config->get('key2'));
+        $this->assertEquals('null', $config->get('key3', 'null'));
+
+        $config = Config::instance('unittest');
+        $this->assertEquals('', $config->get('key2/a'));
+        $this->assertEquals(9.87654321, $config->get('key2/b'));
+    }
+    /* }}} */
+
 }
 

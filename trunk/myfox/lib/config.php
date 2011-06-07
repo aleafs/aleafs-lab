@@ -24,7 +24,7 @@ class Config
 
     /* {{{ 成员变量 */
 
-    private $schema;
+    private $scheme;
 
     private $params = null;
 
@@ -90,7 +90,24 @@ class Config
     public function get($key, $default = null)
     {
         if (null === $this->params) {
+            $this->params   = (array)self::load($this->scheme);
         }
+
+        $key    = trim($key);
+        if (isset($this->params[$key])) {
+            return $this->params[$key];
+        }
+
+        $val    = $this->params;
+        foreach (explode('/', $key) AS $id) {
+            $id = trim($id);
+            if (!isset($val[$id])) {
+                return $default;
+            }
+            $val    = $val[$id];
+        }
+
+        return $val;
     }
     /* }}} */
 
@@ -103,7 +120,7 @@ class Config
      */
     public function __construct($url, $name = null)
     {
-        $this->schema   = trim($url);
+        $this->scheme   = trim($url);
         $this->params   = null;
         if (!empty($name)) {
             self::register($name, $url);
@@ -121,6 +138,28 @@ class Config
     private static function normalize($name)
     {
         return strtolower(preg_replace('/\s+/', '', $name));
+    }
+    /* }}} */
+
+    /* {{{ private static Mixture load() */
+    /**
+     * 加载数据
+     *
+     * @access private static
+     * @return Mixture
+     */
+    private static function load($url)
+    {
+        $url = parse_url($url);
+        if (empty($url) || empty($url['path'])) {
+            return false;
+        }
+
+        $class  = explode('.', trim($url['path'], "\x00..\x20."));
+        $class  = sprintf('%s\%s', __CLASS__, ucfirst(strtolower(end($class))));
+        $object = new $class($url);
+
+        return $object->parse();
     }
     /* }}} */
 
