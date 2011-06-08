@@ -18,6 +18,15 @@ use \Myfox\Lib\LiveBox;
 class Mysql
 {
 
+    /* {{{ 静态常量 */
+
+    const INT	= 'i';
+    const CHAR	= 's';
+    const FLOAT	= 'd';
+    const BLOB  = 'b';
+
+    /* }}} */
+
     /* {{{ 静态变量 */
 
     private static $objects	= array();
@@ -44,6 +53,14 @@ class Mysql
         'prefix'    => '',
         'logurl'    => '',
     );
+
+    private $lastId = 0;
+
+    private $error  = '';
+
+    private $log;
+
+    private $stmts  = array();
 
     /* }}} */
 
@@ -214,11 +231,39 @@ class Mysql
     public function query($query, $value = null, $type = null)
     {
         $query  = self::sqlclean($query);
-        if (self::ismodify($query)) {
+        $modify = self::ismodify($query);
+        if ($modify) {
             $this->connectToMaster();
         } else {
             $this->connectToSlave();
         }
+
+        if (empty($value)) {
+            $rs = $this->handle->query($query);
+            if (false !== $rs && true === $modify) {
+                $rs = $this->handle->affected_rows;
+            }
+
+            $this->error    = $this->handle->error;
+            if (0 === strncasecmp('insert', $query, 6)) {
+                $this->lastId   = $this->handle->insert_id;
+            }
+        } else {
+            $rs = $this->stmt($query, $value, $type);
+        }
+
+        if (false === $rs) {
+            $this->log->debug('QUERY_OK', array(
+                'sql'   => $query,
+            ));
+        } else {
+            $this->log->warning('QUERY_ERROR', array(
+                'sql'   => $query,
+                'error' => $this->error,
+            ));
+        }
+
+        return $rs;
     }
     /* }}} */
 
@@ -302,6 +347,13 @@ class Mysql
      */
     public function disconnect()
     {
+        foreach ($this->stmts AS $pool) {
+            if (!empty($pool->stmt)) {
+                $pool->stmt->close();
+            }
+        }
+        $this->stmts    = array();
+
         if (!empty($this->handle)) {
             $this->handle->close();
             $this->handle   = null;
@@ -374,6 +426,60 @@ class Mysql
                 $this->handle->autocommit(true);
             }
         } while (empty($rs));
+    }
+    /* }}} */
+
+    /* {{{ private Mixture stmt() */
+    /**
+     * stmt方式执行语句
+     *
+     * @access private
+     * @return Mixture
+     */
+    private function stmt(&$query, $value, $type = null)
+    {
+        $id = $query;
+        if (!empty($this->stmts[$id])) {
+            $stmt   = $this->stmts[$id]->stmt;
+            $data   = $this->stmts[$id]->data;
+        } else {
+            $data   = array();
+            if (preg_match_all('/:(\w+)/is', $query, $matches)) {
+                foreach ((array)$matches[1] AS $key => $p) {
+                    if (!isset($value[$p])) {
+                        continue;
+                    }
+
+                    $is = 0;
+                    if (is_array($value[$p])) {
+                        foreach ($value[$p] AS $item) {
+                            $tk = sprintf('%s_%d', $p, $is++);
+                            $data[]     = $tk;
+                            $value[$tk] = $item;
+                            $type[$tk]  = isset($type[$p]) ? $type[$p] : self::CHAR;
+                        }
+                        $is--;
+                    } else {
+                        $data[] = $p;
+                    }
+
+                    $query  = explode(':' . $p, $query, 2);
+                    $query  = sprintf('%s%s%s', $query[0], implode(',', array_fill(0, 1 + $is, '?')), $query[1]);
+                }
+            }
+
+            $stmt   = $this->handle->prepare($query);
+            if (empty($stmt)) {
+                $this->error    = $this->handle->error;
+                return false;
+            }
+
+            $this->stmts[$id]   = array(
+                'stmt'  => $stmt,
+                'data'  => $data,
+                'type'  => self::ismodify($query),
+            );
+        }
     }
     /* }}} */
 
