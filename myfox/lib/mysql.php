@@ -34,6 +34,8 @@ class Mysql
 
     private $handle;
 
+    private $isMaster   = false;
+
     private $option = array(
         'timeout'   => 5,
         'persist'   => false,
@@ -89,24 +91,11 @@ class Mysql
     public static function removeAllNames()
     {
         foreach (self::$objects AS $mysql) {
-            $mysql->close();
+            $mysql->disconnect();
         }
 
         self::$objects	= array();
         self::$alias	= array();
-    }
-    /* }}} */
-
-    /* {{{ private static string normalize() */
-    /**
-     * 名字归一化
-     *
-     * @access private static
-     * @return string
-     */
-    private static function normalize($name)
-    {
-        return strtolower(preg_replace('/\s+/', '', $name));
     }
     /* }}} */
 
@@ -162,7 +151,7 @@ class Mysql
      */
     public function __destruct()
     {
-        $this->close();
+        $this->disconnect();
     }
     /* }}} */
 
@@ -202,18 +191,6 @@ class Mysql
     }
     /* }}} */
 
-    /* {{{ public void close() */
-    /**
-     * 关闭连接
-     *
-     * @access public
-     * @return void
-     */
-    public function close()
-    {
-    }
-    /* }}} */
-
     /* {{{ public Mixture option() */
     /**
      * 获取配置属性
@@ -236,6 +213,12 @@ class Mysql
      */
     public function query($query, $value = null, $type = null)
     {
+        $query  = self::sqlclean($query);
+        if (self::ismodify($query)) {
+            $this->connectToMaster();
+        } else {
+            $this->connectToSlave();
+        }
     }
     /* }}} */
 
@@ -248,6 +231,12 @@ class Mysql
      */
     public function async($query, $value = null, $type = null)
     {
+        $query  = self::sqlclean($query);
+        if (self::ismodify($query)) {
+            $this->connectToMaster();
+        } else {
+            $this->connectToSlave();
+        }
     }
     /* }}} */
 
@@ -260,6 +249,63 @@ class Mysql
      */
     public function poll()
     {
+    }
+    /* }}} */
+
+    /* {{{ public void connectToMaster() */
+    /**
+     * 连接到主库
+     *
+     * @access public
+     * @return void
+     */
+    public function connectToMaster()
+    {
+        if (!empty($this->handle) && $this->isMaster) {
+            return;
+        }
+
+        $this->disconnect();
+        $this->connect($this->master, false);
+        $this->isMaster = true;
+    }
+    /* }}} */
+
+    /* {{{ public void connectToSlave() */
+    /**
+     * 连接到从库
+     *
+     * @access public
+     * @return void
+     */
+    public function connectToSlave()
+    {
+        if (!empty($this->handle)) {
+            return $this->handle->ping();
+        }
+
+        try {
+            $this->connect($this->slave);
+            $this->isMaster = false;
+        } catch (\Exception $e) {
+            $this->connectToMaster();
+        }
+    }
+    /* }}} */
+
+    /* {{{ public void disconnect() */
+    /**
+     * 断开连接
+     *
+     * @access public
+     * @return void
+     */
+    public function disconnect()
+    {
+        if (!empty($this->handle)) {
+            $this->handle->close();
+            $this->handle   = null;
+        }
     }
     /* }}} */
 
@@ -328,6 +374,45 @@ class Mysql
                 $this->handle->autocommit(true);
             }
         } while (empty($rs));
+    }
+    /* }}} */
+
+    /* {{{ private static string normalize() */
+    /**
+     * 名字归一化
+     *
+     * @access private static
+     * @return string
+     */
+    private static function normalize($name)
+    {
+        return strtolower(preg_replace('/\s+/', '', $name));
+    }
+    /* }}} */
+
+    /* {{{ private static string sqlclean() */
+    /**
+     * SQL清洗
+     *
+     * @access private static
+     * @return string
+     */
+    private static function sqlclean($query)
+    {
+        return trim(preg_replace('/\s{2,}/', '', $query), "; \t\r\n");
+    }
+    /* }}} */
+
+    /* {{{ private static Boolean ismodify() */
+    /**
+     * 是否UPDATE语句
+     *
+     * @access private static
+     * @return Boolean true or false
+     */
+    private static function ismodify($query)
+    {
+        return preg_match('/^(INSERT|REPLACE|DELETE|UPDATE|ALTER|CREATE|DROP|LOAD)\s+/is', trim($query)) ? true : false;
     }
     /* }}} */
 
