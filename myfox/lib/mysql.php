@@ -12,6 +12,7 @@
 
 namespace Myfox\Lib;
 
+use \Myfox\Lib\Config;
 use \Myfox\Lib\LiveBox;
 
 class Mysql
@@ -31,6 +32,15 @@ class Mysql
 
     private $slave;
 
+    private $handle;
+
+    private $option = array(
+        'timeout'   => 5,
+        'charset'   => 'utf8',
+        'dbname'    => '',
+        'logurl'    => '',
+    );
+
     /* }}} */
 
     /* {{{ public static Object instance() */
@@ -44,7 +54,7 @@ class Mysql
     {
         $name	= self::normalize($name);
         if (empty(self::$objects[$name])) {
-            if (empty(self::$alias[$name])) {
+            if (!isset(self::$alias[$name])) {
                 throw new \Myfox\Lib\Exception(sprintf('Undefined mysql instance named as "%s"', $name));
             }
             self::$objects[$name]	= new self(self::$alias[$name]);
@@ -94,6 +104,22 @@ class Mysql
      */
     public function __construct($config = null, $name = null)
     {
+        if (is_scalar($config) && !empty($config)) {
+            try {
+                $config = \Myfox\Lib\Config::instance($config);
+            } catch (\Exception $e) {
+                $config = new \Myfox\Lib\Config($config);
+            }
+            $config = $config->get('');
+        }
+
+        $config = (array)$config;
+        foreach ($config AS $key => $val) {
+            if (isset($this->option[$key])) {
+                $this->option[$key] = $val;
+            }
+        }
+
         if (!empty($name)) {
             self::$objects[self::normalize($name)]  = &$this;
         }
