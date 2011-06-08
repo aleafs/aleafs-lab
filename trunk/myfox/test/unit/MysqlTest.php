@@ -30,11 +30,7 @@ class MysqlTest extends \Myfox\Lib\TestShell
             $this->assertContains('Undefined mysql instance named as "i_am_not_exists"', $e->getMessage());
         }
 
-        Mysql::register('mysql1', '');
-
         $mysql	= new Mysql('', 'mysql3');
-
-        $this->assertEquals(Mysql::instance('MYSQl1'), $mysql);
         $this->assertEquals(Mysql::instance('MYSQl3'), $mysql);
     }
     /* }}} */

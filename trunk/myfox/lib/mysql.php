@@ -26,7 +26,7 @@ class Mysql
 
     /* }}} */
 
-    /* {{{ */
+    /* {{{ 成员变量 */
 
     private $master;
 
@@ -36,8 +36,10 @@ class Mysql
 
     private $option = array(
         'timeout'   => 5,
+        'persist'   => true,
         'charset'   => 'utf8',
         'dbname'    => '',
+        'prefix'    => '',
         'logurl'    => '',
     );
 
@@ -120,6 +122,17 @@ class Mysql
             }
         }
 
+        $prefix = empty($name) ? md5(json_encode($config)) : strtolower(trim($name));
+        $this->master   = new LiveBox($prefix . '/master', 10);
+        if (!empty($config['master'])) {
+            $this->init('addMaster', $config['master']);
+        }
+
+        $this->slave    = new LiveBox($prefix . '/slave', 300);
+        if (!empty($config['slave'])) {
+            $this->init('addSlave', $config['slave']);
+        }
+
         if (!empty($name)) {
             self::$objects[self::normalize($name)]  = &$this;
         }
@@ -128,7 +141,8 @@ class Mysql
 
     /* {{{ public void __destruct() */
     /**
-     * 
+     * 析构函数
+     *
      * @access public
      * @return void 
      */
@@ -138,9 +152,48 @@ class Mysql
     }
     /* }}} */
 
+    /* {{{ public void addMaster() */
+    /**
+     * 添加主库
+     *
+     * @access public
+     * @return void
+     */
+    public function addMaster($host, $user, $pass, $port = 3306)
+    {
+        $this->master->register(array(
+            'host'  => $host,
+            'port'  => $port,
+            'user'  => $user,
+            'pass'  => $pass,
+        ));
+    }
+    /* }}} */
+
+    /* {{{ public void addSlave() */
+    /**
+     * 添加从库
+     *
+     * @access public
+     * @return void
+     */
+    public function addSlave($host, $user, $pass, $port = 3306)
+    {
+        $this->slave->register(array(
+            'host'  => $host,
+            'port'  => $port,
+            'user'  => $user,
+            'pass'  => $pass,
+        ));
+    }
+    /* }}} */
+
     /* {{{ public void close() */
     /**
-     * 
+     * 关闭连接
+     *
+     * @access public
+     * @return void
      */
     public function close()
     {
@@ -149,6 +202,7 @@ class Mysql
 
     /* {{{ public Mixture query() */
     /**
+     * 执行query
      *
      * @access public
      * @return Mixture
@@ -172,6 +226,8 @@ class Mysql
 
     /* {{{ public Mixture poll() */
     /**
+     * 等待异步结果
+     *
      * @access public
      * @return Mixture
      */
@@ -190,6 +246,30 @@ class Mysql
     private static function normalize($name)
     {
         return strtolower(preg_replace('/\s+/', '', $name));
+    }
+    /* }}} */
+
+    /* {{{ private void init() */
+    /**
+     * 初始化机器配置
+     *
+     * @access private
+     * @param  String $method
+     * @param  Array $host
+     * @return void
+     */
+    private function init($method, $host)
+    {
+        foreach ((array)$host AS $ln) {
+            $cf = parse_url($ln);
+            if (empty($cf)) {
+                continue;
+            }
+            $this->$method(
+                $cf['host'], rawurldecode($cf['user']), rawurldecode($cf['pass']),
+                empty($cf['port']) ? 3306 : $cf['port']
+            );
+        }
     }
     /* }}} */
 
