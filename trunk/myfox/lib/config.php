@@ -98,6 +98,10 @@ class Config
             return $this->params[$key];
         }
 
+        if ('' == $key) {
+            return $this->params;
+        }
+
         $val    = $this->params;
         foreach (explode('/', $key) AS $id) {
             $id = trim($id);
