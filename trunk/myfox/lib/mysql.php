@@ -36,7 +36,7 @@ class Mysql
 
     private $option = array(
         'timeout'   => 5,
-        'persist'   => true,
+        'persist'   => false,
         'charset'   => 'utf8',
         'dbname'    => '',
         'prefix'    => '',
@@ -59,7 +59,7 @@ class Mysql
             if (!isset(self::$alias[$name])) {
                 throw new \Myfox\Lib\Exception(sprintf('Undefined mysql instance named as "%s"', $name));
             }
-            self::$objects[$name]	= new self(self::$alias[$name]);
+            self::$objects[$name]	= new self(self::$alias[$name], $name);
         }
 
         return self::$objects[$name];
@@ -97,6 +97,19 @@ class Mysql
     }
     /* }}} */
 
+    /* {{{ private static string normalize() */
+    /**
+     * 名字归一化
+     *
+     * @access private static
+     * @return string
+     */
+    private static function normalize($name)
+    {
+        return strtolower(preg_replace('/\s+/', '', $name));
+    }
+    /* }}} */
+
     /* {{{ public void __construct() */
     /**
      * 构造函数
@@ -123,18 +136,19 @@ class Mysql
         }
 
         $prefix = empty($name) ? md5(json_encode($config)) : strtolower(trim($name));
-        $this->master   = new LiveBox($prefix . '/master', 10);
+        $this->master   = new LiveBox('#MYSQL#' . $prefix . '/master', 10);
         if (!empty($config['master'])) {
             $this->init('addMaster', $config['master']);
         }
 
-        $this->slave    = new LiveBox($prefix . '/slave', 300);
+        $this->slave    = new LiveBox('#MYSQL#' . $prefix . '/slave', 300);
         if (!empty($config['slave'])) {
             $this->init('addSlave', $config['slave']);
         }
 
-        if (!empty($name)) {
-            self::$objects[self::normalize($name)]  = &$this;
+        $name   = self::normalize($name);
+        if (!empty($name) && !isset(self::$objects[$name])) {
+            self::$objects[$name]  = &$this;
         }
     }
     /* }}} */
@@ -200,6 +214,19 @@ class Mysql
     }
     /* }}} */
 
+    /* {{{ public Mixture option() */
+    /**
+     * 获取配置属性
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function option($key)
+    {
+        return isset($this->option[$key]) ? $this->option[$key] : null;
+    }
+    /* }}} */
+
     /* {{{ public Mixture query() */
     /**
      * 执行query
@@ -236,19 +263,6 @@ class Mysql
     }
     /* }}} */
 
-    /* {{{ private static string normalize() */
-    /**
-     * 名字归一化
-     *
-     * @access private static
-     * @return string
-     */
-    private static function normalize($name)
-    {
-        return strtolower(preg_replace('/\s+/', '', $name));
-    }
-    /* }}} */
-
     /* {{{ private void init() */
     /**
      * 初始化机器配置
@@ -270,6 +284,50 @@ class Mysql
                 empty($cf['port']) ? 3306 : $cf['port']
             );
         }
+    }
+    /* }}} */
+
+    /* {{{ private void connect() */
+    /**
+     * 连接DB
+     *
+     * @access private
+     * @return void
+     */
+    private function connect(&$box, $setoff = true)
+    {
+        do {
+            $my = $box->fetch();
+            $wr = error_reporting();
+            error_reporting($wr - E_WARNING);
+            foreach (array(10, 100, 1000) AS $us) {
+                $is = mysqli_init();
+                $is->options(MYSQLI_OPT_CONNECT_TIMEOUT, $this->option('timeout'));
+                $rs = $is->real_connect(sprintf(
+                    '%s%s', $this->option('persist', false) ? '' : 'p:', $my['host']
+                ), $my['user'], $my['pass'], $this->option('dbname'), $my['port']);
+
+                if (false !== $rs) {
+                    break;
+                }
+
+                $is->kill($is->thread_id);
+                $is->close();
+                usleep($us);
+            }
+            error_reporting($wr);
+
+            if (empty($rs)) {
+                // TODO: write log
+                if ($setoff) {
+                    $box->setOffline();
+                }
+            } else {
+                $this->handle   = $is;
+                $this->handle->set_charset($this->option('charset'));
+                $this->handle->autocommit(true);
+            }
+        } while (empty($rs));
     }
     /* }}} */
 
