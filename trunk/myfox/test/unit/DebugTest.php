@@ -12,7 +12,8 @@ class DebugTest extends \Myfox\Lib\TestShell
 	/* {{{ protected void setUp() */
 	protected function setUp()
 	{
-		parent::setUp();
+        parent::setUp();
+        Pool::clean();
 	}
 	/* }}} */
 
