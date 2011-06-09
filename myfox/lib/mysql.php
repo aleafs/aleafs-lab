@@ -25,7 +25,7 @@ class Mysql
     const FLOAT	= 'd';
     const BLOB  = 'b';
 
-    const MANIPULATE    = '/^(INSERT|REPLACE|DELETE|UPDATE|ALTER|CREATE|DROP|LOAD)\s+/is';
+    const MANIPULATE    = '/^(INSERT|REPLACE|DELETE|UPDATE|ALTER|CREATE|DROP|LOAD|TRUNCATE)\s+/is';
 
     /* }}} */
 
@@ -55,8 +55,6 @@ class Mysql
         'prefix'    => '',
         'logurl'    => '',
     );
-
-    private $lastId = 0;
 
     private $error  = '';
 
@@ -253,9 +251,6 @@ class Mysql
             }
 
             $this->error    = $this->handle->error;
-            if (0 === strncasecmp('insert', $query, 6)) {
-                $this->lastId   = $this->handle->insert_id;
-            }
         } else {
             $rs = $this->stmt($query, $value, $type);
         }
@@ -302,6 +297,19 @@ class Mysql
      */
     public function poll()
     {
+    }
+    /* }}} */
+
+    /* {{{ public Integer lastId() */
+    /**
+     * 获取最后一次插入的ID
+     *
+     * @access public
+     * @return Integer
+     */
+    public function lastId()
+    {
+        return $this->handle ? $this->handle->insert_id : 0;
     }
     /* }}} */
 
