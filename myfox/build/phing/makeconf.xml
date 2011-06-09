@@ -43,7 +43,9 @@
 		<copy file="build/tpl/mysql.ini" todir="etc" overwrite="true">
 			<filterchain>
 				<replacetokens begintoken="##" endtoken="##">
-					<token key="mysql.log.url" value="log://notice.warn.error/${env.HOME}/mysql_test.log" />
+					<token key="default.mysql.logurl" value="log://notice.warn.error/${env.HOME}/my.default.log" />
+					<token key="default.mysql.dbname" value="meta_myfox_cluster" />
+					<token key="default.mysql.prefix" value="v2_" />
 				</replacetokens>
 			</filterchain>
 		</copy>
