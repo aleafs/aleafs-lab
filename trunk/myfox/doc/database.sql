@@ -1,7 +1,7 @@
 
 -- 节点表
-DROP TABLE IF EXISTS dev_node_list;
-CREATE TABLE dev_node_list (
+DROP TABLE IF EXISTS test_node_list;
+CREATE TABLE test_node_list (
 	node_id smallint(5) unsigned not null auto_increment,
 	node_type tinyint(2) unsigned not null default 0,
 	node_name char(16) not null default '',
@@ -12,8 +12,8 @@ CREATE TABLE dev_node_list (
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
 -- 机器表
-DROP TABLE IF EXISTS dev_host_list;
-CREATE TABLE dev_host_list (
+DROP TABLE IF EXISTS test_host_list;
+CREATE TABLE test_host_list (
 	host_id int(10) unsigned not null auto_increment,
 	node_id smallint(5) unsigned not null default 0,
 	host_type tinyint(2) unsigned not null default 0,
@@ -31,13 +31,17 @@ CREATE TABLE dev_host_list (
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
 -- 配置表
-DROP TABLE IF EXISTS dev_table_list;
-CREATE TABLE dev_table_list (
+DROP TABLE IF EXISTS test_table_list;
+CREATE TABLE test_table_list (
 	autokid int(10) unsigned not null auto_increment,
 	addtime datetime not null default '0000-00-00 00:00:00',
 	modtime datetime not null default '0000-00-00 00:00:00',
 	backups tinyint(2) unsigned not null default 1,
 	loadtype tinyint(2) unsigned not null default 0,
+	split_threshold int(10) unsigned not null default 0,
+	split_drift decimal(5,2) unsigned not null default 0.00,
+	route_method tinyint(2) unsigned not null default 0,
+	route_fields varchar(128) not null default '',
 	tabname varchar(64) not null default '',
 	tabdesc varchar(128) not null default '',
 	filemd5 varchar(32) not null default '',
@@ -46,8 +50,8 @@ CREATE TABLE dev_table_list (
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
 -- 路由表
-DROP TABLE IF EXISTS dev_route_info;
-CREATE TABLE IF NOT EXISTS dev_route_info (
+DROP TABLE IF EXISTS test_route_info;
+CREATE TABLE IF NOT EXISTS test_route_info (
 	autokid int(10) unsigned not null auto_increment,
 	thedate int(10) unsigned not null default 0,
 	idxsign int(10) unsigned not null default 0,
@@ -65,19 +69,21 @@ CREATE TABLE IF NOT EXISTS dev_route_info (
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
 -- 系统状态表
-DROP TABLE IF EXISTS dev_settings;
-CREATE TABLE IF NOT EXISTS dev_settings (
-	cfgname char(64) not null default '',
-	cfgdesc varchar(255) not null default '',
+DROP TABLE IF EXISTS test_settings;
+CREATE TABLE IF NOT EXISTS test_settings (
+	autokid int(10) unsigned not null auto_increment,
+	cfgname varchar(32) not null default '',
+	ownname varchar(32) not null default '',
 	cfgvalue varchar(255) not null default '',
 	addtime datetime not null default '0000-00-00 00:00:00',
 	modtime datetime not null default '0000-00-00 00:00:00',
-	PRIMARY KEY pk_setting_name (cfgname)
+	PRIMARY KEY pk_setting_id (autokid),
+	UNIQUE KEY uk_setting_name (ownname,cfgname)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
 -- 任务队列表
-DROP TABLE IF EXISTS dev_task_queque;
-CREATE TABLE IF NOT EXISTS dev_task_queque (
+DROP TABLE IF EXISTS test_task_queque;
+CREATE TABLE IF NOT EXISTS test_task_queque (
 	autokid bigint(20) unsigned not null auto_increment,
 	agentid smallint(5) unsigned not null default 0,
 	priority smallint(5) unsigned not null default 0,
@@ -96,5 +102,5 @@ CREATE TABLE IF NOT EXISTS dev_task_queque (
 	KEY idx_queque_time (addtime)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
--- SELECT ... FROM dev_task_queque WHERE task_flag = ? AND trytimes < ? ORDER BY priority ASC, trytimes ASC, autokid ASC-- SELECT ... FROM dev_task_queque WHERE addtime < ?
+-- SELECT ... FROM test_task_queque WHERE task_flag = ? AND trytimes < ? ORDER BY priority ASC, trytimes ASC, autokid ASC-- SELECT ... FROM test_task_queque WHERE addtime < ?
 
