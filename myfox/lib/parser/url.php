@@ -86,8 +86,12 @@ class Url
      * @access public
      * @return Mixture
      */
-    public function param($key, $default = null)
+    public function param($key = null, $default = null)
     {
+        if (null === $key) {
+            return $this->param;
+        }
+
         return isset($this->param[$key]) ? $this->param[$key] : $default;
     }
     /* }}} */

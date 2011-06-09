@@ -10,11 +10,6 @@
 
 namespace Myfox\App;
 
-use \Myfox\Lib\AutoLoad;
-//use \Myfox\Lib\Configer;
-
-use \Myfox\Lib\Parser\Url;
-
 class Dispatcher
 {
 
@@ -41,13 +36,9 @@ class Dispatcher
      */
     public static function run($ini, $url, $post = null)
     {
-        try {
-            $dsp    = new self($ini);
-            $dsp->dispach($url, $post);
-        } catch (\Exception $e) {
-        }
+        $dsp    = new self($ini);
+        $dsp->dispach($url, $post);
 
-        self::$timeout  = false;
         if (empty($GLOBALS['__in_debug_tools']) && function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();
         }
@@ -63,10 +54,10 @@ class Dispatcher
      */
     public static function setAutoLoad()
     {
-        require_once __DIR__ . '/autoload.php';
+        require_once __DIR__ . '/../lib/autoload.php';
 
-        AutoLoad::init();
-        AutoLoad::register('myfox\\app',    __DIR__);
+        \Myfox\Lib\AutoLoad::init();
+        \Myfox\Lib\AutoLoad::register('myfox\\app',    __DIR__);
     }
     /* }}} */
 
@@ -83,6 +74,35 @@ class Dispatcher
             $this->log->error('RUN_TIMEOUT', array(
                 'url' => $this->url,
             ));
+        }
+    }
+    /* }}} */
+
+    /* {{{ private void __construct() */
+    /**
+     * 构造函数
+     *
+     * @access public
+     * @param String $ini
+     * @return void
+     */
+    private function __construct($ini)
+    {
+        self::setAutoLoad();
+        \Myfox\Lib\Config::register('default', $ini);
+
+        $this->config   = \Myfox\Lib\Config::instance('default');
+        $this->prefix   = rtrim($this->config->get('url.prefix', ''), '/');
+
+        $logurl = $this->config->get('log.url');
+        if (empty($logurl)) {
+            $this->log  = new \Myfox\Lib\BlackHole();
+        } else {
+            $this->log  = new \Myfox\Lib\Log($logurl);
+        }
+
+        foreach ((array)$this->config->get('mysql') AS $name => $file) {
+            \Myfox\Lib\Mysql::register($name, $file);
         }
     }
     /* }}} */
@@ -104,38 +124,28 @@ class Dispatcher
         $url    = new \Myfox\Lib\Parser\Url($this->url);
         $module = $url->module();
         if (empty($module)) {
-            $ctrl   = sprintf('\\Myfox\\App\\Controller');
+            $ctrl   = sprintf('Myfox\App\Controller');
         } else {
-            $ctrl   = sprintf('\\Myfox\\App\\Control\\%s', ucfirst(strtolower($module)));
+            $ctrl   = sprintf('Myfox\App\Control\%s', ucfirst(strtolower($module)));
         }
 
-        $ctrl   = new $ctrl();
-        $ctrl->execute($url->action(), $url->param(), $post);
-    }
-    /* }}} */
-
-    /* {{{ private void __construct() */
-    /**
-     * 构造函数
-     *
-     * @access public
-     * @param String $ini
-     * @return void
-     */
-    private function __construct($ini)
-    {
-        self::setAutoLoad();
-        Configer::register('default',   $ini);
-
-        $this->config   = Configer::instance('default');
-        $this->log      = Factory::getLog($this->config->get('log.url', ''));
-        $this->prefix   = trim($this->config->get('url.prefix', ''), '/ ');
-        foreach ($this->config->get('includes', array()) AS $name => $file) {
-            Configer::register($name,   $file);
-        }
-
-        set_time_limit($this->config->get('timeout', 30));
+        set_time_limit($this->config->get('run.timeout', 30));
         register_shutdown_function(array(&$this, 'shutdownCallBack'));
+        try {
+            $ctrl   = new $ctrl();
+            $ctrl->execute($url->action(), $url->param(), $post);
+            $this->log->debug('REQUEST', array(
+                'url'   => $this->url,
+                'post'  => $post,
+            ));
+        } catch (\Exception $e) {
+            $this->log->error('EXCEPTION', array(
+                'url'   => $this->url,
+                'post'  => $post,
+                'error' => $e->getMessage(),
+            ));
+        }
+        self::$timeout  = false;
     }
     /* }}} */
 

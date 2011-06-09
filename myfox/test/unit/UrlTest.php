@@ -38,7 +38,7 @@ class UrlTest extends \Myfox\Lib\TestShell
         $url = new Url('test//index/a/b/c/2');
         $this->assertEquals('test', $url->module());
         $this->assertEquals('index', $url->action());
-        $this->assertEquals(array('a' => 'b', 'c' => '2'), $url->param);
+        $this->assertEquals(array('a' => 'b', 'c' => '2'), $url->param());
 
         $url = new Url("test\t/in\ndex/__SQL__/b/c/2/d");
         $this->assertEquals('test', $url->module());
