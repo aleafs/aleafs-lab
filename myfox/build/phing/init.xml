@@ -10,6 +10,13 @@
 		<property name="run.user" value="${env.USER}" />
 		<property name="run.home" value="${env.HOME}" />
 
+		<!--MySQL-->
+		<property name="default.mysql.logurl" value="log://notice.warn.error/${env.HOME}/mysql.dev.log" />
+		<property name="default.mysql.dbname" value="meta_myfox_cluster" />
+		<property name="default.mysql.prefix" value="v2_" />
+		<property name="default.mysql.master" value="mysql://magiccube:magiccube@10.232.31.3" />
+		<property name="default.mysql.slave" value="mysql://magiccube:magiccube@10.232.64.121" />
+
 		<phingcall target="-copyfile" />
 
 	</target>
@@ -20,6 +27,14 @@
 				<replacetokens begintoken="##" endtoken="##">
 					<token key="dir.root" value="${dir.root}" />
 					<token key="run.mode" value="${run.mode}" />
+
+					<!--MySQL-->
+					<token key="default.mysql.logurl" value="${default.mysql.logurl}" />
+					<token key="default.mysql.dbname" value="${default.mysql.dbname}" />
+					<token key="default.mysql.prefix" value="${default.mysql.prefix}" />
+
+					<token key="default.mysql.master" value="${default.mysql.master}" />
+					<token key="default.mysql.slave" value="${default.mysql.slave}" />
 				</replacetokens>
 			</filterchain>
 		</copy>
