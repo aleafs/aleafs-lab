@@ -14,7 +14,7 @@ class MysqlTest extends \Myfox\Lib\TestShell
     {
         parent::setUp();
 
-        $config = new Config(__DIR__ . '/ini/mysql.ini');
+        $config = new Config(__DIR__ . '/ini/mysql_test.ini');
         $logurl = parse_url($config->get('logurl', ''));
 
         $this->logfile  = $logurl['path'];
@@ -60,7 +60,7 @@ class MysqlTest extends \Myfox\Lib\TestShell
     /* {{{ public void test_should_simple_query_works_fine() */
     public function test_should_simple_query_works_fine()
     {
-        $mysql  = new Mysql(__DIR__ . '/ini/mysql.ini');
+        $mysql  = new Mysql(__DIR__ . '/ini/mysql_test.ini');
         try {
             $mysql->connectToSlave();
         } catch (\Exception $e) {
