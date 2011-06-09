@@ -421,7 +421,7 @@ class Mysql
             $wr = error_reporting();
             $my['host'] = (empty($this->option['persist']) ? '' : 'p:') . $my['host'];
             error_reporting($wr - E_WARNING);
-            foreach (array(10, 100, 1000) AS $us) {
+            foreach (array(10000, 100000, 1000000) AS $us) {
                 $is = mysqli_init();
                 $is->options(MYSQLI_OPT_CONNECT_TIMEOUT, $this->option['timeout']);
                 $rs = $is->real_connect($my['host'],$my['user'], $my['pass'], $this->option['dbname'], $my['port']);
