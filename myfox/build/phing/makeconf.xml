@@ -37,7 +37,7 @@
 					<token key="run.mode" value="${run.mode}" />
 					<token key="run.timeout" value="60" />
 					<token key="url.prefix" value="${env.USER}/myfox2" />
-					<token key="log.url" value="log://notice.warn.error$/{env.HOME}/myfox.log" />
+					<token key="log.url" value="log://notice.warn.error/${env.HOME}/myfox.log" />
 					<token key="dir.root" value="${dir.root}" />
 				</replacetokens>
 			</filterchain>
