@@ -105,5 +105,33 @@ class MysqlTest extends \Myfox\Lib\TestShell
     }
     /* }}} */
 
+    /* {{{ public void test_should_escape_works_fine() */
+    public function test_should_escape_works_fine()
+    {
+        $mysql  = new Mysql(array(
+            'charset'   => 'UTF8',
+            'persist'   => true,
+            'logurl'    => 'log://debug.notice.warn.error' . $this->logfile . '?buffer=0',
+            'master'    => array(
+                'mysql://magiccube:magiccube@10.232.31.3',
+            ),
+        ));
+
+        $data   = array(
+            'a' => 'i\'m chinese',
+            "'" => '省',
+        );
+
+        $this->assertEquals(array(
+            'a' => 'i\\\'m chinese',
+            '\\\''  => '省',
+        ), $mysql->escape($data));
+        $this->assertContains(
+            "\tCONNECT_OK\t-\t{\"host\":\"p:10.232.31.3\",\"port\":3306,\"user\":\"magiccube\",\"pass\":\"**\"",
+            self::getLogContents($this->logfile, -1)
+        );
+    }
+    /* }}} */
+
 }
 

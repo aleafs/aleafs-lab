@@ -55,8 +55,6 @@ class Mysql
 
     private $log;
 
-    private $stmts  = array();
-
     /* }}} */
 
     /* {{{ public static Object instance() */
@@ -305,6 +303,29 @@ class Mysql
     }
     /* }}} */
 
+    /* {{{ public Mixture escape() */
+    /**
+     * 安全过滤
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function escape($val)
+    {
+        $this->connectToSlave();
+        if (is_scalar($val)) {
+            return $this->handle->real_escape_string($val);
+        }
+
+        $rt = array();
+        foreach ((array)$val AS $k => $v) {
+            $rt[$this->handle->real_escape_string($k)]  = $this->escape($v);
+        }
+
+        return $rt;
+    }
+    /* }}} */
+
     /* {{{ public void connectToMaster() */
     /**
      * 连接到主库
@@ -355,13 +376,6 @@ class Mysql
      */
     public function disconnect()
     {
-        foreach ($this->stmts AS $pool) {
-            if (!empty($pool->stmt)) {
-                $pool->stmt->close();
-            }
-        }
-        $this->stmts    = array();
-
         if (!empty($this->handle)) {
             $this->handle->close();
             $this->handle   = null;
