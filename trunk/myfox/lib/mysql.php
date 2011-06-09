@@ -288,6 +288,20 @@ class Mysql
     }
     /* }}} */
 
+    /* {{{ public Mixture getRow() */
+    /**
+     * 获取
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function getRow($rs)
+    {
+        $rt = (array)$this->getAll($rs, 1);
+        return reset($rt);
+    }
+    /* }}} */
+
     /* {{{ public Mixture getOne() */
     /**
      * 获取单元格
@@ -297,8 +311,7 @@ class Mysql
      */
     public function getOne($rs, $pos = 0)
     {
-        $rt = (array)$this->getAll($rs, 1);
-        $rt = array_values((array)reset($rt));
+        $rt = array_values((array)$this->getRow($rs));
         return isset($rt[$pos]) ? $rt[$pos] : null;
     }
     /* }}} */

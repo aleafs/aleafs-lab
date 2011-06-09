@@ -56,6 +56,19 @@ abstract class Task
     }
     /* }}} */
 
+    /* {{{ public Mixture __get() */
+    /**
+     * 魔术方法获取私有变量
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function __get($key)
+    {
+        return isset($this->$key) ? $this->$key : null;
+    }
+    /* }}} */
+
     /* {{{ public Integer wait() */
     /**
      * 等待异步执行结果
@@ -82,6 +95,65 @@ abstract class Task
     }
     /* }}} */
 
+    /* {{{ public Mixture option() */
+    /**
+     * 返回任务属性
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function option($key, $default = null)
+    {
+        return isset($this->option[$key]) ? $this->option[$key] : $default;
+    }
+    /* }}} */
+
+    /* {{{ public Boolean lock() */
+    /**
+     * 锁定任务
+     *
+     * @access public
+     * @return Boolean true or false
+     */
+    public function lock()
+    {
+        return (bool)Queque::update(
+            $this->id,
+            array(
+                'begtime'   => sprintf(
+                    "IF(task_flag=%d,begtime,'%s')",
+                    Queque::FLAG_LOCK, date('Y-m-d H:i:s')
+                ),
+                'task_flag' => Queque::FLAG_LOCK,
+            ),
+            array('begtime' => true)
+        );
+    }
+    /* }}} */
+
+    /* {{{ public Boolean unlock() */
+    /**
+     * 完成后任务解锁
+     *
+     * @access public
+     * @return Boolean true or false
+     */
+    public function unlock($errno = 0, $error = '')
+    {
+        $flag   = empty($errno) ? Queque::FLAG_DONE : Queque::FLAG_WAIT;
+        return Queque::update($this->id, array(
+            'trytimes'  => sprintf('IF(task_flag=%d,trytimes,trytimes+1)', $flag),
+            'endtime'   => sprintf("IF(loadflag=%d,endtime,'%s')", $flag, date('Y-m-d H:i:s')),
+            'task_flag' => $flag,
+            'last_error'=> trim($error),
+        ), array(
+            'trytimes'  => true,
+            'endtime'   => true,
+            'task_flag' => true,
+        ));
+    }
+    /* }}} */
+
     /* {{{ protected void setError() */
     /**
      * 设置错误消息
@@ -93,19 +165,6 @@ abstract class Task
     protected function setError($error)
     {
         $this->lastError    = trim($error);
-    }
-    /* }}} */
-
-    /* {{{ protected Mixture option() */
-    /**
-     * 返回任务属性
-     *
-     * @access protected
-     * @return Mixture
-     */
-    protected function option($key, $default = null)
-    {
-        return isset($this->option[$key]) ? $this->option[$key] : $default;
     }
     /* }}} */
 
