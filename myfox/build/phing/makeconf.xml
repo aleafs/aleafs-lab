@@ -54,7 +54,7 @@
 	<target name="-unittest" description="Make configure files for unit test.">
 		<phingcall target="-cleanup-unittest" />
 
-		<copy file="build/tpl/mysql_test.ini" todir="test/unit/ini" overwrite="true">
+		<copy file="build/tpl/mysql_test.ini" tofile="test/unit/ini/mysql.ini" overwrite="true">
 			<filterchain>
 				<replacetokens begintoken="##" endtoken="##">
 					<token key="mysql.log.url" value="log://debug.notice.warn.error/${env.HOME}/mysql_test.log?buffer=0" />
