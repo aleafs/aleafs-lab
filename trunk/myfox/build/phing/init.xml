@@ -12,10 +12,10 @@
 
 		<!--MySQL-->
 		<property name="default.mysql.logurl" value="log://notice.warn.error/${env.HOME}/mysql.dev.log" />
-		<property name="default.mysql.dbname" value="meta_myfox_cluster" />
-		<property name="default.mysql.prefix" value="v2_" />
-		<property name="default.mysql.master" value="mysql://magiccube:magiccube@10.232.31.3" />
-		<property name="default.mysql.slave" value="mysql://magiccube:magiccube@10.232.64.121" />
+		<property name="default.mysql.dbname" value="meta_myfox_config" />
+		<property name="default.mysql.prefix" value="dev_" />
+		<property name="default.mysql.master" value="mysql://db_write:123456@10.232.132.3" />
+		<property name="default.mysql.slave" value="mysql://db_read:123456@10.232.132.3" />
 
 		<phingcall target="-copyfile" />
 

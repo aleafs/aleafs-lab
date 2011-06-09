@@ -1,7 +1,7 @@
 
 -- 节点表
-DROP TABLE IF EXISTS node_list;
-CREATE TABLE node_list (
+DROP TABLE IF EXISTS dev_node_list;
+CREATE TABLE dev_node_list (
 	node_id smallint(5) unsigned not null auto_increment,
 	node_type tinyint(2) unsigned not null default 0,
 	node_name char(16) not null default '',
@@ -12,8 +12,8 @@ CREATE TABLE node_list (
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
 -- 机器表
-DROP TABLE IF EXISTS host_list;
-CREATE TABLE host_list (
+DROP TABLE IF EXISTS dev_host_list;
+CREATE TABLE dev_host_list (
 	host_id int(10) unsigned not null auto_increment,
 	node_id smallint(5) unsigned not null default 0,
 	host_type tinyint(2) unsigned not null default 0,
@@ -31,8 +31,8 @@ CREATE TABLE host_list (
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
 -- 配置表
-DROP TABLE IF EXISTS table_list;
-CREATE TABLE table_list (
+DROP TABLE IF EXISTS dev_table_list;
+CREATE TABLE dev_table_list (
 	autokid int(10) unsigned not null auto_increment,
 	addtime datetime not null default '0000-00-00 00:00:00',
 	modtime datetime not null default '0000-00-00 00:00:00',
@@ -46,8 +46,8 @@ CREATE TABLE table_list (
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
 -- 路由表
-DROP TABLE IF EXISTS route_info;
-CREATE TABLE IF NOT EXISTS route_info (
+DROP TABLE IF EXISTS dev_route_info;
+CREATE TABLE IF NOT EXISTS dev_route_info (
 	autokid int(10) unsigned not null auto_increment,
 	thedate int(10) unsigned not null default 0,
 	idxsign int(10) unsigned not null default 0,
@@ -65,8 +65,8 @@ CREATE TABLE IF NOT EXISTS route_info (
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
 -- 系统状态表
-DROP TABLE IF EXISTS settings;
-CREATE TABLE IF NOT EXISTS settings (
+DROP TABLE IF EXISTS dev_settings;
+CREATE TABLE IF NOT EXISTS dev_settings (
 	cfgname char(64) not null default '',
 	cfgdesc varchar(255) not null default '',
 	cfgvalue varchar(255) not null default '',
@@ -76,8 +76,8 @@ CREATE TABLE IF NOT EXISTS settings (
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
 -- 任务队列表
-DROP TABLE IF EXISTS task_queque;
-CREATE TABLE IF NOT EXISTS task_queque (
+DROP TABLE IF EXISTS dev_task_queque;
+CREATE TABLE IF NOT EXISTS dev_task_queque (
 	autokid bigint(20) unsigned not null auto_increment,
 	agentid smallint(5) unsigned not null default 0,
 	priority smallint(5) unsigned not null default 0,
@@ -96,5 +96,5 @@ CREATE TABLE IF NOT EXISTS task_queque (
 	KEY idx_queque_time (addtime)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
--- SELECT ... FROM task_queque WHERE task_flag = ? AND trytimes < ? ORDER BY priority ASC, trytimes ASC, autokid ASC-- SELECT ... FROM task_queque WHERE addtime < ?
+-- SELECT ... FROM dev_task_queque WHERE task_flag = ? AND trytimes < ? ORDER BY priority ASC, trytimes ASC, autokid ASC-- SELECT ... FROM dev_task_queque WHERE addtime < ?
 

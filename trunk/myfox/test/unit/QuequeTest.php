@@ -33,70 +33,6 @@ class QuequeTest extends \Myfox\Lib\TestShell
     }
     /* }}} */
 
-    /* {{{ public void test_should_queque_insert_and_fetch_works_fine() */
-    public function test_should_queque_insert_and_fetch_works_fine()
-    {
-        $this->assertTrue(Queque::insert(
-            Queque::IMPORT, array(
-                'src' => 'http://www.taobao.com',
-            ),
-            1,
-            array(
-                'trytimes'  => 2,
-                'adduser'   => 'unittest',
-                'priority'  => 201,
-            )
-        ));
-
-        $task   = Queque::fetch(1);
-        $this->assertTrue($task instanceof \Edp\Myfox\Task\Import);
-        $this->assertEquals('http://www.taobao.com', $task->option('src',''));
-
-        $this->assertTrue(Queque::insert(
-            Queque::TYPE_TRANSFER, array(
-                'from'  => 1,
-                'to'    => 9,
-            ),
-            1,
-            array(
-                'adduser'   => 'unittest',
-                'trytimes'  => 2,
-            )
-        ));
-        $this->assertTrue(Queque::insert(
-            Queque::TRANSFER, array(
-                'from'  => 2,
-                'to'    => 10,
-            ),
-            0,
-            array(
-                'adduser'   => 'unittest',
-                'trytimes'  => 1,
-            )
-        ));
-
-        $task   = Queque::fetch(1);
-        $this->assertTrue($task instanceof \Edp\Myfox\Task\Transfer);
-        $this->assertEquals(2, $task->option('from'));
-        $this->assertEquals(10, $task->option('to'));
-
-        $this->assertEquals(1, Queque::update($task->id, array(
-            'trytimes'  => 'trytimes + 1',
-            'priority'  => 202,
-        ), array(
-            'trytimes'  => true,
-        )));
-
-        $this->assertEquals(array(
-            'trytimes'  => 2,
-            'priority'  => 202,
-        ), DataLoader::getDao()->getRow(sprintf(
-            'SELECT trytimes, priority FROM %s.myfox_task_queque WHERE autokid = %d',
-            DataLoader::dbname('cluster'), $task->id
-        )));
-    }
-    /* }}} */
-
     /* {{{ public void test_should_throw_exception_when_undefined_task_type() */
     public function test_should_throw_exception_when_undefined_task_type()
     {
@@ -119,6 +55,72 @@ class QuequeTest extends \Myfox\Lib\TestShell
         } catch (\Exception $e) {
             $this->assertContains('Undefined task type as "99"', $e->getMessage());
         }
+    }
+    /* }}} */
+
+    /* {{{ public void test_should_queque_insert_and_fetch_works_fine() */
+    public function test_should_queque_insert_and_fetch_works_fine()
+    {
+        $this->assertTrue(Queque::insert(
+            Queque::IMPORT, array(
+                'src' => 'http://www.taobao.com',
+            ),
+            1,
+            array(
+                'trytimes'  => 2,
+                'adduser'   => 'unittest',
+                'priority'  => 201,
+            )
+        ));
+
+        $task   = Queque::fetch(1);
+        $this->assertTrue($task instanceof \Myfox\App\Task\Import);
+        $this->assertEquals('http://www.taobao.com', $task->option('src',''));
+
+        $this->assertTrue(Queque::insert(
+            Queque::TRANSFER, array(
+                'from'  => 1,
+                'to'    => 9,
+            ),
+            1,
+            array(
+                'adduser'   => 'unittest',
+                'trytimes'  => 2,
+            )
+        ));
+        $this->assertTrue(Queque::insert(
+            Queque::TRANSFER, array(
+                'from'  => 2,
+                'to'    => 10,
+            ),
+            0,
+            array(
+                'adduser'   => 'unittest',
+                'trytimes'  => 1,
+            )
+        ));
+
+        $task   = Queque::fetch(1);
+        $this->assertTrue($task instanceof \Myfox\App\Task\Transfer);
+        $this->assertEquals(2, $task->option('from'));
+        $this->assertEquals(10, $task->option('to'));
+
+        $this->assertEquals(1, Queque::update($task->id, array(
+            'trytimes'  => 'trytimes + 1',
+            'priority'  => 202,
+        ), array(
+            'trytimes'  => true,
+        )));
+
+        $this->assertEquals(array(
+            'trytimes'  => 2,
+            'priority'  => 202,
+        ), self::$mysql->getRow(self::$mysql->query(sprintf(
+            'SELECT trytimes, priority FROM %s.%stask_queque WHERE autokid = %d',
+            self::$mysql->option('dbname', 'meta_myfox_config'),
+            self::$mysql->option('prefix', ''),
+            $task->id
+        ))));
     }
     /* }}} */
 
