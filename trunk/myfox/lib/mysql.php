@@ -25,6 +25,8 @@ class Mysql
     const FLOAT	= 'd';
     const BLOB  = 'b';
 
+    const MANIPULATE    = '/^(INSERT|REPLACE|DELETE|UPDATE|ALTER|CREATE|DROP|LOAD)\s+/is';
+
     /* }}} */
 
     /* {{{ 静态变量 */
@@ -152,6 +154,12 @@ class Mysql
             $this->init('addSlave', $config['slave']);
         }
 
+        if (empty($this->option['logurl'])) {
+            $this->log  = new \Myfox\Lib\BlackHole();
+        } else {
+            $this->log  = new \Myfox\Lib\Log($this->option['logurl']);
+        }
+
         $name   = self::normalize($name);
         if (!empty($name) && !isset(self::$objects[$name])) {
             self::$objects[$name]  = &$this;
@@ -252,12 +260,12 @@ class Mysql
             $rs = $this->stmt($query, $value, $type);
         }
 
-        if (false === $rs) {
+        if (false !== $rs) {
             $this->log->debug('QUERY_OK', array(
                 'sql'   => $query,
             ));
         } else {
-            $this->log->warning('QUERY_ERROR', array(
+            $this->log->warn('QUERY_ERROR', array(
                 'sql'   => $query,
                 'error' => $this->error,
             ));
@@ -294,6 +302,27 @@ class Mysql
      */
     public function poll()
     {
+    }
+    /* }}} */
+
+    /* {{{ public Mixture getGrid() */
+    /**
+     * 获取结果集
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function getGrid($rs)
+    {
+        if ($rs instanceof \MySQLi_Result) {
+            return self::fetchFromResult($rs, 0);
+        }
+
+        if ($rs instanceof \MySQLi_STMT) {
+            return self::fetchFromStmt($rs, 0);
+        }
+
+        return null;
     }
     /* }}} */
 
@@ -397,13 +426,12 @@ class Mysql
         do {
             $my = $box->fetch();
             $wr = error_reporting();
+            $my['host'] = (empty($this->option['persist']) ? '' : 'p:') . $my['host'];
             error_reporting($wr - E_WARNING);
             foreach (array(10, 100, 1000) AS $us) {
                 $is = mysqli_init();
-                $is->options(MYSQLI_OPT_CONNECT_TIMEOUT, $this->option('timeout'));
-                $rs = $is->real_connect(sprintf(
-                    '%s%s', $this->option('persist', false) ? '' : 'p:', $my['host']
-                ), $my['user'], $my['pass'], $this->option('dbname'), $my['port']);
+                $is->options(MYSQLI_OPT_CONNECT_TIMEOUT, $this->option['timeout']);
+                $rs = $is->real_connect($my['host'],$my['user'], $my['pass'], $this->option['dbname'], $my['port']);
 
                 if (false !== $rs) {
                     break;
@@ -415,14 +443,18 @@ class Mysql
             }
             error_reporting($wr);
 
+            $my['pass'] = '**';
             if (empty($rs)) {
-                // TODO: write log
+                $this->log->warn('CONNECT_ERROR', $my + array(
+                    'error'     => $is->connect_error,
+                ));
                 if ($setoff) {
                     $box->setOffline();
                 }
             } else {
+                $this->log->debug('CONNECT_OK', $my);
                 $this->handle   = $is;
-                $this->handle->set_charset($this->option('charset'));
+                $this->handle->set_charset($this->option['charset']);
                 $this->handle->autocommit(true);
             }
         } while (empty($rs));
@@ -518,7 +550,28 @@ class Mysql
      */
     private static function ismodify($query)
     {
-        return preg_match('/^(INSERT|REPLACE|DELETE|UPDATE|ALTER|CREATE|DROP|LOAD)\s+/is', trim($query)) ? true : false;
+        return preg_match(self::MANIPULATE, trim($query)) ? true : false;
+    }
+    /* }}} */
+
+    /* {{{ private static Mixture fetchFromResult() */
+    /**
+     * 从MySQLi_Result中获取结果
+     *
+     * @access private static
+     * @return Mixture
+     */
+    private static function fetchFromResult($rs, $cn = 0)
+    {
+        $rt = array();
+        $sz = 0;
+        $rs->data_seek(0);
+        while (($cn <= 0 || $sz++ < $cn) && $row = $rs->fetch_assoc()) {
+            $rt[] = $row;
+        }
+        $rs->free();
+
+        return $rt;
     }
     /* }}} */
 

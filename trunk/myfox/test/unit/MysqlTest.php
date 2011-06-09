@@ -48,9 +48,18 @@ class MysqlTest extends \Myfox\Lib\TestShell
     }
     /* }}} */
 
-    public function test_should_aa()
+    /* {{{ public void test_should_simple_query_works_fine() */
+    public function test_should_simple_query_works_fine()
     {
+        $mysql  = new Mysql(__DIR__ . '/ini/mysql.ini');
+        $mysql->addSlave('10.232.64.121', 'magiccube', 'magiccube');
+        $mysql->addSlave('10.232.64.121', 'magiccube', 'magiccube');
+        $mysql->addMaster('10.232.31.3', 'magiccube', 'magiccube', 3306);
+
+        $rs = $mysql->getGrid($mysql->query('SHOW DATABASES'));
+        $this->assertContains(array('Database' => 'test'), $rs);
     }
+    /* }}} */
 
 }
 
