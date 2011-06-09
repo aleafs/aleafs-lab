@@ -20,11 +20,6 @@ class Mysql
 
     /* {{{ 静态常量 */
 
-    const INT	= 'i';
-    const CHAR	= 's';
-    const FLOAT	= 'd';
-    const BLOB  = 'b';
-
     const MANIPULATE    = '/^(INSERT|REPLACE|DELETE|UPDATE|ALTER|CREATE|DROP|LOAD|TRUNCATE)\s+/is';
 
     /* }}} */
@@ -234,39 +229,9 @@ class Mysql
      * @access public
      * @return Mixture
      */
-    public function query($query, $value = null, $type = null)
+    public function query($query)
     {
-        $query  = self::sqlclean($query);
-        $modify = self::ismodify($query);
-        if ($modify) {
-            $this->connectToMaster();
-        } else {
-            $this->connectToSlave();
-        }
-
-        if (empty($value)) {
-            $rs = $this->handle->query($query);
-            if (false !== $rs && true === $modify) {
-                $rs = $this->handle->affected_rows;
-            }
-
-            $this->error    = $this->handle->error;
-        } else {
-            $rs = $this->stmt($query, $value, $type);
-        }
-
-        if (false !== $rs) {
-            $this->log->debug('QUERY_OK', array(
-                'sql'   => $query,
-            ));
-        } else {
-            $this->log->warn('QUERY_ERROR', array(
-                'sql'   => $query,
-                'error' => $this->error,
-            ));
-        }
-
-        return $rs;
+        return $this->runsql($query, false);
     }
     /* }}} */
 
@@ -277,14 +242,9 @@ class Mysql
      * @access public
      * @return void
      */
-    public function async($query, $value = null, $type = null)
+    public function async($query)
     {
-        $query  = self::sqlclean($query);
-        if (self::ismodify($query)) {
-            $this->connectToMaster();
-        } else {
-            $this->connectToSlave();
-        }
+        return $this->runsql($query, true);
     }
     /* }}} */
 
@@ -313,24 +273,35 @@ class Mysql
     }
     /* }}} */
 
-    /* {{{ public Mixture getGrid() */
+    /* {{{ public Mixture getAll() */
     /**
      * 获取结果集
      *
      * @access public
      * @return Mixture
      */
-    public function getGrid($rs)
+    public function getAll($rs, $limit = 0)
     {
         if ($rs instanceof \MySQLi_Result) {
-            return self::fetchFromResult($rs, 0);
-        }
-
-        if ($rs instanceof \MySQLi_STMT) {
-            return self::fetchFromStmt($rs, 0);
+            return self::fetchFromResult($rs, $limit);
         }
 
         return null;
+    }
+    /* }}} */
+
+    /* {{{ public Mixture getOne() */
+    /**
+     * 获取单元格
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function getOne($rs, $pos = 0)
+    {
+        $rt = (array)$this->getAll($rs, 1);
+        $rt = array_values((array)reset($rt));
+        return isset($rt[$pos]) ? $rt[$pos] : null;
     }
     /* }}} */
 
@@ -469,57 +440,41 @@ class Mysql
     }
     /* }}} */
 
-    /* {{{ private Mixture stmt() */
+    /* {{{ private Mixture runsql() */
     /**
-     * stmt方式执行语句
+     * 执行query
      *
-     * @access private
+     * @access public
      * @return Mixture
      */
-    private function stmt(&$query, $value, $type = null)
+    private function runsql($query, $async = false)
     {
-        $id = $query;
-        if (!empty($this->stmts[$id])) {
-            $stmt   = $this->stmts[$id]->stmt;
-            $data   = $this->stmts[$id]->data;
+        $query  = self::sqlclean($query);
+        $modify = self::ismodify($query);
+        if ($modify) {
+            $this->connectToMaster();
         } else {
-            $data   = array();
-            if (preg_match_all('/:(\w+)/is', $query, $matches)) {
-                foreach ((array)$matches[1] AS $key => $p) {
-                    if (!isset($value[$p])) {
-                        continue;
-                    }
-
-                    $is = 0;
-                    if (is_array($value[$p])) {
-                        foreach ($value[$p] AS $item) {
-                            $tk = sprintf('%s_%d', $p, $is++);
-                            $data[]     = $tk;
-                            $value[$tk] = $item;
-                            $type[$tk]  = isset($type[$p]) ? $type[$p] : self::CHAR;
-                        }
-                        $is--;
-                    } else {
-                        $data[] = $p;
-                    }
-
-                    $query  = explode(':' . $p, $query, 2);
-                    $query  = sprintf('%s%s%s', $query[0], implode(',', array_fill(0, 1 + $is, '?')), $query[1]);
-                }
-            }
-
-            $stmt   = $this->handle->prepare($query);
-            if (empty($stmt)) {
-                $this->error    = $this->handle->error;
-                return false;
-            }
-
-            $this->stmts[$id]   = array(
-                'stmt'  => $stmt,
-                'data'  => $data,
-                'type'  => self::ismodify($query),
-            );
+            $this->connectToSlave();
         }
+
+        $rs = $this->handle->query($query);
+        if (false !== $rs && true === $modify) {
+            $rs = $this->handle->affected_rows;
+        }
+        $this->error    = $this->handle->error;
+
+        if (false !== $rs) {
+            $this->log->debug('QUERY_OK', array(
+                'sql'   => $query,
+            ));
+        } else {
+            $this->log->warn('QUERY_ERROR', array(
+                'sql'   => $query,
+                'error' => $this->error,
+            ));
+        }
+
+        return $rs;
     }
     /* }}} */
 

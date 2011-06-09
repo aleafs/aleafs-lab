@@ -78,7 +78,7 @@ class MysqlTest extends \Myfox\Lib\TestShell
             self::getLogContents($this->logfile, -1)
         );
 
-        $rs = $mysql->getGrid($mysql->query('SHOW DATABASES'));
+        $rs = $mysql->getAll($mysql->query('SHOW DATABASES'));
         $this->assertContains("\tQUERY_OK\t-\t{\"sql\":\"SHOW DATABASES\"}", self::getLogContents($this->logfile, -1));
         $this->assertContains(array('Database' => 'test'), $rs);
 
@@ -95,6 +95,9 @@ class MysqlTest extends \Myfox\Lib\TestShell
         );
 
         $lastId = $mysql->lastId();
+        $this->assertEquals($lastId, $mysql->getOne($mysql->query(
+            'SELECT MAX(id) FROM meta_myfox_cluster.only_for_test'
+        )));
         $mysql->query('INSERT INTO meta_myfox_cluster.only_for_test (content) VALUES ("aabbcc2")');
         $this->assertTrue($lastId < $mysql->lastId());
 
