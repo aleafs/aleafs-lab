@@ -23,6 +23,18 @@ class TestShell extends \PHPUnit_Framework_TestCase
         parent::setUp();
         \Myfox\Lib\AutoLoad::init();
         \Myfox\Lib\AutoLoad::register('myfox\\app',    __DIR__ . '/../app');
+
+        \Myfox\Lib\Cache\Apc::cleanAllCache();
+    }
+
+    protected static function getLogContents($file, $offs = -1)
+    {
+        $data   = array_filter(array_map('trim', (array)@file($file)));
+        $lines  = count($data);
+        $offs   = $offs < 0 ? $lines + $offs : $offs;
+        $offs   = max(0, $offs);
+
+        return $offs >= $lines ? end($data) : $data[$offs];
     }
 
 }
