@@ -69,8 +69,7 @@ class Table
         if (null === $this->option) {
             $mysql  = \Myfox\Lib\Mysql::instance('default');
             $info   = $mysql->getRow($mysql->query(sprintf(
-                "SELECT * FROM %s.%stable_list WHERE tabname = '%s'",
-                $mysql->option('dbname', 'meta_myfox_config'),
+                "SELECT * FROM %stable_list WHERE tabname = '%s'",
                 $mysql->option('prefix', ''),
                 $mysql->escape($this->tbname)
             )));
