@@ -9,6 +9,7 @@
 namespace Myfox\App\Model;
 
 use \Myfox\Lib\Mysql;
+use \Myfox\App\Setting;
 use \Myfox\App\Model\Table;
 
 class Router
@@ -26,11 +27,16 @@ class Router
     const MIRROR    = 0;            /**<    镜像表 */
     const SHARDING  = 1;            /**<    分区   */
 
+    const ONLINE    = 0;            /**<    正常节点 */
+    const ARCHIVE   = 1;            /**<    归档节点 */
+
     /* }}} */
 
     /* {{{ 静态变量 */
 
     private static $mysql;
+
+    private static $nodes   = array();
 
     /* }}} */
 
@@ -93,7 +99,9 @@ class Router
             );
         }
 
+        $last   = (int)Setting::get('last_assign_node');
         $ready  = self::get($tbname, $field);
+        $nodes  = self::nodelist();
         foreach ($bucket AS $item) {
         }
 
@@ -247,6 +255,26 @@ class Router
         }
 
         return $route;
+    }
+    /* }}} */
+
+    /* {{{ private static Mixture nodelist() */
+    /**
+     * 获取节点列表
+     *
+     * @access private static
+     * @return Mixture
+     */
+    private static function nodelist()
+    {
+        if (empty(self::$nodes)) {
+            self::$nodes = (array)self::$mysql->getAll(self::$mysql->query(sprintf(
+                'SELECT node_id,node_type FROM %snode_list ORDER BY node_id ASC',
+                self::$mysql->option('prefix', '')
+            )));
+        }
+
+        return self::$nodes;
     }
     /* }}} */
 

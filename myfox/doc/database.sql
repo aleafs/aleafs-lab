@@ -11,6 +11,10 @@ CREATE TABLE test_node_list (
 	UNIQUE KEY uk_node_name (node_name)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
+INSERT INTO test_node_list (node_id,node_type,node_name,addtime,modtime) VALUES (1,0,'online_01',NOW(),NOW());
+INSERT INTO test_node_list (node_id,node_type,node_name,addtime,modtime) VALUES (2,0,'online_02',NOW(),NOW());
+INSERT INTO test_node_list (node_id,node_type,node_name,addtime,modtime) VALUES (3,1,'archive_01',NOW(),NOW());
+
 -- 机器表
 DROP TABLE IF EXISTS test_host_list;
 CREATE TABLE test_host_list (

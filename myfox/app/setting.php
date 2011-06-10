@@ -56,10 +56,9 @@ class Setting
             self::init(self::$expire);
 
             $option	= self::$mysql->getAll(self::$mysql->query(sprintf(
-                "SELECT cfgname,ownname,cfgvalue FROM %ssettings WHERE ownname='%s'%s",
+                "SELECT cfgname,ownname,cfgvalue FROM %ssettings WHERE ownname='%s'",
                 self::$mysql->option('prefix', ''),
-                self::$mysql->escape($own),
-                empty($own) ? '' : sprintf(" AND cfgname='%s'", self::$mysql->escape($key))
+                self::$mysql->escape($own)
             )));
             foreach ((array)$option AS $row) {
                 self::$option[self::idx($row['cfgname'], $row['ownname'])]	= array(
