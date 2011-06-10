@@ -13,99 +13,103 @@ namespace Myfox\App;
 class Setting
 {
 
-	/* {{{ 静态变量 */
+    /* {{{ 静态变量 */
 
-	private static $mysql;
+    public static $queries  = 0;
 
-	private static $expire	= 60;
+    private static $mysql;
 
-	private static $option	= array();
+    private static $expire	= 60;
 
-	/* }}} */
+    private static $option	= array();
 
-	/* {{{ public static void init() */
-	/**
-	 * 初始化
-	 *
-	 * @access public static
-	 * @return void
-	 */
-	public static function init($expire = 60)
-	{
-		self::$expire	= (int)$expire;
-		if (empty(self::$mysql)) {
-			self::$mysql	= \Myfox\Lib\Mysql::instance('default');
-		}
-	}
-	/* }}} */
+    /* }}} */
 
-	/* {{{ public static Mixture get() */
-	/**
-	 * 获取配置值
-	 *
-	 * @access public static
-	 * @return Mixture
-	 */
-	public static function get($key, $own = '')
-	{
-		$now	= time();
-		$idx	= self::idx($key, $own);
-		if (!isset(self::$option[$idx]) || $now > self::$option[$idx]['t']) {
-			self::init(self::$expire);
+    /* {{{ public static void init() */
+    /**
+     * 初始化
+     *
+     * @access public static
+     * @return void
+     */
+    public static function init($expire = 60)
+    {
+        self::$expire	= (int)$expire;
+        if (empty(self::$mysql)) {
+            self::$mysql	= \Myfox\Lib\Mysql::instance('default');
+        }
+    }
+    /* }}} */
 
-			$option	= self::$mysql->getAll(self::$mysql->query(sprintf(
-				"SELECT cfgname,ownname,cfgvalue FROM %ssettings WHERE ownname='%s'%s",
-				self::$mysql->option('prefix', ''),
-				self::$mysql->escape($own),
-				empty($own) ? '' : sprintf(" AND cfgname='%s'", self::$mysql->escape($key))
-			)));
-			foreach ((array)$option AS $row) {
-				self::$option[self::idx($row['cfgname'], $row['ownname'])]	= array(
-					't'	=> $now + self::$expire,
-					'v'	=> $row['cfgvalue'],
-				);
-			}
-		}
+    /* {{{ public static Mixture get() */
+    /**
+     * 获取配置值
+     *
+     * @access public static
+     * @return Mixture
+     */
+    public static function get($key, $own = '')
+    {
+        $now	= microtime(true);
+        $idx	= self::idx($key, $own);
+        if (!isset(self::$option[$idx]) || $now > self::$option[$idx]['t']) {
+            self::init(self::$expire);
 
-		return isset(self::$option[$idx]['v']) ? self::$option[$idx]['v'] : null;
-	}
-	/* }}} */
+            $option	= self::$mysql->getAll(self::$mysql->query(sprintf(
+                "SELECT cfgname,ownname,cfgvalue FROM %ssettings WHERE ownname='%s'%s",
+                self::$mysql->option('prefix', ''),
+                self::$mysql->escape($own),
+                empty($own) ? '' : sprintf(" AND cfgname='%s'", self::$mysql->escape($key))
+            )));
+            foreach ((array)$option AS $row) {
+                self::$option[self::idx($row['cfgname'], $row['ownname'])]	= array(
+                    't'	=> $now + self::$expire,
+                    'v'	=> $row['cfgvalue'],
+                );
+            }
+            self::$queries++;
+        }
 
-	/* {{{ public static Boolean set() */
-	/**
-	 * 设置配置值
-	 *
-	 * @access public static
-	 * @return Boolean true or false
-	 */
-	public static function set($key, $own, $value)
-	{
-		unset(self::$option[self::idx($key, $own)]);
-		self::init(self::$expire);
+        return isset(self::$option[$idx]['v']) ? self::$option[$idx]['v'] : null;
+    }
+    /* }}} */
 
-		$time	= date('Y-m-d H:i:s');
-		$value	= self::$mysql->escape($value);
+    /* {{{ public static Boolean set() */
+    /**
+     * 设置配置值
+     *
+     * @access public static
+     * @return Boolean true or false
+     */
+    public static function set($key, $own, $value)
+    {
+        unset(self::$option[self::idx($key, $own)]);
+        self::init(self::$expire);
+        self::$queries++;
 
-		return self::$mysql->query(sprintf(
-			"INSERT INTO %ssetting(cfgname,ownname,cfgvalue,addtime,modtime) VALUES ('%s','%s','%s','%s','%s')" .
-			" ON DUPLICATE KEY UPDATE modtime = '%s',cfgvalue='%s'",
-			self::$mysql->option('prefix', ''), self::$mysql->escape($key), self::$mysql->escape($own),
-			$value, $time, $time, $time, $value
-		));
-	}
-	/* }}} */
+        $time	= date('Y-m-d H:i:s');
+        $value	= self::$mysql->escape($value);
 
-	/* {{{ private static string idx() */
-	/**
-	 * 组织KEY名字
-	 *
-	 * @access private static
-	 * @return String
-	 */
-	private static function idx($key, $own)
-	{
-		return strtolower(sprintf('%s/%s', trim($own), trim($key)));
-	}
-	/* }}} */
+        return self::$mysql->query(sprintf(
+            "INSERT INTO %ssettings (cfgname,ownname,cfgvalue,addtime,modtime) VALUES ('%s','%s','%s','%s','%s')" .
+            " ON DUPLICATE KEY UPDATE modtime = '%s',cfgvalue='%s'",
+            self::$mysql->option('prefix', ''), self::$mysql->escape($key), self::$mysql->escape($own),
+            $value, $time, $time, $time, $value
+        ));
+    }
+    /* }}} */
+
+    /* {{{ private static string idx() */
+    /**
+     * 组织KEY名字
+     *
+     * @access private static
+     * @return String
+     */
+    private static function idx($key, $own)
+    {
+        return strtolower(sprintf('%s/%s', trim($own), trim($key)));
+    }
+    /* }}} */
 
 }
