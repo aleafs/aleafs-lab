@@ -46,16 +46,16 @@ class Router
     public static function get($tbname, $field = array())
     {
         $tbname = trim($tbname);
-        $table  = Table::instance($tbname);
-        if (!$table->get('autokid')) {
-            throw new \Myfox\Lib\Exception(sprintf(
-                'Undefined table named as "%s"', $tbname
-            ));
+        $routes = self::load($tbname, self::filter($tbname, (array)$field));
+        if (empty($routes)) {
+            return null;
         }
 
-        return self::parse(self::load(
-            $tbname, self::filter($tbname, (array)$field)
-        ));
+        return array(
+            'seqid' => sprintf('%d_%d', $routes['tabid'], $routes['seqid']),
+            'mtime' => $routes['mtime'],
+            'route' => self::parse($routes['route']),
+        );
     }
     /* }}} */
 
@@ -71,20 +71,13 @@ class Router
      */
     public static function set($tbname, $field = array(), $rownum = null)
     {
-        $table  = Table::instance($tbname);
-        if (!$table->get('autokid')) {
-            throw new \Myfox\Lib\Exception(sprintf(
-                'Undefined table named as "%s"', $tbname
-            ));
-        }
-
         $routes = self::filter($tbname, (array)$field);
+        $table  = Table::instance($tbname);
         $chunk  = (int)$table->get('split_threshold');
-        var_dump($chunk);
         $drift  = $table->get('split_drift');
 
         $bucket = array();
-        if ($chunk > 0 && self::SHARDING == $table->get('route_type')) {
+        if ($chunk > 0 && self::SHARDING == $table->get('route_method')) {
             $lf = (int)$chunk * (1 + $drift);
             while ($rownum > $lf) {
                 $rownum -= $chunk;
@@ -100,6 +93,7 @@ class Router
             );
         }
 
+        $ready  = self::get($tbname, $field);
         foreach ($bucket AS $item) {
         }
 
@@ -153,10 +147,17 @@ class Router
      */
     private static function filter($tbname, $field = array())
     {
+        $table  = Table::instance($tbname);
+        if (!$table->get('autokid')) {
+            throw new \Myfox\Lib\Exception(sprintf(
+                'Undefined table named as "%s"', $tbname
+            ));
+        }
+
         $rt = array();
         $sp = preg_split(
             '/[\s,;\/]+/',
-            trim(Table::instance($tbname)->get('route_fields', ''), "{}\t\r\n "),
+            trim($table->get('route_fields', ''), "{}\t\r\n "),
             -1, PREG_SPLIT_NO_EMPTY
         );
 
@@ -195,7 +196,7 @@ class Router
         self::init();
 
         $query  = sprintf(
-            "SELECT CONCAT(modtime, '|', split_info) FROM %s%%s WHERE tabname = '%s' AND routes = '%s' AND idxsign = %u AND useflag IN (%d, %d, %d)",
+            "SELECT autokid,modtime,split_info FROM %s%%s WHERE tabname='%s' AND routes='%s' AND idxsign=%u AND useflag IN (%d,%d,%d)",
             self::$mysql->option('prefix', ''),
             self::$mysql->escape($tbname),
             self::$mysql->escape($char),
@@ -203,10 +204,15 @@ class Router
             self::FLAG_NORMAL_USE, self::FLAG_PRE_RESHIP, self::FLAG_IS_LOCKING
         );
 
-        foreach (array('route_info') AS $table) {
-            $rt = self::$mysql->getOne(self::$mysql->query(sprintf($query, $table)));
-            if (empty($rt)) {
-                return (string)$rt;
+        foreach (array('route_info') AS $key => $table) {
+            $rt = self::$mysql->getRow(self::$mysql->query(sprintf($query, $table)));
+            if (!empty($rt)) {
+                return array(
+                    'tabid' => $key,
+                    'seqid' => (int)$rt['autokid'],
+                    'mtime' => strtotime($rt['modtime']),
+                    'route' => $rt['split_info'],
+                );
             }
         }
 
@@ -228,8 +234,6 @@ class Router
             return null;
         }
 
-        list($time, $char) = array_pad(explode('|', trim($char), 2), 2, '');
-        $time	= strtotime($time);
         $route	= array();
         foreach (explode("\n", trim($char)) AS $ln) {
             $ln = explode("\t", $ln);
@@ -237,7 +241,6 @@ class Router
                 continue;
             }
             $route[]	= array(
-                'time'	=> $time,
                 'node'	=> $ln[0],
                 'name'	=> $ln[1],
             );
