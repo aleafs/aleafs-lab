@@ -46,7 +46,7 @@ class RouterTest extends \Myfox\Lib\TestShell
             $this->assertContains('Undefined table named as "i am not exists"', $e->getMessage());
         }
 
-        Router::get('mirror');
+        Router::set('mirror', array('thedate' => 20110610), 1300);
     }
     /* }}} */
 
