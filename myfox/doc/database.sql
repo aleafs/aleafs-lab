@@ -49,6 +49,8 @@ CREATE TABLE test_table_list (
 	UNIQUE KEY uk_table_name (tabname)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
+INSERT INTO test_table_list (addtime,modtime,loadtype,tabname,split_threshold,split_drift,route_method,route_fields) VALUES (NOW(),NOW(),1,'mirror',1000,0.2,0,''), (NOW(),NOW(),0,'numsplit',1000,0.4,1,'{thedate:date,cid:int}');
+
 -- 路由表
 DROP TABLE IF EXISTS test_route_info;
 CREATE TABLE IF NOT EXISTS test_route_info (

@@ -23,9 +23,6 @@ class Router
     const FLAG_IS_LOCKING	= 5;	/**<	热数据迁移时使用			*/
     const FLAG_IS_DELETED	= 0;	/**<	废弃路由，等待删除			*/
 
-    const ROUTE_TYPE_INT    = 0;
-    const ROUTE_TYPE_DATE   = 1;
-
     const MIRROR    = 0;            /**<    镜像表 */
     const SHARDING  = 1;            /**<    分区   */
 
@@ -33,30 +30,8 @@ class Router
 
     /* {{{ 静态变量 */
 
-    private static $db;
+    private static $mysql;
 
-    private static $inited	= false;
-
-    /* }}} */
-
-    /* {{{ public static void init() */
-    /**
-     * 类初始化
-     *
-     * @access public static
-     * @param  Object $db
-     * @return void
-     */
-    public static function init($db = null)
-    {
-        if ($db instanceof \Myfox\Lib\Mysql) {
-            self::$db	= $db;
-        } else {
-            self::$db	= \Myfox\Lib\Mysql::instance('default');
-        }
-
-        self::$inited	= true;
-    }
     /* }}} */
 
     /* {{{ public static Mixture get() */
@@ -71,6 +46,13 @@ class Router
     public static function get($tbname, $field = array())
     {
         $tbname = trim($tbname);
+        $table  = Table::instance($tbname);
+        if (!$table->get('autokid')) {
+            throw new \Myfox\Lib\Exception(sprintf(
+                'Undefined table named as "%s"', $tbname
+            ));
+        }
+
         return self::parse(self::load(
             $tbname, self::filter($tbname, (array)$field)
         ));
@@ -87,12 +69,18 @@ class Router
      * @param  Integer $rownum
      * @return Mixture
      */
-    public static function set($tbname, $field, $rownum)
+    public static function set($tbname, $field = array(), $rownum = null)
     {
-        $routes = self::filter($tbname, (array)$field);
         $table  = Table::instance($tbname);
+        if (!$table->get('autokid')) {
+            throw new \Myfox\Lib\Exception(sprintf(
+                'Undefined table named as "%s"', $tbname
+            ));
+        }
 
+        $routes = self::filter($tbname, (array)$field);
         $chunk  = (int)$table->get('split_threshold');
+        var_dump($chunk);
         $drift  = $table->get('split_drift');
 
         $bucket = array();
@@ -136,7 +124,23 @@ class Router
             $sign   = ($sign << 5) + $sign + ord(substr($char, $i, 1));
         }
 
-        return sprintf('%u', $sign);
+        return $sign % 4294967296;
+    }
+    /* }}} */
+
+    /* {{{ private static void init() */
+    /**
+     * 类初始化
+     *
+     * @access private static
+     * @param  Object $db
+     * @return void
+     */
+    private static function init()
+    {
+        if (empty(self::$mysql)) {
+            self::$mysql    = \Myfox\Lib\Mysql::instance('default');
+        }
     }
     /* }}} */
 
@@ -150,13 +154,19 @@ class Router
     private static function filter($tbname, $field = array())
     {
         $rt = array();
-        foreach (Table::instance($tbname)->get('route_fields') AS $val) {
-            list($column, $type) = array_values($val);
+        $sp = preg_split(
+            '/[\s,;\/]+/',
+            trim(Table::instance($tbname)->get('route_fields', ''), "{}\t\r\n "),
+            -1, PREG_SPLIT_NO_EMPTY
+        );
+
+        foreach ((array)$sp AS $val) {
+            list($column, $type) = array_pad(explode(':', $val), 2, 'int');
             if (!isset($field[$column])) {
                 throw new \Myfox\Lib\Exception('Column "%s" required for table "%s"', $column, $tbname);
             }
 
-            if (self::ROUTE_TYPE_DATE == $type) {
+            if (0 === strcasecmp('date', $type)) {
                 $rt[$column]    = date('Ymd', strtotime($field[$column]));
             } else {
                 $rt[$column]    = 0 + $field[$column];
@@ -182,14 +192,25 @@ class Router
      */
     private static function load($tbname, $char)
     {
-        !self::$inited && self::init();
+        self::init();
 
-        return (string)self::$db->getCell(sprintf(
-            "SELECT CONCAT(modtime, '|', split_info) FROM %s WHERE tbname='%s' AND routes = '%s' ".
-            ' AND idxsign = %u AND useflag IN (%d, %d, %d)',
-                '', self::$db->escape($tbname), self::$db->escape($char), self::sign($char . '|' . $tbname),
-                self::FLAG_NORMAL_USE, self::FLAG_PRE_RESHIP, self::FLAG_IS_LOCKING
-            ));
+        $query  = sprintf(
+            "SELECT CONCAT(modtime, '|', split_info) FROM %s%%s WHERE tabname = '%s' AND routes = '%s' AND idxsign = %u AND useflag IN (%d, %d, %d)",
+            self::$mysql->option('prefix', ''),
+            self::$mysql->escape($tbname),
+            self::$mysql->escape($char),
+            self::sign($char . '|' . $tbname),
+            self::FLAG_NORMAL_USE, self::FLAG_PRE_RESHIP, self::FLAG_IS_LOCKING
+        );
+
+        foreach (array('route_info') AS $table) {
+            $rt = self::$mysql->getOne(self::$mysql->query(sprintf($query, $table)));
+            if (empty($rt)) {
+                return (string)$rt;
+            }
+        }
+
+        return null;
     }
     /* }}} */
 
@@ -203,15 +224,22 @@ class Router
      */
     private static function parse($char)
     {
+        if (empty($char)) {
+            return null;
+        }
+
         list($time, $char) = array_pad(explode('|', trim($char), 2), 2, '');
         $time	= strtotime($time);
         $route	= array();
         foreach (explode("\n", trim($char)) AS $ln) {
-            list($node, $name) = explode("\t", $ln);
+            $ln = explode("\t", $ln);
+            if (empty($ln[1])) {
+                continue;
+            }
             $route[]	= array(
                 'time'	=> $time,
-                'node'	=> $node,
-                'name'	=> $name,
+                'node'	=> $ln[0],
+                'name'	=> $ln[1],
             );
         }
 

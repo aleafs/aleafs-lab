@@ -50,9 +50,8 @@ class Queque
         self::init();
 
         $row    = self::$mysql->getRow(self::$mysql->query(sprintf(
-            'SELECT autokid AS id,task_type,task_info FROM %s.%stask_queque WHERE agentid IN (0,%d) '.
+            'SELECT autokid AS id,task_type,task_info FROM %stask_queque WHERE agentid IN (0,%d) '.
             ' AND task_flag=%d AND trytimes<%d ORDER BY priority ASC, trytimes ASC, autokid ASC LIMIT 1',
-            self::$mysql->option('dbname', 'meta_myfox_config'),
             self::$mysql->option('prefix', ''),
             $host, self::FLAG_WAIT, self::MAX_TRIES
         )));
@@ -99,8 +98,7 @@ class Queque
         $column['task_info']= self::$mysql->escape(json_encode($info));
 
         return (bool)self::$mysql->query(sprintf(
-            "INSERT INTO %s.%stask_queque (%s) VALUES ('%s')",
-            self::$mysql->option('dbname', 'meta_myfox_config'),
+            "INSERT INTO %stask_queque (%s) VALUES ('%s')",
             self::$mysql->option('prefix', ''),
             implode(',', array_keys($column)), implode("','", $column)
         ));
@@ -148,8 +146,7 @@ class Queque
         }
 
         return self::$mysql->query(sprintf(
-            'UPDATE %s.%stask_queque SET %s WHERE autokid = %d',
-            self::$mysql->option('dbname', 'meta_myfox_config'),
+            'UPDATE %stask_queque SET %s WHERE autokid = %d',
             self::$mysql->option('prefix', ''),
             implode(',', $update), $id
         ));
