@@ -80,7 +80,7 @@ class Setting
      * @access public static
      * @return Boolean true or false
      */
-    public static function set($key, $own, $value)
+    public static function set($key, $value, $own = '')
     {
         unset(self::$option[self::idx($key, $own)]);
         self::init(self::$expire);

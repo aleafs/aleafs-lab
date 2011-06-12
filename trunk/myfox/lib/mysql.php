@@ -527,7 +527,7 @@ class Mysql
      */
     private static function sqlclean($query)
     {
-        return trim(preg_replace('/\s{2,}/', '', $query), "; \t\r\n");
+        return trim(preg_replace('/\s{2,}/', ' ', $query), "; \t\r\n");
     }
     /* }}} */
 

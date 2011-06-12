@@ -27,8 +27,8 @@ class Router
     const MIRROR    = 0;            /**<    镜像表 */
     const SHARDING  = 1;            /**<    分区   */
 
-    const ONLINE    = 0;            /**<    正常节点 */
-    const ARCHIVE   = 1;            /**<    归档节点 */
+    const ONLINE    = 1;            /**<    正常节点 */
+    const ARCHIVE   = 2;            /**<    归档节点 */
 
     /* }}} */
 
@@ -101,9 +101,24 @@ class Router
 
         $last   = (int)Setting::get('last_assign_node');
         $ready  = self::get($tbname, $field);
-        $nodes  = self::nodelist();
-        foreach ($bucket AS $item) {
+        if (self::MIRROR == $table->get('route_method')) {
+            $nodes  = self::nodelist(0);
+            $backup = count($nodes);
+        } else {
+            $nodes  = self::nodelist(self::ONLINE);
+            $backup = max(1, $table->get('backups'));
         }
+        $counts = count($nodes);
+
+        foreach ($bucket AS &$item) {
+            $ns = array();
+            for ($i = 0; $i < $backup; $i++) {
+                $ns[]   = $nodes[($last++) % $counts]['node_id'];
+            }
+            $item['node']   = implode(',', $ns);
+            $item['table']  = '';
+        }
+        Setting::set('last_assign_node', $last % $counts);
 
         // xxx: write to db
 
@@ -265,16 +280,18 @@ class Router
      * @access private static
      * @return Mixture
      */
-    private static function nodelist()
+    private static function nodelist($type = 0)
     {
-        if (empty(self::$nodes)) {
-            self::$nodes = (array)self::$mysql->getAll(self::$mysql->query(sprintf(
-                'SELECT node_id,node_type FROM %snode_list ORDER BY node_id ASC',
-                self::$mysql->option('prefix', '')
+        $type   = (int)$type;
+        if (!isset(self::$nodes[$type])) {
+            self::$nodes[$type] = (array)self::$mysql->getAll(self::$mysql->query(sprintf(
+                'SELECT node_id FROM %snode_list %s ORDER BY node_id ASC',
+                self::$mysql->option('prefix', ''),
+                !empty($type) ? sprintf(' WHERE node_type = %d', $type) : ''
             )));
         }
 
-        return self::$nodes;
+        return self::$nodes[$type];
     }
     /* }}} */
 
