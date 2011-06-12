@@ -2,6 +2,7 @@
 /* vim: set expandtab tabstop=4 shiftwidth=4 foldmethod=marker: */
 
 use \Myfox\App\Model\Router;
+use \Myfox\App\Setting;
 
 require_once(__DIR__ . '/../../lib/TestShell.php');
 
@@ -25,6 +26,8 @@ class RouterTest extends \Myfox\Lib\TestShell
             "DELETE FROM %sroute_info WHERE tabname IN ('mirror', 'numsplit')",
             self::$mysql->option('prefix')
         ));
+
+        Setting::set('last_assign_node', 0);
     }
     /* }}} */
 
@@ -46,7 +49,17 @@ class RouterTest extends \Myfox\Lib\TestShell
             $this->assertContains('Undefined table named as "i am not exists"', $e->getMessage());
         }
 
-        Router::set('mirror', array('thedate' => 20110610), 1300);
+        $this->assertEquals(
+            array(
+                array(
+                    'rows'  => 1300,
+                    'node'  => '1,2,3',
+                    'table' => '',
+                ),
+            ),
+            Router::set('mirror', array('thedate' => 20110610), 1300)
+        );
+        $this->assertEquals(0, Setting::get('last_assign_node'));
     }
     /* }}} */
 

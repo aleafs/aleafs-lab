@@ -40,7 +40,7 @@ class SettingTest extends \Myfox\Lib\TestShell
 		$this->assertEquals(null, Setting::get('key1', 'unittest1'));
 		$this->assertEquals(1, Setting::$queries);
 
-		$this->assertEquals(1, Setting::set('key1', 'unittest1', 'a am a hacker'));
+		$this->assertEquals(1, Setting::set('key1', 'a am a hacker', 'unittest1'));
 		$this->assertEquals(2, Setting::$queries);
 
 		$this->assertEquals('a am a hacker', Setting::get('key1', 'unittest1'));
@@ -54,7 +54,7 @@ class SettingTest extends \Myfox\Lib\TestShell
 		$this->assertEquals('a am a hacker', Setting::get('key1', 'unittest1'));
 		$this->assertEquals(4, Setting::$queries);
 
-		$this->assertEquals(2, Setting::set('key1', 'unittest1', 'i am not a hacker'));
+		$this->assertEquals(2, Setting::set('key1', 'i am not a hacker', 'unittest1'));
 		$this->assertEquals(5, Setting::$queries);
 
 		$this->assertEquals('i am not a hacker', Setting::get('key1', 'unittest1'));
