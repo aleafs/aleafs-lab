@@ -99,8 +99,6 @@ class Router
             );
         }
 
-        $last   = (int)Setting::get('last_assign_node');
-        $ready  = self::get($tbname, $field);
         if (self::MIRROR == $table->get('route_method')) {
             $nodes  = self::nodelist(0);
             $backup = count($nodes);
@@ -109,7 +107,7 @@ class Router
             $backup = max(1, $table->get('backups'));
         }
         $counts = count($nodes);
-
+        $last   = (int)Setting::get('last_assign_node');
         foreach ($bucket AS &$item) {
             $ns = array();
             for ($i = 0; $i < $backup; $i++) {
