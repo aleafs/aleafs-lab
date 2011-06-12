@@ -77,44 +77,52 @@ class Router
      */
     public static function set($tbname, $detail = array())
     {
-        $routes = self::filter($tbname, (array)$field);
         $table  = Table::instance($tbname);
-        $chunk  = (int)$table->get('split_threshold');
-        $drift  = $table->get('split_drift');
-
-        $bucket = array();
-        if ($chunk > 0 && self::SHARDING == $table->get('route_method')) {
-            $lf = (int)$chunk * (1 + $drift);
-            while ($rownum > $lf) {
-                $rownum -= $chunk;
-                $bucket[]   = array(
-                    'rows'  => $chunk,
-                );
-            }
-        }
-
-        if ($rownum > 0) {
-            $bucket[]   = array(
-                'rows'  => $rownum,
-            );
+        if (!$table->get('autokid')) {
+            throw new \Myfox\Lib\Exception(sprintf(
+                'Undefined table named as "%s"', $tbname
+            ));
         }
 
         if (self::MIRROR == $table->get('route_method')) {
             $nodes  = self::nodelist(0);
             $backup = count($nodes);
+            $chunks = array(array(array(
+                'data' => '',
+                'size' => empty($detail[0]['count']) ? 0 : $detail[0]['count'],
+            )));
         } else {
             $nodes  = self::nodelist(self::ONLINE);
             $backup = max(1, $table->get('backups'));
+
+            $bucket = new \Myfox\App\Bucket($table->get('split_threshold', 2E6), $table->get('split_drift', 0.2));
+            foreach ((array)$detail AS $route) {
+                $bucket->push(self::filter($tbname, $route['field']), $route['count']);
+            }
+            $chunks = $bucket->allot();
         }
+
         $counts = count($nodes);
         $last   = (int)Setting::get('last_assign_node');
-        foreach ($bucket AS &$item) {
+        $bucket = array();
+
+        foreach ($chunks AS $items) {
             $ns = array();
             for ($i = 0; $i < $backup; $i++) {
                 $ns[]   = $nodes[($last++) % $counts]['node_id'];
             }
-            $item['node']   = implode(',', $ns);
-            $item['table']  = '';
+
+            $ns = implode(',', $ns);
+
+            // xxx: 表名
+            $tb = '';
+            foreach ($items AS $it) {
+                $bucket[$it['data']][]  = array(
+                    'rows'  => $it['size'],
+                    'node'  => $ns,
+                    'table' => $tb,
+                );
+            }
         }
         Setting::set('last_assign_node', $last % $counts);
 
@@ -282,6 +290,7 @@ class Router
     {
         $type   = (int)$type;
         if (!isset(self::$nodes[$type])) {
+            self::init();
             self::$nodes[$type] = (array)self::$mysql->getAll(self::$mysql->query(sprintf(
                 'SELECT node_id FROM %snode_list %s ORDER BY node_id ASC',
                 self::$mysql->option('prefix', ''),

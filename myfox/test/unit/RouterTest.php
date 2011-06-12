@@ -49,16 +49,17 @@ class RouterTest extends \Myfox\Lib\TestShell
             $this->assertContains('Undefined table named as "i am not exists"', $e->getMessage());
         }
 
-        return;
         $this->assertEquals(
             array(
-                array(
-                    'rows'  => 1300,
-                    'node'  => '1,2,3',
-                    'table' => '',
+                ''  => array(
+                    array(
+                        'rows'  => 1300,
+                        'node'  => '1,2,3',
+                        'table' => '',
+                    ),
                 ),
             ),
-            Router::set('mirror', array('thedate' => 20110610), 1300)
+            Router::set('mirror', array(array('count' => 1300)))
         );
         $this->assertEquals(0, Setting::get('last_assign_node'));
     }
