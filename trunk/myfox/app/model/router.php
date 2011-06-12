@@ -75,7 +75,7 @@ class Router
      * @param  Integer $rownum
      * @return Mixture
      */
-    public static function set($tbname, $field = array(), $rownum = null)
+    public static function set($tbname, $detail = array())
     {
         $routes = self::filter($tbname, (array)$field);
         $table  = Table::instance($tbname);
