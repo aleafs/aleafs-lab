@@ -59,19 +59,19 @@ INSERT INTO test_table_list (addtime,modtime,loadtype,tabname,split_threshold,sp
 DROP TABLE IF EXISTS test_route_info;
 CREATE TABLE IF NOT EXISTS test_route_info (
 	autokid int(10) unsigned not null auto_increment,
-	thedate int(10) unsigned not null default 0,
 	idxsign int(10) unsigned not null default 0,
 	isarchive tinyint(2) unsigned not null default 0,
 	useflag tinyint(2) unsigned not null default 0,
 	addtime datetime not null default '0000-00-00 00:00:00',
 	modtime datetime not null default '0000-00-00 00:00:00',
+	hittime datetime not null default '0000-00-00 00:00:00',
 	tabname varchar(64) not null default '',
 	routes varchar(1024) not null default '',
 	split_info text,
 	split_temp text,
 	PRIMARY KEY pk_route_id (autokid),
 	KEY idx_route_sign (idxsign, useflag),
-	KEY idx_route_date (thedate, useflag)
+	KEY idx_route_date (hittime, useflag, isarchive)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
 -- 系统状态表
