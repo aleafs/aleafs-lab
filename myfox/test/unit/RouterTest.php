@@ -42,8 +42,8 @@ class RouterTest extends \Myfox\Lib\TestShell
     }
     /* }}} */
 
-    /* {{{ public void test_should_router_set_and_get_works_fine() */
-    public function test_should_router_set_and_get_works_fine()
+    /* {{{ public void test_should_mirror_table_router_set_and_get_works_fine() */
+    public function test_should_mirror_table_router_set_and_get_works_fine()
     {
         try {
             Router::set('i am not exists');
@@ -54,57 +54,82 @@ class RouterTest extends \Myfox\Lib\TestShell
         }
 
         $mirror = \Myfox\App\Model\Table::instance('mirror');
+        foreach (array(0, 1, 2, 0) AS $id) {
+            $this->assertEquals(
+                array(
+                    ''  => array(
+                        array(
+                            'rows'  => 1300,
+                            'node'  => '1,2,3',
+                            'table' => 'mirror_0.t_' . $mirror->get('autokid') . '_' . $id,
+                        ),
+                    ),
+                ),
+                Router::set('mirror', array(array('count' => 1300)))
+            );
+        }
+        $this->assertEquals(0, Setting::get('last_assign_node'));
+        $this->assertEquals(4, Setting::get('table_route_count', 'mirror'));
+        $this->assertEquals(0, (int)Setting::get('table_real_count', 'mirror'));
+    }
+    /* }}} */
+
+    /* {{{ public void test_should_sharding_table_router_set_and_get_works_fine() */
+    public function test_should_sharding_table_router_set_and_get_works_fine()
+    {
+        $table  = \Myfox\App\Model\Table::instance('numsplit');
+        try {
+            Router::set('numsplit', array(array(
+                'field' => array(
+                    'thedate'   => '20110610',
+                ),
+                'count' => 1201,
+            )));
+            $this->assertTrue(false);
+        } catch (\Exception $e) {
+            $this->assertTrue($e instanceof \Myfox\Lib\Exception);
+            $this->assertContains('Column "cid" required for table "numsplit"', $e->getMessage());
+        }
 
         $this->assertEquals(
             array(
-                ''  => array(
+                '1:cid;20110610:thedate'    => array(
                     array(
-                        'rows'  => 1300,
-                        'node'  => '1,2,3',
-                        'table' => 'mirror_0.t_' . $mirror->get('autokid') . '_0',
+                        'rows'  => 1000,
+                        'node'  => 1,
+                        'table' => 'numsplit_0.t_' . $table->get('autokid') . '_0',
+                    ),
+                    array(
+                        'rows'  => 201,
+                        'node'  => 2,
+                        'table' => 'numsplit_0.t_' . $table->get('autokid') . '_1',
+                    ),
+                ),
+                '2:cid;20110610:thedate'    => array(
+                    array(
+                        'rows'  => 998,
+                        'node'  => 2,
+                        'table' => 'numsplit_0.t_' . $table->get('autokid') . '_1',
                     ),
                 ),
             ),
-            Router::set('mirror', array(array('count' => 1300)))
-        );
-        $this->assertEquals(
-            array(
-                ''  => array(
-                    array(
-                        'rows'  => 1300,
-                        'node'  => '1,2,3',
-                        'table' => 'mirror_0.t_' . $mirror->get('autokid') . '_1',
+            Router::set('numsplit', array(
+                array(
+                    'field' => array(
+                        'thedate'   => '2011-06-10',
+                        'cid'       => 1,
                     ),
+                    'count' => 1201,
                 ),
-            ),
-            Router::set('mirror', array(array('count' => 1300)))
-        );
-        $this->assertEquals(
-            array(
-                ''  => array(
-                    array(
-                        'rows'  => 1300,
-                        'node'  => '1,2,3',
-                        'table' => 'mirror_0.t_' . $mirror->get('autokid') . '_2',
+                array(
+                    'field' => array(
+                        'thedate'   => '2011-06-10',
+                        'cid'       => 2,
                     ),
+                    'count' => 998,
                 ),
-            ),
-            Router::set('mirror', array(array('count' => 1300)))
-        );
-        $this->assertEquals(
-            array(
-                ''  => array(
-                    array(
-                        'rows'  => 1300,
-                        'node'  => '1,2,3',
-                        'table' => 'mirror_0.t_' . $mirror->get('autokid') . '_0',
-                    ),
-                ),
-            ),
-            Router::set('mirror', array(array('count' => 1300)))
-        );
-        $this->assertEquals(0, Setting::get('last_assign_node'));
-        $this->assertEquals(4, Setting::get('table_route_count', 'mirror'));
+            )
+        ));
     }
     /* }}} */
 

@@ -268,7 +268,9 @@ class Router
         $column = array_change_key_case((array)$column, CASE_LOWER);
         foreach ($this->rfield AS $name => $type) {
             if (!isset($column[$name])) {
-                throw new \Myfox\Lib\Exception('Column "%s" required for table "%s"', $name, $this->tbname);
+                throw new \Myfox\Lib\Exception(sprintf(
+                    'Column "%s" required for table "%s"', $name, $this->tbname
+                ));
             }
 
             $routes[]   = sprintf(
