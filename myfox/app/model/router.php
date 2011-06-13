@@ -34,9 +34,21 @@ class Router
 
     /* {{{ 静态变量 */
 
-    private static $mysql;
+    private static $mysql   = null;
 
     private static $nodes   = array();
+
+    private static $objects = array();
+
+    /* }}} */
+
+    /* {{{ 成员变量 */
+
+    private $table;
+
+    private $tbname;
+
+    private $rfield = null;
 
     /* }}} */
 
@@ -51,8 +63,8 @@ class Router
      */
     public static function get($tbname, $field = array())
     {
-        $tbname = trim($tbname);
-        $routes = self::load($tbname, self::filter($tbname, (array)$field));
+        $table  = self::instance($tbname);
+        $routes = $table->load($table->filter((array)$field));
         if (empty($routes)) {
             return null;
         }
@@ -77,58 +89,7 @@ class Router
      */
     public static function set($tbname, $detail = array())
     {
-        $table  = Table::instance($tbname);
-        if (!$table->get('autokid')) {
-            throw new \Myfox\Lib\Exception(sprintf(
-                'Undefined table named as "%s"', $tbname
-            ));
-        }
-
-        if (self::MIRROR == $table->get('route_method')) {
-            $nodes  = self::nodelist(0);
-            $backup = count($nodes);
-            $chunks = array(array(array(
-                'data' => '',
-                'size' => empty($detail[0]['count']) ? 0 : $detail[0]['count'],
-            )));
-        } else {
-            $nodes  = self::nodelist(self::ONLINE);
-            $backup = max(1, $table->get('backups'));
-
-            $bucket = new \Myfox\App\Bucket($table->get('split_threshold', 2E6), $table->get('split_drift', 0.2));
-            foreach ((array)$detail AS $route) {
-                $bucket->push(self::filter($tbname, $route['field']), $route['count']);
-            }
-            $chunks = $bucket->allot();
-        }
-
-        $counts = count($nodes);
-        $last   = (int)Setting::get('last_assign_node');
-        $bucket = array();
-
-        foreach ($chunks AS $items) {
-            $ns = array();
-            for ($i = 0; $i < $backup; $i++) {
-                $ns[]   = $nodes[($last++) % $counts]['node_id'];
-            }
-
-            $ns = implode(',', $ns);
-
-            // xxx: 表名
-            $tb = '';
-            foreach ($items AS $it) {
-                $bucket[$it['data']][]  = array(
-                    'rows'  => $it['size'],
-                    'node'  => $ns,
-                    'table' => $tb,
-                );
-            }
-        }
-        Setting::set('last_assign_node', $last % $counts);
-
-        // xxx: write to db
-
-        return $bucket;
+        return self::instance($tbname)->insert((array)$detail);
     }
     /* }}} */
 
@@ -151,101 +112,20 @@ class Router
     }
     /* }}} */
 
-    /* {{{ private static void init() */
+    /* {{{ private static Object instance() */
     /**
-     * 类初始化
+     * 获取对象实例
      *
      * @access private static
-     * @param  Object $db
-     * @return void
+     * @return Object
      */
-    private static function init()
+    private static function instance($tbname)
     {
-        if (empty(self::$mysql)) {
-            self::$mysql    = \Myfox\Lib\Mysql::instance('default');
-        }
-    }
-    /* }}} */
-
-    /* {{{ private static String filter() */
-    /**
-     * 过滤路由字段
-     *
-     * @access private static
-     * @return String
-     */
-    private static function filter($tbname, $field = array())
-    {
-        $table  = Table::instance($tbname);
-        if (!$table->get('autokid')) {
-            throw new \Myfox\Lib\Exception(sprintf(
-                'Undefined table named as "%s"', $tbname
-            ));
+        if (empty(self::$objects[$tbname])) {
+            self::$objects[$tbname] = new self($tbname);
         }
 
-        $rt = array();
-        $sp = preg_split(
-            '/[\s,;\/]+/',
-            trim($table->get('route_fields', ''), "{}\t\r\n "),
-            -1, PREG_SPLIT_NO_EMPTY
-        );
-
-        foreach ((array)$sp AS $val) {
-            list($column, $type) = array_pad(explode(':', $val), 2, 'int');
-            if (!isset($field[$column])) {
-                throw new \Myfox\Lib\Exception('Column "%s" required for table "%s"', $column, $tbname);
-            }
-
-            if (0 === strcasecmp('date', $type)) {
-                $rt[$column]    = date('Ymd', strtotime($field[$column]));
-            } else {
-                $rt[$column]    = 0 + $field[$column];
-            }
-        }
-        ksort($rt);
-
-        $st = array();
-        foreach ($rt AS $k => $v) {
-            $st[]   = sprintf('%s:%s', $v, $k);
-        }
-
-        return implode(';', $st);
-    }
-    /* }}} */
-
-    /* {{{ private static String load() */
-    /**
-     * 从DB中加载路由数据
-     *
-     * @access private static
-     * @return String
-     */
-    private static function load($tbname, $char)
-    {
-        self::init();
-
-        $query  = sprintf(
-            "SELECT autokid,modtime,split_info FROM %s%%s WHERE tabname='%s' AND routes='%s' AND idxsign=%u AND useflag IN (%d,%d,%d)",
-            self::$mysql->option('prefix', ''),
-            self::$mysql->escape($tbname),
-            self::$mysql->escape($char),
-            self::sign($char . '|' . $tbname),
-            self::FLAG_NORMAL_USE, self::FLAG_PRE_RESHIP, self::FLAG_IS_LOCKING
-        );
-
-        foreach (array('route_info') AS $key => $table) {
-            $rt = self::$mysql->getRow(self::$mysql->query(sprintf($query, $table)));
-            if (!empty($rt)) {
-                return array(
-                    'tabid' => $key,
-                    'seqid' => (int)$rt['autokid'],
-                    'mtime' => strtotime($rt['modtime']),
-                    'route' => $rt['split_info'],
-                );
-            }
-        }
-
-        return null;
+        return self::$objects[$tbname];
     }
     /* }}} */
 
@@ -290,7 +170,6 @@ class Router
     {
         $type   = (int)$type;
         if (!isset(self::$nodes[$type])) {
-            self::init();
             self::$nodes[$type] = (array)self::$mysql->getAll(self::$mysql->query(sprintf(
                 'SELECT node_id FROM %snode_list %s ORDER BY node_id ASC',
                 self::$mysql->option('prefix', ''),
@@ -299,6 +178,165 @@ class Router
         }
 
         return self::$nodes[$type];
+    }
+    /* }}} */
+
+    /* {{{ private void __construct() */
+    /**
+     * 构造函数
+     *
+     * @access private
+     * @return void
+     */
+    private function __construct($tbname)
+    {
+        $this->table    = Table::instance($tbname);
+        if (!$this->table->get('autokid')) {
+            throw new \Myfox\Lib\Exception(sprintf(
+                'Undefined table named as "%s"', $tbname
+            ));
+        }
+        $this->tbname   = $this->table->get('tabname', '');
+
+        if (empty(self::$mysql)) {
+            self::$mysql    = \Myfox\Lib\Mysql::instance('default');
+        }
+    }
+    /* }}} */
+
+    /* {{{ private String load() */
+    /**
+     * 从DB中加载路由数据
+     *
+     * @access private
+     * @return String
+     */
+    private function load($char)
+    {
+        $query  = sprintf(
+            "SELECT autokid,modtime,split_info FROM %s%%s WHERE tabname='%s' AND routes='%s' AND idxsign=%u AND useflag IN (%d,%d,%d)",
+            self::$mysql->option('prefix', ''),
+            self::$mysql->escape($this->tbname),
+            self::$mysql->escape($char),
+            self::sign($char . '|' . $this->tbname),
+            self::FLAG_NORMAL_USE, self::FLAG_PRE_RESHIP, self::FLAG_IS_LOCKING
+        );
+
+        foreach (array('route_info') AS $key => $table) {
+            $rt = self::$mysql->getRow(self::$mysql->query(sprintf($query, $table)));
+            if (!empty($rt)) {
+                return array(
+                    'tabid' => $key,
+                    'seqid' => (int)$rt['autokid'],
+                    'mtime' => strtotime($rt['modtime']),
+                    'route' => $rt['split_info'],
+                );
+            }
+        }
+
+        return null;
+    }
+    /* }}} */
+
+    /* {{{ private String filter() */
+    /**
+     * 过滤路由字段
+     *
+     * @access private
+     * @return String
+     */
+    private function filter($column = array())
+    {
+        if (null === $this->rfield) {
+            $fields = preg_split(
+                '/[\s,;\/]+/',
+                trim($this->table->get('route_fields', ''), "{}\t\r\n "),
+                -1, PREG_SPLIT_NO_EMPTY
+            );
+
+            $this->rfield   = array();
+            foreach ((array)$fields AS $item) {
+                list($name, $type) = array_pad(explode(':', $item, 2), 2, 'int');
+                $this->rfield[strtolower(trim($name))]  = strtolower(trim($type));
+            }
+            ksort($this->rfield);
+        }
+
+        $routes = array();
+        $column = array_change_key_case((array)$column, CASE_LOWER);
+        foreach ($this->rfield AS $name => $type) {
+            if (!isset($column[$name])) {
+                throw new \Myfox\Lib\Exception('Column "%s" required for table "%s"', $name, $this->tbname);
+            }
+
+            $routes[]   = sprintf(
+                '%s:%s',
+                ('date' == $type) ? date('Ymd', strtotime($column[$name])) : 0 + $column[$name],
+                $name
+            );
+        }
+
+        return implode(';', $routes);
+    }
+    /* }}} */
+
+    /* {{{ private Mixture insert() */
+    /**
+     * 计算路由
+     *
+     * @access private
+     * @return Mixture
+     */
+    private function insert($detail = array())
+    {
+        if (self::MIRROR == $this->table->get('route_method')) {
+            $nodes  = self::nodelist(0);
+            $backup = count($nodes);
+            $chunks = array(array(array(
+                'data' => '',
+                'size' => empty($detail[0]['count']) ? 0 : $detail[0]['count'],
+            )));
+        } else {
+            $nodes  = self::nodelist(self::ONLINE);
+            $backup = max(1, $this->table->get('backups'));
+
+            $bucket = new \Myfox\App\Bucket(
+                $this->table->get('split_threshold', 2000000),
+                $this->table->get('split_drift', 0.2)
+            );
+            foreach ((array)$detail AS $route) {
+                $bucket->push($this->filter($route['field']), $route['count']);
+            }
+            $chunks = $bucket->allot();
+        }
+
+        $counts = count($nodes);
+        $last   = (int)Setting::get('last_assign_node');
+        $bucket = array();
+
+        foreach ($chunks AS $items) {
+            $ns = array();
+            for ($i = 0; $i < $backup; $i++) {
+                $ns[]   = $nodes[($last++) % $counts]['node_id'];
+            }
+
+            $ns = implode(',', $ns);
+
+            // xxx: 表名
+            $tb = '';
+            foreach ($items AS $it) {
+                $bucket[$it['data']][]  = array(
+                    'rows'  => $it['size'],
+                    'node'  => $ns,
+                    'table' => $tb,
+                );
+            }
+        }
+        Setting::set('last_assign_node', $last % $counts);
+
+        // xxx: write to db
+
+        return $bucket;
     }
     /* }}} */
 
