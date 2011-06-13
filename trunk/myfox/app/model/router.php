@@ -93,25 +93,6 @@ class Router
     }
     /* }}} */
 
-    /* {{{ public static Integer sign() */
-    /**
-     * 返回字符串的签名
-     *
-     * @access public static
-     * @param  String $char
-     * @return Integer
-     */
-    public static function sign($char)
-    {
-        $sign   = 5381;
-        for ($i = 0, $len = strlen($char); $i < $len; $i++) {
-            $sign   = ($sign << 5) + $sign + ord(substr($char, $i, 1));
-        }
-
-        return $sign % 4294967296;
-    }
-    /* }}} */
-
     /* {{{ private static Object instance() */
     /**
      * 获取对象实例
@@ -126,6 +107,25 @@ class Router
         }
 
         return self::$objects[$tbname];
+    }
+    /* }}} */
+
+    /* {{{ private static Integer sign() */
+    /**
+     * 返回字符串的签名
+     *
+     * @access private static
+     * @param  String $char
+     * @return Integer
+     */
+    private static function sign($char)
+    {
+        $sign   = 5381;
+        for ($i = 0, $len = strlen($char); $i < $len; $i++) {
+            $sign   = ($sign << 5) + $sign + ord(substr($char, $i, 1));
+        }
+
+        return $sign % 4294967296;
     }
     /* }}} */
 
