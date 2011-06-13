@@ -80,18 +80,21 @@ class Setting
      * @access public static
      * @return Boolean true or false
      */
-    public static function set($key, $value, $own = '')
+    public static function set($key, $value, $own = '', $comma = true)
     {
         unset(self::$option[self::idx($key, $own)]);
         self::init(self::$expire);
         self::$queries++;
 
         $time	= date('Y-m-d H:i:s');
-        $value	= self::$mysql->escape($value);
+        $value  = self::$mysql->escape($value);
+        if ($comma) {
+            $value  = sprintf("'%s'", $value);
+        }
 
         return self::$mysql->query(sprintf(
-            "INSERT INTO %ssettings (cfgname,ownname,cfgvalue,addtime,modtime) VALUES ('%s','%s','%s','%s','%s')" .
-            " ON DUPLICATE KEY UPDATE modtime = '%s',cfgvalue='%s'",
+            "INSERT INTO %ssettings (cfgname,ownname,cfgvalue,addtime,modtime) VALUES ('%s','%s',%s,'%s','%s')" .
+            " ON DUPLICATE KEY UPDATE modtime = '%s',cfgvalue=%s",
             self::$mysql->option('prefix', ''), self::$mysql->escape($key), self::$mysql->escape($own),
             $value, $time, $time, $time, $value
         ));

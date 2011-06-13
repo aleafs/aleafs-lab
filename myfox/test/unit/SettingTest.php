@@ -62,4 +62,16 @@ class SettingTest extends \Myfox\Lib\TestShell
 	}
 	/* }}} */
 
+    /* {{{ public void test_should_setting_set_without_comma_works_fine() */
+    public function test_should_setting_set_without_comma_works_fine()
+    {
+        Setting::init(0);
+        $this->assertEquals(1, Setting::set('key2', 1, 'unittest1'));
+        $this->assertEquals(1, Setting::get('key2', 'unittest1'));
+
+        $this->assertEquals(2, Setting::set('key2', 'IF(cfgvalue + 0 > 0, 2, 3)', 'unittest1', false));
+        $this->assertEquals(2, Setting::get('key2', 'unittest1'));
+    }
+    /* }}} */
+
 }
