@@ -30,6 +30,8 @@ class Router
     const ONLINE    = 1;            /**<    正常节点 */
     const ARCHIVE   = 2;            /**<    归档节点 */
 
+    const TABLES_PER_DB = 400;
+
     /* }}} */
 
     /* {{{ 静态变量 */
@@ -314,6 +316,9 @@ class Router
         $last   = (int)Setting::get('last_assign_node');
         $bucket = array();
 
+        $cursor = (int)Setting::get('table_route_count', $this->tbname);
+        $dbnums = (int)Setting::get('table_real_count', $this->tbname);
+
         foreach ($chunks AS $items) {
             $ns = array();
             for ($i = 0; $i < $backup; $i++) {
@@ -321,9 +326,11 @@ class Router
             }
 
             $ns = implode(',', $ns);
-
-            // xxx: 表名
-            $tb = '';
+            $tb = sprintf(
+                '%s_%d.t_%d_%d', $this->tbname, $dbnums % self::TABLES_PER_DB,
+                $this->table->get('autokid'),
+                (self::MIRROR === $this->table->get('route_method')) ? $cursor : $cursor % 3
+            );
             foreach ($items AS $it) {
                 $bucket[$it['data']][]  = array(
                     'rows'  => $it['size'],
@@ -331,8 +338,12 @@ class Router
                     'table' => $tb,
                 );
             }
+            $cursor++;
         }
         Setting::set('last_assign_node', $last % $counts);
+        Setting::set('table_route_count', sprintf(
+            'IF(cfgvalue + 0 > %d, cfgvalue, %d)', $cursor, $cursor
+        ), $this->tbname, false);
 
         // xxx: write to db
 

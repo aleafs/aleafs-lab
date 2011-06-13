@@ -26,6 +26,10 @@ class RouterTest extends \Myfox\Lib\TestShell
             "DELETE FROM %sroute_info WHERE tabname IN ('mirror', 'numsplit')",
             self::$mysql->option('prefix')
         ));
+        self::$mysql->query(sprintf(
+            "DELETE FROM %ssettings WHERE cfgname IN ('table_route_count', 'table_real_count')",
+            self::$mysql->option('prefix')
+        ));
 
         Setting::set('last_assign_node', 0);
     }
@@ -49,19 +53,58 @@ class RouterTest extends \Myfox\Lib\TestShell
             $this->assertContains('Undefined table named as "i am not exists"', $e->getMessage());
         }
 
+        $mirror = \Myfox\App\Model\Table::instance('mirror');
+
         $this->assertEquals(
             array(
                 ''  => array(
                     array(
                         'rows'  => 1300,
                         'node'  => '1,2,3',
-                        'table' => '',
+                        'table' => 'mirror_0.t_' . $mirror->get('autokid') . '_0',
+                    ),
+                ),
+            ),
+            Router::set('mirror', array(array('count' => 1300)))
+        );
+        $this->assertEquals(
+            array(
+                ''  => array(
+                    array(
+                        'rows'  => 1300,
+                        'node'  => '1,2,3',
+                        'table' => 'mirror_0.t_' . $mirror->get('autokid') . '_1',
+                    ),
+                ),
+            ),
+            Router::set('mirror', array(array('count' => 1300)))
+        );
+        $this->assertEquals(
+            array(
+                ''  => array(
+                    array(
+                        'rows'  => 1300,
+                        'node'  => '1,2,3',
+                        'table' => 'mirror_0.t_' . $mirror->get('autokid') . '_2',
+                    ),
+                ),
+            ),
+            Router::set('mirror', array(array('count' => 1300)))
+        );
+        $this->assertEquals(
+            array(
+                ''  => array(
+                    array(
+                        'rows'  => 1300,
+                        'node'  => '1,2,3',
+                        'table' => 'mirror_0.t_' . $mirror->get('autokid') . '_0',
                     ),
                 ),
             ),
             Router::set('mirror', array(array('count' => 1300)))
         );
         $this->assertEquals(0, Setting::get('last_assign_node'));
+        $this->assertEquals(4, Setting::get('table_route_count', 'mirror'));
     }
     /* }}} */
 
