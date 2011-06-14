@@ -353,7 +353,7 @@ class Mysql
         }
 
         $this->disconnect();
-        $this->connect($this->master, false);
+        $this->connect($this->master);
         $this->isMaster = true;
     }
     /* }}} */
@@ -427,7 +427,7 @@ class Mysql
      * @access private
      * @return void
      */
-    private function connect(&$box, $setoff = true)
+    private function connect(&$box)
     {
         do {
             $my = $box->fetch();
@@ -454,9 +454,7 @@ class Mysql
                 $this->log->warn('CONNECT_ERROR', $my + array(
                     'error'     => $is->connect_error,
                 ));
-                if ($setoff) {
-                    $box->setOffline();
-                }
+                $box->setOffline();
             } else {
                 $this->log->debug('CONNECT_OK', $my);
                 $this->handle   = $is;
