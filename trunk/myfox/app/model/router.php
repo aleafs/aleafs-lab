@@ -21,7 +21,6 @@ class Router
     const FLAG_IMPORT_END	= 2;	/**<	数据装完，等待路由生效		*/
     const FLAG_NORMAL_USE	= 3;	/**<	数据装完，路由生效			*/
     const FLAG_PRE_RESHIP	= 4;	/**<	等待重装					*/
-    const FLAG_IS_LOCKING	= 5;	/**<	热数据迁移时使用			*/
     const FLAG_IS_DELETED	= 0;	/**<	废弃路由，等待删除			*/
 
     const MIRROR    = 0;            /**<    镜像表 */
@@ -66,13 +65,13 @@ class Router
     public static function get($tbname, $field = array())
     {
         $table  = self::instance($tbname);
-        $routes = $table->load($table->filter((array)$field));
+        $routes = $table->load($table->filter((array)$field), true);
         if (empty($routes)) {
             return null;
         }
 
         return array(
-            'seqid' => sprintf('%d_%d', $routes['tabid'], $routes['seqid']),
+            'seqid' => sprintf('%s_%d', $routes['tabid'], $routes['seqid']),
             'mtime' => $routes['mtime'],
             'route' => self::parse($routes['route']),
         );
@@ -225,8 +224,8 @@ class Router
 
         if (false !== $inuse) {
             $query  = sprintf(
-                '%s AND useflag IN (%d,%d,%d)', $query,
-                self::FLAG_NORMAL_USE, self::FLAG_PRE_RESHIP, self::FLAG_IS_LOCKING
+                '%s AND useflag IN (%d,%d)', $query,
+                self::FLAG_NORMAL_USE, self::FLAG_PRE_RESHIP
             );
         }
 
@@ -236,7 +235,7 @@ class Router
                 return array(
                     'tabid' => $table,
                     'seqid' => (int)$rt['autokid'],
-                    'mtime' => strtotime($rt['modtime']),
+                    'mtime' => (int)$rt['modtime'],
                     'route' => $rt['split_info'],
                 );
             }
@@ -383,7 +382,7 @@ class Router
                 );
                 $query  = sprintf(
                     "%s VALUES (%d,0,%d,'%s','%s','%s','%s')",
-                    $query, $this->sign($key), self::FLAG_PRE_IMPORT, date('Y-m-d H:i:s'),
+                    $query, $this->sign($key), self::FLAG_PRE_IMPORT, time(),
                     $this->tbname, self::$mysql->escape($key), $value
                 );
             } else {
