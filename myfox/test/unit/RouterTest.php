@@ -158,11 +158,11 @@ class RouterTest extends \Myfox\Lib\TestShell
         $this->assertEquals(array(
             array(
                 'node'  => 1,
-                'name'  => 'numsplit_0.t_52_0',
+                'name'  => sprintf('numsplit_0.t_%d_0', $table->get('autokid')),
             ),
             array(
                 'node'  => 2,
-                'name'  => 'numsplit_0.t_52_1',
+                'name'  => sprintf('numsplit_0.t_%d_1', $table->get('autokid')),
             ),
         ), $routes['route']);
     }
