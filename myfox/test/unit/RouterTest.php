@@ -54,7 +54,7 @@ class RouterTest extends \Myfox\Lib\TestShell
         }
 
         $mirror = \Myfox\App\Model\Table::instance('mirror');
-        foreach (array(0, 1, 2, 0) AS $id) {
+        foreach (array(0, 1, 2, 0) AS $key => $id) {
             $this->assertEquals(
                 array(
                     ''  => array(
@@ -67,10 +67,17 @@ class RouterTest extends \Myfox\Lib\TestShell
                 ),
                 Router::set('mirror', array(array('count' => 1300)))
             );
+            if ($key == 0) {
+                $this->assertEquals(null, Router::get('mirror'));
+            }
         }
         $this->assertEquals(0, Setting::get('last_assign_node'));
         $this->assertEquals(4, Setting::get('table_route_count', 'mirror'));
         $this->assertEquals(0, (int)Setting::get('table_real_count', 'mirror'));
+
+        $route  = Router::get('mirror');
+        $this->assertEquals(0, $route['mtime']);
+        $this->assertEquals(null, $route['route']);
     }
     /* }}} */
 
@@ -130,6 +137,34 @@ class RouterTest extends \Myfox\Lib\TestShell
                 ),
             )
         ));
+        $this->assertEquals(null, Router::get('numsplit', array(
+            'thedate'   => '2011-6-10',
+            'cid'       => 1,
+            'blablala'  => 2,
+        )));
+
+        // xxx: 模拟装完数据
+        self::$mysql->query(sprintf(
+            "UPDATE %sroute_info SET useflag=%d,modtime=1111,split_info=split_temp WHERE useflag=%d AND routes='%s'",
+            self::$mysql->option('prefix'), Router::FLAG_NORMAL_USE, Router::FLAG_PRE_IMPORT,
+            '1:cid;20110610:thedate'
+        ));
+        $routes = Router::get('numsplit', array(
+            'thedate'   => '2011-6-10',
+            'cid'       => 1,
+            'blablala'  => 2,
+        ));
+        $this->assertEquals(1111, $routes['mtime']);
+        $this->assertEquals(array(
+            array(
+                'node'  => 1,
+                'name'  => 'numsplit_0.t_52_0',
+            ),
+            array(
+                'node'  => 2,
+                'name'  => 'numsplit_0.t_52_1',
+            ),
+        ), $routes['route']);
     }
     /* }}} */
 
