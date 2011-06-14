@@ -112,25 +112,6 @@ class Router
     }
     /* }}} */
 
-    /* {{{ private static Integer sign() */
-    /**
-     * 返回字符串的签名
-     *
-     * @access private static
-     * @param  String $char
-     * @return Integer
-     */
-    private static function sign($char)
-    {
-        $sign   = 5381;
-        for ($i = 0, $len = strlen($char); $i < $len; $i++) {
-            $sign   = ($sign << 5) + $sign + ord(substr($char, $i, 1));
-        }
-
-        return $sign % 4294967296;
-    }
-    /* }}} */
-
     /* {{{ private static Mixture parse() */
     /**
      * 路由结果解析
@@ -146,8 +127,8 @@ class Router
         }
 
         $route	= array();
-        foreach (explode("\n", trim($char)) AS $ln) {
-            $ln = explode("\t", $ln);
+        foreach (explode(';', trim($char)) AS $ln) {
+            $ln = explode(':', trim($ln, '[]'));
             if (empty($ln[1])) {
                 continue;
             }
@@ -158,6 +139,27 @@ class Router
         }
 
         return $route;
+    }
+    /* }}} */
+
+    /* {{{ private static String build() */
+    /**
+     * 组织路由为字符串
+     *
+     * @access private static
+     * @return String
+     */
+    private static function build($route)
+    {
+        $rt = array();
+        foreach ((array)$route AS $row) {
+            if (empty($row['node']) || empty($row['table'])) {
+                continue;
+            }
+            $rt[]   = sprintf('[%s:%s]', $row['node'], $row['table']);
+        }
+
+        return implode(';', $rt);
     }
     /* }}} */
 
@@ -213,22 +215,26 @@ class Router
      * @access private
      * @return String
      */
-    private function load($char)
+    private function load($char, $inuse = true)
     {
         $query  = sprintf(
-            "SELECT autokid,modtime,split_info FROM %s%%s WHERE tabname='%s' AND routes='%s' AND idxsign=%u AND useflag IN (%d,%d,%d)",
-            self::$mysql->option('prefix', ''),
-            self::$mysql->escape($this->tbname),
-            self::$mysql->escape($char),
-            self::sign($char . '|' . $this->tbname),
-            self::FLAG_NORMAL_USE, self::FLAG_PRE_RESHIP, self::FLAG_IS_LOCKING
+            "SELECT autokid,modtime,split_info FROM %s%%s WHERE tabname='%s' AND routes='%s' AND idxsign=%u",
+            self::$mysql->option('prefix', ''), self::$mysql->escape($this->tbname),
+            self::$mysql->escape($char), $this->sign($char)
         );
 
-        foreach (array('route_info') AS $key => $table) {
+        if (false !== $inuse) {
+            $query  = sprintf(
+                '%s AND useflag IN (%d,%d,%d)', $query,
+                self::FLAG_NORMAL_USE, self::FLAG_PRE_RESHIP, self::FLAG_IS_LOCKING
+            );
+        }
+
+        foreach (array('route_info') AS $table) {
             $rt = self::$mysql->getRow(self::$mysql->query(sprintf($query, $table)));
             if (!empty($rt)) {
                 return array(
-                    'tabid' => $key,
+                    'tabid' => $table,
                     'seqid' => (int)$rt['autokid'],
                     'mtime' => strtotime($rt['modtime']),
                     'route' => $rt['split_info'],
@@ -281,6 +287,26 @@ class Router
         }
 
         return implode(';', $routes);
+    }
+    /* }}} */
+
+    /* {{{ private Integer sign() */
+    /**
+     * 返回字符串的签名
+     *
+     * @access private
+     * @param  String $char
+     * @return Integer
+     */
+    private function sign($char)
+    {
+        $char   = sprintf('%s|%s', trim($char), $this->tbname);
+        $sign   = strlen($char);
+        for ($i = 0, $len = $sign; $i < $len; $i++) {
+            $sign   = ($sign << 4) ^ ($sign >> 28) ^ ord(substr($char, $i, 1));
+        }
+
+        return abs($sign) % 4294967296;
     }
     /* }}} */
 
@@ -347,7 +373,28 @@ class Router
             'IF(cfgvalue + 0 > %d, cfgvalue, %d)', $cursor, $cursor
         ), $this->tbname, false);
 
-        // xxx: write to db
+        foreach ($bucket AS $key => $val) {
+            $exists = $this->load($key, false);
+            $value  = self::$mysql->escape(self::build($val));
+            if (empty($exists)) {
+                $query  = sprintf(
+                    "INSERT INTO %sroute_info (idxsign,isarchive,useflag,addtime,tabname,routes,split_temp)",
+                    self::$mysql->option('prefix')
+                );
+                $query  = sprintf(
+                    "%s VALUES (%d,0,%d,'%s','%s','%s','%s')",
+                    $query, $this->sign($key), self::FLAG_PRE_IMPORT, date('Y-m-d H:i:s'),
+                    $this->tbname, self::$mysql->escape($key), $value
+                );
+            } else {
+                $query  = sprintf(
+                    "UPDATE %s%s SET useflag=%d,split_temp='%s' WHERE autokid = %d",
+                    self::$mysql->option('prefix'), $exists['tabid'], self::FLAG_PRE_RESHIP,
+                    $value, $exists['seqid']
+                );
+            }
+            self::$mysql->query($query);
+        }
 
         return $bucket;
     }
