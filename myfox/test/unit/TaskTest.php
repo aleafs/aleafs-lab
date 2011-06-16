@@ -18,10 +18,18 @@ class TaskTest extends \Myfox\Lib\TestShell
 		self::$mysql    = \Myfox\Lib\Mysql::instance('default');
 	}
 
+    /* {{{ public void test_should_delete_task_works_fine() */
+    public function test_should_delete_task_works_fine()
+    {
+        $task   = new \Myfox\App\Task\Delete(-1, array(
+            'host'  => 'host_01_01',
+            'path'  => 'mirror_0.t_42_0',
+            'where' => '',
+        ));
+    }
+    /* }}} */
+
 	/* {{{ public void test_should_import_task_works_fine() */
-	/**
-	 * @xxx: 这个啥都不干哦
-	 */
 	public function test_should_import_task_works_fine()
 	{
 		$task	= new \Myfox\App\Task\Import(-1, array('a' => 'none'));
