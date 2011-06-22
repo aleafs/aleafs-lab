@@ -1,0 +1,5 @@
+
+
+Requirements:
+
+1. php >= 5.3.3, with mysqli(mysqlnd), json, igbinary, apc, memcached, pcntl, igbinary
