@@ -21,6 +21,9 @@ class TestShell extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
+
+        set_time_limit(0);
+
         \Myfox\Lib\AutoLoad::init();
         \Myfox\Lib\AutoLoad::register('myfox\\app',    __DIR__ . '/../app');
 
