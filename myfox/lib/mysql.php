@@ -55,6 +55,8 @@ class Mysql
 
     private $log;
 
+    private $queque = array();
+
     /* }}} */
 
     /* {{{ public static Object instance() */
@@ -242,19 +244,45 @@ class Mysql
      */
     public function async($query)
     {
-        return $this->runsql($query, true);
+        if (!$this->runsql($query, true)) {
+            return false;
+        }
+
+        return array_push($this->queque, array(
+            'sql'   => $query,
+        )) - 1;
     }
     /* }}} */
 
-    /* {{{ public Mixture poll() */
+    /* {{{ public Mixture wait() */
     /**
      * 等待异步结果
      *
      * @access public
+     * @param  String $key
      * @return Mixture
      */
-    public function poll()
+    public function wait($key)
     {
+        if (!isset($this->queque[$key])) {
+            return false;
+        }
+
+        $usleep = 1000;
+        $maxrun = ceil(2 * $this->option['timeout'] * 1000000 / $usleep);
+        for ($i = 0; $i < $maxrun; $i++) {
+            $reads  = $error = $reject = array($this->handle);
+            if (!$this->handle->poll($reads, $error, $reject, 0, $usleep)) {
+                continue;
+            }
+
+            foreach ($reads AS $link) {
+                if ($rs = $link->reap_async_query()) {
+                    var_dump($rs);
+                }
+            }
+            break;
+        }
     }
     /* }}} */
 
@@ -482,7 +510,7 @@ class Mysql
             $this->connectToSlave();
         }
 
-        $rs = $this->handle->query($query);
+        $rs = $this->handle->query($query, $async ? MYSQLI_ASYNC : null);
         if (false !== $rs && true === $modify) {
             $rs = $this->handle->affected_rows;
         }
@@ -491,10 +519,12 @@ class Mysql
         if (false !== $rs) {
             $this->log->debug('QUERY_OK', array(
                 'sql'   => $query,
+                'async' => (bool)$async,
             ));
         } else {
             $this->log->warn('QUERY_ERROR', array(
                 'sql'   => $query,
+                'async' => (bool)$async,
                 'error' => $this->error,
             ));
         }

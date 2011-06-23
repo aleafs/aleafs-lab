@@ -79,12 +79,12 @@ class MysqlTest extends \Myfox\Lib\TestShell
         );
 
         $rs = $mysql->getAll($mysql->query('SHOW DATABASES'));
-        $this->assertContains("\tQUERY_OK\t-\t{\"sql\":\"SHOW DATABASES\"}", self::getLogContents($this->logfile, -1));
+        $this->assertContains("\tQUERY_OK\t-\t{\"sql\":\"SHOW DATABASES\"", self::getLogContents($this->logfile, -1));
         $this->assertContains(array('Database' => 'test'), $rs);
 
         $this->assertFalse($mysql->query('I AM A WRONG QUERY'));
         $this->assertContains(
-            "\tQUERY_ERROR\t-\t{\"sql\":\"I AM A WRONG QUERY\",\"error\":",
+            "\tQUERY_ERROR\t-\t{\"sql\":\"I AM A WRONG QUERY\",\"async\":false,\"error\":",
             self::getLogContents($this->logfile, -1)
         );
 
@@ -132,6 +132,16 @@ class MysqlTest extends \Myfox\Lib\TestShell
         );
     }
     /* }}} */
+
+    public function test_should_async_query_works_fine()
+    {
+        $mysql  = new Mysql(__DIR__ . '/ini/mysql_test.ini');
+        $mysql->addSlave('10.232.64.121', 'magiccube', 'magiccube');
+        $mysql->addMaster('10.232.31.3', 'magiccube', 'magiccube', 3306);
+        $a1 = $mysql->async('SELECT MAX(id) FROM meta_myfox_cluster.only_for_test');
+
+        $mysql->wait($a1);
+    }
 
 }
 
