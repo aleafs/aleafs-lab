@@ -268,21 +268,21 @@ class Mysql
             return false;
         }
 
-        $usleep = 1000;
-        $maxrun = ceil(2 * $this->option['timeout'] * 1000000 / $usleep);
-        for ($i = 0; $i < $maxrun; $i++) {
-            $reads  = $error = $reject = array($this->handle);
+        while (!isset($this->queque[$key]['result'])) {
+            $usleep = 500;
+            $reads  = array($this->handle);
+            $error  = $reject   = array();
             if (!$this->handle->poll($reads, $error, $reject, 0, $usleep)) {
+                $usleep = (int)(1.2 * $usleep);
                 continue;
             }
 
-            foreach ($reads AS $link) {
-                if ($rs = $link->reap_async_query()) {
-                    var_dump($rs);
-                }
-            }
-            break;
+            $rs = $this->handle->reap_async_query();
+            $id = $key;
+            $this->queque[$id]['result']    = $rs;
         }
+
+        return $this->queque[$key]['result'];
     }
     /* }}} */
 
@@ -509,7 +509,6 @@ class Mysql
         } else {
             $this->connectToSlave();
         }
-
         $rs = $this->handle->query($query, $async ? MYSQLI_ASYNC : null);
         if (false !== $rs && true === $modify) {
             $rs = $this->handle->affected_rows;
