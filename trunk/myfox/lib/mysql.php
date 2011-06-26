@@ -30,6 +30,10 @@ class Mysql
 
     private static $alias	= array();
 
+    private static $queque  = array();      /**<    异步请求列表   */
+
+    private static $counter = 0;            /**<    异步请求计数器 */
+
     /* }}} */
 
     /* {{{ 成员变量 */
@@ -54,8 +58,6 @@ class Mysql
     private $error  = '';
 
     private $log;
-
-    private $queque = array();
 
     /* }}} */
 
@@ -248,9 +250,11 @@ class Mysql
             return false;
         }
 
-        return array_push($this->queque, array(
+        self::$queque[self::$counter] = array(
             'sql'   => $query,
-        )) - 1;
+        );
+
+        return self::$counter++;
     }
     /* }}} */
 
@@ -264,11 +268,11 @@ class Mysql
      */
     public function wait($key)
     {
-        if (!isset($this->queque[$key])) {
+        if (!isset(self::$queque[$key])) {
             return false;
         }
 
-        while (!isset($this->queque[$key]['result'])) {
+        while (!isset(self::$queque[$key]['result'])) {
             $usleep = 500;
             $reads  = array($this->handle);
             $error  = $reject   = array();
@@ -279,10 +283,13 @@ class Mysql
 
             $rs = $this->handle->reap_async_query();
             $id = $key;
-            $this->queque[$id]['result']    = $rs;
+            self::$queque[$id]['result']    = $rs;
         }
 
-        return $this->queque[$key]['result'];
+        $rt = self::$queque[$id]['result'];
+        unset(self::$queque[$id]);
+
+        return $rt;
     }
     /* }}} */
 
@@ -311,6 +318,7 @@ class Mysql
         if ($rs instanceof \MySQLi_Result) {
             return self::fetchFromResult($rs, $limit);
         }
+        $this->handle->next_result();
 
         return null;
     }

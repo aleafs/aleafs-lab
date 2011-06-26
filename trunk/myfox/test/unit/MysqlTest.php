@@ -139,6 +139,8 @@ class MysqlTest extends \Myfox\Lib\TestShell
         $mysql->addSlave('10.232.64.121', 'magiccube', 'magiccube');
         $mysql->addMaster('10.232.31.3', 'magiccube', 'magiccube', 3306);
         $a1 = $mysql->async('SELECT MAX(id) FROM meta_myfox_cluster.only_for_test');
+        $this->assertEquals($a1, 0);
+        //var_dump($a1, $mysql);
 
         $mysql->wait($a1);
     }
