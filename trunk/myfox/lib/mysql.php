@@ -318,7 +318,6 @@ class Mysql
         if ($rs instanceof \MySQLi_Result) {
             return self::fetchFromResult($rs, $limit);
         }
-        $this->handle->next_result();
 
         return null;
     }
@@ -465,12 +464,14 @@ class Mysql
      */
     private function connect(&$box)
     {
-        do {
+        $cn = 0;
+        $rs = null;
+        while ($cn++ < 3 && empty($rs)) { 
             $my = $box->fetch();
             $wr = error_reporting();
             $my['host'] = (empty($this->option['persist']) ? '' : 'p:') . $my['host'];
             error_reporting($wr - E_WARNING);
-            foreach (array(10000, 100000, 1000000) AS $us) {
+            foreach (array(10, 100, 1000) AS $us) {
                 $is = mysqli_init();
                 $is->options(MYSQLI_OPT_CONNECT_TIMEOUT, $this->option['timeout']);
                 $rs = $is->real_connect($my['host'],$my['user'], $my['pass'], $this->option['dbname'], $my['port']);
@@ -481,7 +482,7 @@ class Mysql
 
                 $is->kill($is->thread_id);
                 $is->close();
-                usleep($us);
+                usleep($us * 1000);
             }
             error_reporting($wr);
 
@@ -497,7 +498,7 @@ class Mysql
                 $this->handle->set_charset($this->option['charset']);
                 $this->handle->autocommit(true);
             }
-        } while (empty($rs));
+        }
     }
     /* }}} */
 
