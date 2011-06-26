@@ -81,25 +81,21 @@ class LiveBoxTest extends \Myfox\Lib\TestShell
     }
     /* }}} */
 
-    /* {{{ public function test_should_throw_exception_when_all_offline() */
-    public function test_should_throw_exception_when_all_offline()
+    /* {{{ public function test_should_reset_when_all_offline() */
+    public function test_should_reset_when_all_offline()
     {
         $this->pool->register('www.baidu.com', 'baidu')
             ->register('www.google.com', 'google')
             ->setOffline('baidu')
             ->setOffline('google');
 
-        try {
-            $this->pool->fetch();
-            $this->assertTrue(false);
-        } catch (\Exception $e) {
-            $this->assertTrue($e instanceof \Myfox\Lib\Exception);
-            $this->assertContains(
-                'There is no available server',
-                $e->getMessage(),
-                'Exception Message Error.'
-            );
-        }
+        $this->assertContains(
+            $this->pool->fetch(),
+            array(
+                'www.baidu.com',
+                'www.google.com',
+            )
+        );
     }
     /* }}} */
 

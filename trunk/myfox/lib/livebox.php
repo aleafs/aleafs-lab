@@ -15,21 +15,31 @@ use \Myfox\Lib\Cache\Apc;
 class LiveBox
 {
 
+    /* {{{ 静态常量 */
+
+    const OFFS  = 1;
+
+    const PROF  = 2;
+
+    /* }}} */
+
     /* {{{ 成员变量 */
 
-    private $host   = array();      /**<  服务器列表      */
+    private $host   = array();      /**<    服务器列表      */
 
-    private $pool   = array();
+    private $offs   = array();      /**<    不可用列表      */
 
-    private $offs   = array();      /**<  不可用列表      */
+    private $prof   = array();      /**<    故障历史 */
 
-    private $sign   = null;         /**<  不可用列表签名      */
+    private $pool   = null;
 
-    private $last   = null;         /**<  上次返回的服务器      */
+    private $flush  = 0;            /**<    刷新数据 */
 
-    private $live   = 300;          /**<  自动存活检查时间      */
+    private $last   = null;         /**<    上次返回的服务器      */
 
-    private $cache  = null;         /**<  缓存服务      */
+    private $live   = 300;          /**<    自动存活检查时间      */
+
+    private $cache  = null;         /**<    缓存服务      */
 
     /* }}} */
 
@@ -44,8 +54,8 @@ class LiveBox
      */
     public function __construct($token, $live = 300)
     {
-        $this->live  = max(0, (int)$live);
-
+        $this->live     = max(0, (int)$live);
+        $this->flush    = 0;
         if (function_exists('apc_add')) {
             $this->cache = new Apc($token, $this->live);
         } else {
@@ -54,8 +64,8 @@ class LiveBox
 
         if (!empty($this->cache)) {
             $this->offs = self::filterOffs($this->cache->get('offs'));
+            $this->prof = $this->cache->get('prof');
         }
-        $this->sign = crc32(json_encode($this->offs));
     }
     /* }}} */
 
@@ -68,16 +78,18 @@ class LiveBox
      */
     public function __destruct()
     {
-        if (!empty($this->cache)) {
-            $offs = self::filterOffs(array_merge(
+        if (empty($this->cache)) {
+            return;
+        }
+
+        if (self::OFFS & $this->flush) {
+            $this->cache->set('offs', self::filterOffs(array_merge(
                 (array)$this->cache->get('offs'),
                 (array)$this->offs
-            ));
-            ksort($offs);
+            )), (int)(1.2 * $this->live));
+        }
 
-            if (crc32(json_encode($offs)) != $this->sign) {
-                $this->cache->set('offs', $offs, intval(1.2 * $this->live));
-            }
+        if (self::PROF & $this->flush) {
         }
     }
     /* }}} */
@@ -93,7 +105,7 @@ class LiveBox
     public function register($host, $id = null)
     {
         $this->host[(null === $id) ? count($this->host) : $id] = $host;
-        $this->pool = array();
+        $this->pool = null;
         return $this;
     }
     /* }}} */
@@ -106,13 +118,21 @@ class LiveBox
      * @param  Mixture $host (default null)
      * @return Object $this
      */
-    public function setOffline($id = null)
+    public function setOffline($id = null, $num = 1, $ttl = 120)
     {
+        $tm = time();
         $id = (null === $id) ? $this->last : $id;
-        if (isset($this->host[$id])) {
-            $this->offs[$id] = time() + $this->live;
+        if ($num >= 2) {
+            $va = &$this->prof[$id][(int)($tm / 6)];
+            $va = empty($va) ? 1 : $va + 1;
+            $this->flush    |= self::PROF;
         }
-        $this->pool = array();
+
+        if ($num < 2 || $va >= $num) {
+            $this->offs[$id] = $tm + $this->live;
+            $this->flush    |= self::OFFS;
+        }
+        $this->pool = null;
 
         return $this;
     }
@@ -128,9 +148,9 @@ class LiveBox
     public function cleanAllCache()
     {
         $this->host = array();
-        $this->pool = array();
         $this->offs = array();
-        $this->sign = crc32(json_encode($this->offs));
+        $this->prof = array();
+        $this->pool = null;
         $this->last = null;
 
         if (!empty($this->cache)) {
@@ -150,11 +170,12 @@ class LiveBox
      */
     public function fetch()
     {
-        if (empty($this->pool)) {
+        if (null === $this->pool) {
             $this->pool = array_keys(array_diff_key($this->host, $this->offs));
         }
         if (empty($this->pool)) {
-            throw new \Myfox\Lib\Exception('There is no available server');
+            $this->pool = array_keys($this->host);
+            $this->offs = array();
         }
 
         $this->last = $this->pool[array_rand($this->pool)];
