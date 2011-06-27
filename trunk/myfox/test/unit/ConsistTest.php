@@ -32,8 +32,8 @@ class ConsistTest extends \Myfox\Lib\TestShell
             $this->assertContains("Empty server list for consistency check", $e->getMessage());
         }
 
-        return;
         $this->assertTrue(Consist::check('i_am_not_exists.lalalla', array('host_01_01', 'host_02_01')));
+        $this->assertTrue(Consist::check('mirror_0.mirror_583_2', array('host_01_01', 'host_02_01')));
     }
     /* }}} */
 

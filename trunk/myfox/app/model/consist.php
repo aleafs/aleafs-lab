@@ -65,6 +65,14 @@ class Consist
         }
 
         $query  = implode(' UNION ALL ', $querys);
+        $result = array();
+        foreach ((array)$server AS $name) {
+            $db = Server::instance($name)->getlink();
+            // xxx: 异步
+            foreach ((array)$db->getAll($db->query($query)) AS $row) {
+                $result[$name][$row['c0']]  = $row['c1'];
+            }
+        }
 
         return true;
     }
