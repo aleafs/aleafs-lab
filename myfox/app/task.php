@@ -117,7 +117,7 @@ abstract class Task
      */
     public function lock()
     {
-        return (bool)Queque::update(
+        return Queque::update(
             $this->id,
             array(
                 'begtime'   => sprintf(
@@ -143,7 +143,7 @@ abstract class Task
         $flag   = empty($errno) ? Queque::FLAG_DONE : Queque::FLAG_WAIT;
         return Queque::update($this->id, array(
             'trytimes'  => sprintf('IF(task_flag=%d,trytimes,trytimes+1)', $flag),
-            'endtime'   => sprintf("IF(loadflag=%d,endtime,'%s')", $flag, date('Y-m-d H:i:s')),
+            'endtime'   => sprintf("IF(task_flag=%d,endtime,'%s')", $flag, date('Y-m-d H:i:s')),
             'task_flag' => $flag,
             'last_error'=> trim($error),
         ), array(

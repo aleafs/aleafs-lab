@@ -36,10 +36,10 @@ class TaskTest extends \Myfox\Lib\TestShell
 
 		$this->assertEquals('none', $task->option('a'));
 
-		$this->assertFalse($task->lock());
+		$this->assertEquals(0, $task->lock());
 		//$this->assertEquals(Task::FAIL, $task->execute());
 		//$this->assertEquals(Task::FAIL, $task->wait());
-		$this->assertFalse($task->unlock());
+		$this->assertEquals(0, $task->unlock());
 
 		//$this->assertContains('Unreachable interface', $task->getLastError());
 	}
