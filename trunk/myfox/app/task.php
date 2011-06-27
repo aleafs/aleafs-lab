@@ -168,4 +168,25 @@ abstract class Task
     }
     /* }}} */
 
+    /* {{{ protected Boolean isReady() */
+    /**
+     * 检查参数是否完整
+     *
+     * @access protected
+     * @return Boolean true or false
+     */
+    protected function isReady()
+    {
+        $args   = func_get_args();
+        foreach ((array)$args AS $id) {
+            if (!isset($this->option[$id])) {
+                $this->setError(sprintf('Required column named as "%s"', $id));
+                return false;
+            }
+        }
+
+        return true;
+    }
+    /* }}} */
+
 }
