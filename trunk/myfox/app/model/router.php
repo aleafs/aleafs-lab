@@ -51,6 +51,8 @@ class Router
 
     private $rfield = null;
 
+    private $flush  = array();
+
     /* }}} */
 
     /* {{{ public static Mixture get() */
@@ -62,10 +64,10 @@ class Router
      * @param  Mixture $field
      * @return Mixture
      */
-    public static function get($tbname, $field = array())
+    public static function get($tbname, $field = array(), $touch = false)
     {
         $table  = self::instance($tbname);
-        $routes = $table->load($table->filter((array)$field), true);
+        $routes = $table->load($table->filter((array)$field), true, $touch);
         if (empty($routes)) {
             return null;
         }
@@ -91,6 +93,19 @@ class Router
     public static function set($tbname, $detail = array())
     {
         return self::instance($tbname)->insert((array)$detail);
+    }
+    /* }}} */
+
+    /* {{{ public static void clean() */
+    /**
+     * 清理实例对象 
+     *
+     * @access public static
+     * @return void
+     */
+    public static function clean()
+    {
+        self::$objects  = array();
     }
     /* }}} */
 
@@ -207,6 +222,28 @@ class Router
     }
     /* }}} */
 
+    /* {{{ public void __destruct() */
+    /**
+     * 析构函数
+     *
+     * @access public
+     * @return void
+     */
+    public function __destruct()
+    {
+        foreach ($this->flush AS $table => $ids) {
+            if (empty($ids)) {
+                continue;
+            }
+            self::$mysql->query(sprintf(
+                'UPDATE %s%s SET hittime = %d WHERE autokid IN (%s)',
+                self::$mysql->option('prefix'), $table,
+                time(), implode(',', $ids)
+            ));
+        }
+    }
+    /* }}} */
+
     /* {{{ private String load() */
     /**
      * 从DB中加载路由数据
@@ -214,7 +251,7 @@ class Router
      * @access private
      * @return String
      */
-    private function load($char, $inuse = true)
+    private function load($char, $inuse = true, $touch = false)
     {
         $query  = sprintf(
             "SELECT autokid,modtime,split_info FROM %s%%s WHERE tabname='%s' AND routes='%s' AND idxsign=%u",
@@ -232,6 +269,10 @@ class Router
         foreach (array('route_info') AS $table) {
             $rt = self::$mysql->getRow(self::$mysql->query(sprintf($query, $table)));
             if (!empty($rt)) {
+                if ($touch) {
+                    $this->flush[$table][]  = (int)$rt['autokid'];
+                }
+
                 return array(
                     'tabid' => $table,
                     'seqid' => (int)$rt['autokid'],
