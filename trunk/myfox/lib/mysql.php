@@ -246,12 +246,14 @@ class Mysql
      */
     public function async($query)
     {
-        if (!$this->runsql($query, true)) {
+        // xxx : 实际为阻塞
+        if (false === ($rs = $this->runsql($query, false))) {
             return false;
         }
 
         self::$queque[self::$counter] = array(
             'sql'   => $query,
+            'res'   => $rs,
         );
 
         return self::$counter++;
@@ -272,7 +274,8 @@ class Mysql
             return false;
         }
 
-        while (!isset(self::$queque[$key]['result'])) {
+        $id = $key;
+        while (!isset(self::$queque[$key]['res'])) {
             $usleep = 500;
             $reads  = array($this->handle);
             $error  = $reject   = array();
@@ -282,11 +285,10 @@ class Mysql
             }
 
             $rs = $this->handle->reap_async_query();
-            $id = $key;
-            self::$queque[$id]['result']    = $rs;
+            self::$queque[$id]['res']   = $rs;
         }
 
-        $rt = self::$queque[$id]['result'];
+        $rt = self::$queque[$id]['res'];
         unset(self::$queque[$id]);
 
         return $rt;

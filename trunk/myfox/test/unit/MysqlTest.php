@@ -103,7 +103,7 @@ class MysqlTest extends \Myfox\Lib\TestShell
 
         $mysql->query('TRUNCATE meta_myfox_cluster.only_for_test');
     }
-    /* }}} */
+    /* }}} */ 
 
     /* {{{ public void test_should_escape_works_fine() */
     public function test_should_escape_works_fine()
@@ -133,17 +133,21 @@ class MysqlTest extends \Myfox\Lib\TestShell
     }
     /* }}} */
 
+    /* {{{ public void test_should_async_query_works_fine() */
     public function test_should_async_query_works_fine()
     {
         $mysql  = new Mysql(__DIR__ . '/ini/mysql_test.ini');
         $mysql->addSlave('10.232.64.121', 'magiccube', 'magiccube');
         $mysql->addMaster('10.232.31.3', 'magiccube', 'magiccube', 3306);
-        $a1 = $mysql->async('SELECT MAX(id) FROM meta_myfox_cluster.only_for_test');
-        $this->assertEquals($a1, 0);
-        //var_dump($a1, $mysql);
+        $this->assertEquals(0, $mysql->async(
+            'INSERT INTO meta_myfox_cluster.only_for_test (content) VALUES ("aabbcc")'
+        ));
+        $this->assertEquals(1, $mysql->async('SELECT MAX(id) FROM meta_myfox_cluster.only_for_test'));
 
-        $mysql->wait($a1);
+        $this->assertEquals(1, $mysql->wait(0));
+        $this->assertEquals(1, $mysql->getOne($mysql->wait(1)));
     }
+    /* }}} */
 
 }
 
