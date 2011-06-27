@@ -139,13 +139,13 @@ class MysqlTest extends \Myfox\Lib\TestShell
         $mysql  = new Mysql(__DIR__ . '/ini/mysql_test.ini');
         $mysql->addSlave('10.232.64.121', 'magiccube', 'magiccube');
         $mysql->addMaster('10.232.31.3', 'magiccube', 'magiccube', 3306);
-        $this->assertEquals(0, $mysql->async(
+        $id = $mysql->async(
             'INSERT INTO meta_myfox_cluster.only_for_test (content) VALUES ("aabbcc")'
-        ));
-        $this->assertEquals(1, $mysql->async('SELECT MAX(id) FROM meta_myfox_cluster.only_for_test'));
+        );
+        $this->assertEquals($id + 1, $mysql->async('SELECT MAX(id) FROM meta_myfox_cluster.only_for_test'));
 
-        $this->assertEquals(1, $mysql->wait(0));
-        $this->assertEquals(1, $mysql->getOne($mysql->wait(1)));
+        $this->assertEquals(1, $mysql->wait($id));
+        $this->assertEquals(1, $mysql->getOne($mysql->wait($id + 1)));
     }
     /* }}} */
 
