@@ -24,8 +24,11 @@ class TaskTest extends \Myfox\Lib\TestShell
     public function test_should_example_task_works_fine()
     {
         $task	= new \Myfox\App\Task\Example(-1, array('a' => 'none'));
-
         $this->assertEquals('none', $task->option('a'));
+        $this->assertEquals(Task::FAIL, $task->execute());
+        $this->assertContains('Required column named as "type"', $task->lastError());
+
+        $task	= new \Myfox\App\Task\Example(-1, array('type' => 'none'));
         $this->assertEquals(0, $task->lock());
 
         $this->assertEquals(0, $task->counter);
@@ -35,6 +38,20 @@ class TaskTest extends \Myfox\Lib\TestShell
         $this->assertEquals(Task::FAIL, $task->wait());
         $this->assertContains('None sense for wait', $task->lastError());
         $this->assertEquals(0, $task->unlock());
+    }
+    /* }}} */
+
+    /* {{{ public void test_should_transfer_task_works_fine() */
+    public function test_should_transfer_task_works_fine()
+    {
+        $task	= new \Myfox\App\Task\Transfer(-1, array(
+            'from'  => '1,2',
+            'save'  => '3',
+            'path'  => '',
+        ));
+
+        $this->assertEquals(Task::WAIT, $task->execute());
+        $this->assertEquals(Task::SUCC, $task->wait());
     }
     /* }}} */
 

@@ -15,7 +15,11 @@ class Example extends \Myfox\App\Task
 	public $counter	= 0;
 
 	public function execute()
-	{
+    {
+        if (!$this->isReady('type')) {
+            return self::FAIL;
+        }
+
 		$this->counter++;
 		return self::SUCC;
 	}
