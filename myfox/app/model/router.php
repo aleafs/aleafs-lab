@@ -292,6 +292,7 @@ class Router
     /* {{{ private Integer sign() */
     /**
      * 返回字符串的签名
+     * xxx : 此处算法严禁修改
      *
      * @access private
      * @param  String $char

@@ -13,74 +13,97 @@ namespace Myfox\Lib;
 class Hash
 {
 
-	const MAX_INT	= 4294967296;
+    /* {{{ 静态常量 */
 
-	/* {{{ public static String md5() */
-	/**
-	 * 计算MD5
-	 *
-	 * @access public static
-	 * @return String
-	 */
-	public static function md5($char)
-	{
-		return bin2hex(md5($char, true));
-	}
-	/* }}} */
+    const MAX_INT	= 4294967296;
 
-	/* {{{ public static Integer time33() */
-	/**
-	 * TIME33算法
-	 *
-	 * @access public static
-	 * @return Integer
-	 */
-	public static function time33($char)
-	{
-		$sign	= 5381;
-		for ($i = 0, $len = strlen($char); $i < $len; $i++) {
-			$sign	= ($sign << 5 + $sign) + ord(substr($char, $i, 1));
-		}
+    /* }}} */
 
-		return $sign % self::MAX_INT;
-	}
-	/* }}} */
+    /* {{{ public static String md5() */
+    /**
+     * 计算MD5
+     *
+     * @access public static
+     * @return String
+     */
+    public static function md5($char)
+    {
+        return bin2hex(md5($char, true));
+    }
+    /* }}} */
 
-	/* {{{ public static Integer rotate() */
-	/**
-	 * 循环算法
-	 *
-	 * @access public static
-	 * @return Integer
-	 */
-	public static function rotate($char)
-	{
-		$sign   = strlen($char);
-		for ($i = 0, $len = $sign; $i < $len; $i++) {
-			$sign   = ($sign << 4) ^ ($sign >> 28) ^ ord(substr($char, $i, 1));
-		}
+    /* {{{ public static Integer time33() */
+    /**
+     * TIME33算法
+     *
+     * @access public static
+     * @return Integer
+     */
+    public static function time33($char)
+    {
+        $sign	= 5381;
+        for ($i = 0, $len = strlen($char); $i < $len; $i++) {
+            $sign	= ($sign << 5 + $sign) + ord(substr($char, $i, 1));
+        }
 
-		return $sign % self::MAX_INT;
-	}
-	/* }}} */
+        return $sign % self::MAX_INT;
+    }
+    /* }}} */
 
-	/* {{{ public static Integer fnvla() */
-	public static function fnvla($char)
-	{
-		$prim	= 16777619;
-		$sign	= 0x811C9DC5;
-		for ($i = 0, $len = $sign; $i < $len; $i++) {
-			$sign	= ($sign ^ ord(substr($char, $i, 1))) * $prim;
-		}
+    /* {{{ public static Integer rotate() */
+    /**
+     * 循环算法
+     *
+     * @access public static
+     * @return Integer
+     */
+    public static function rotate($char)
+    {
+        $sign   = strlen($char);
+        for ($i = 0, $len = $sign; $i < $len; $i++) {
+            $sign   = ($sign << 4) ^ ($sign >> 28) ^ ord(substr($char, $i, 1));
+        }
 
-		$sign	+= $sign << 13;
-		$sign	^= $sign >> 7;
-		$sign	+= $sign << 3;
-		$sign	^= $sign >> 17;
-		$sign	+= $sign << 5;
+        return $sign % self::MAX_INT;
+    }
+    /* }}} */
 
-		return $sign % self::MAX_INT;
-	}
-	/* }}} */
+    /* {{{ public static Integer fnvla() */
+    /**
+     * FNV-la算法
+     *
+     * @access public static
+     * @return Integeg
+     */
+    public static function fnvla($char)
+    {
+        $prim	= 16777619;
+        $sign	= 0x811C9DC5;
+        for ($i = 0, $len = $sign; $i < $len; $i++) {
+            $sign	= ($sign ^ ord(substr($char, $i, 1))) * $prim;
+        }
+
+        $sign	+= $sign << 13;
+        $sign	^= $sign >> 7;
+        $sign	+= $sign << 3;
+        $sign	^= $sign >> 17;
+        $sign	+= $sign << 5;
+
+        return $sign % self::MAX_INT;
+    }
+    /* }}} */
+
+    /* {{{ public static Integer crc32() */
+    /**
+     * CRC32算法
+     *
+     * @access public static
+     * @return Integer
+     */
+    public static function crc32($char)
+    {
+        return crc32($char) % self::MAX_INT;
+    }
+    /* }}} */
 
 }
