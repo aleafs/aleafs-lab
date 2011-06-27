@@ -299,13 +299,9 @@ class Router
      */
     private function sign($char)
     {
-        $char   = sprintf('%s|%s', trim($char), $this->tbname);
-        $sign   = strlen($char);
-        for ($i = 0, $len = $sign; $i < $len; $i++) {
-            $sign   = ($sign << 4) ^ ($sign >> 28) ^ ord(substr($char, $i, 1));
-        }
-
-        return abs($sign) % 4294967296;
+        return abs(\Myfox\Lib\Hash::rotate(sprintf(
+            '%s|%s', trim($char), $this->tbname
+        )));
     }
     /* }}} */
 

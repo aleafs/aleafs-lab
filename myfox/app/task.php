@@ -82,14 +82,14 @@ abstract class Task
     }
     /* }}} */
 
-    /* {{{ public String getLastError() */
+    /* {{{ public String lastError() */
     /**
      * 获取错误描述
      *
      * @access public
      * @return String
      */
-    public function getLastError()
+    public function lastError()
     {
         return $this->lastError;
     }
