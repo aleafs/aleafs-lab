@@ -19,7 +19,7 @@ class DispatcherTest extends \Myfox\Lib\TestShell
 
         $this->inifile  = __DIR__ . '/ini/myfox.ini';
         $config = new Config($this->inifile);
-        $logurl = parse_url($config->get('log.url', ''));
+        $logurl = parse_url($config->get('log/default', ''));
 
         $this->prefix   = rtrim($config->get('url.prefix', ''), '/');
         $this->logfile  = $logurl['path'];
