@@ -45,22 +45,6 @@ class Dispatcher
     }
     /* }}} */
 
-    /* {{{ public static void setAutoLoad() */
-    /**
-     * 自动加载初始化
-     *
-     * @access public static
-     * @return void
-     */
-    public static function setAutoLoad()
-    {
-        require_once __DIR__ . '/../lib/autoload.php';
-
-        \Myfox\Lib\AutoLoad::init();
-        \Myfox\Lib\AutoLoad::register('myfox\\app',    __DIR__);
-    }
-    /* }}} */
-
     /* {{{ public void shutdownCallBack() */
     /**
      * 请求结束时的回调函数
@@ -88,21 +72,15 @@ class Dispatcher
      */
     private function __construct($ini)
     {
-        self::setAutoLoad();
-        \Myfox\Lib\Config::register('default', $ini);
-
+        Application::init($ini);
         $this->config   = \Myfox\Lib\Config::instance('default');
         $this->prefix   = rtrim($this->config->get('url.prefix', ''), '/');
 
-        $logurl = $this->config->get('log.url');
+        $logurl = $this->config->get('log/default');
         if (empty($logurl)) {
             $this->log  = new \Myfox\Lib\BlackHole();
         } else {
             $this->log  = new \Myfox\Lib\Log($logurl);
-        }
-
-        foreach ((array)$this->config->get('mysql') AS $name => $file) {
-            \Myfox\Lib\Mysql::register($name, $file);
         }
     }
     /* }}} */

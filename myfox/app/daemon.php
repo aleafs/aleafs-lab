@@ -26,22 +26,6 @@ class Daemon
 	}
 	/* }}} */
 
-	/* {{{ public static void setAutoLoad() */
-	/**
-	 * 自动加载初始化
-	 *
-	 * @access public static
-	 * @return void
-	 */
-	public static function setAutoLoad()
-	{
-		require_once __DIR__ . '/../lib/autoload.php';
-
-		\Myfox\Lib\AutoLoad::init();
-		\Myfox\Lib\AutoLoad::register('myfox\\app',    __DIR__);
-	}
-	/* }}} */
-
 	/* {{{ private void __construct() */
 	/**
 	 * 构造函数
@@ -50,7 +34,8 @@ class Daemon
 	 * @return void
 	 */
 	private function __construct($ini)
-	{
+    {
+        Application::init($ini);
 	}
 	/* }}} */
 
