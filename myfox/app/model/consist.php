@@ -65,11 +65,14 @@ class Consist
         }
 
         $query  = implode(' UNION ALL ', $querys);
-        $result = array();
+        $pools  = array();
         foreach ((array)$server AS $name) {
+            $pools[$name]   = Server::instance($name)->getlink()->async($query);
+        }
+
+        foreach ($pools AS $name => $id) {
             $db = Server::instance($name)->getlink();
-            // xxx: 异步
-            foreach ((array)$db->getAll($db->query($query)) AS $row) {
+            foreach ((array)$db->getAll($db->wait($id)) AS $row) {
                 $result[$name][$row['c0']]  = $row['c1'];
             }
         }
