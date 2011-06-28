@@ -17,6 +17,7 @@ class Server
     const TYPE_VIRTUAL  = 1;
 
     const STAT_ONLINE   = 0;
+    const STAT_PREPARE  = 1;
     const STAT_ISDOWN   = 9;
 
     /* }}} */

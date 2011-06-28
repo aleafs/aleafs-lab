@@ -17,6 +17,7 @@ abstract class Task
     const SUCC  = 0;
     const FAIL  = 1;
     const WAIT  = 2;
+    const IGNO  = 9;
 
     /* }}} */
 
