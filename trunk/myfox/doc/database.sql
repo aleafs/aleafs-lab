@@ -55,6 +55,36 @@ CREATE TABLE test_table_list (
 
 INSERT INTO test_table_list (addtime,modtime,loadtype,tabname,split_threshold,split_drift,route_method,route_fields) VALUES (NOW(),NOW(),1,'mirror',1000,0.2,0,''), (NOW(),NOW(),0,'numsplit',1000,0.4,1,'{thedate:date,cid:int}');
 
+DROP TABLE IF EXISTS test_table_column;
+CREATE TABLE test_table_column (
+	autokid int(10) unsigned not null auto_increment,
+	colseqn smallint(5) unsigned not null default 0,
+	tabname varchar(64) not null default '',
+	colname varchar(64) not null default '',
+	coltype varchar(15) not null default '',
+	coldesc varchar(100) not null default '',
+	sqlchar varchar(200) not null default '',
+	addtime datetime not null default '0000-00-00 00:00:00',
+	modtime datetime not null default '0000-00-00 00:00:00',
+	PRIMARY KEY pk_column_id (autokid),
+	UNIQUE KEY uk_column_name (tabname,colname),
+	KEY idx_column_order (tabname,colseqn)
+) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
+
+DROP TABLE IF EXISTS test_table_index;
+CREATE TABLE test_table_index (
+	autokid int(10) unsigned not null auto_increment,
+	idxseqn smallint(5) unsigned not null default 0,
+	tabname varchar(64) not null default '',
+	idxname varchar(64) not null default '',
+	idxchar varchar(200) not null default '',
+	addtime datetime not null default '0000-00-00 00:00:00',
+	modtime datetime not null default '0000-00-00 00:00:00',
+	PRIMARY KEY pk_index_id (autokid),
+	UNIQUE KEY uk_index_name (tabname,idxname),
+	KEY idx_index_order (tabname,idxseqn)
+) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
+
 -- 路由表
 DROP TABLE IF EXISTS test_route_info;
 CREATE TABLE IF NOT EXISTS test_route_info (
