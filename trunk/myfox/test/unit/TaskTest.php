@@ -47,7 +47,8 @@ class TaskTest extends \Myfox\Lib\TestShell
         $task	= new \Myfox\App\Task\Transfer(-1, array(
             'from'  => '1,2',
             'save'  => '3',
-            'path'  => '',
+            'table' => 'numsplit',
+            'path'  => 'numsplit_0.numsplit_563_2',
         ));
 
         $this->assertEquals(Task::WAIT, $task->execute());
