@@ -78,6 +78,7 @@ class Transfer extends \Myfox\App\Task
             return self::FAIL;
         }
 
+        $return = self::SUCC;
         foreach ($target AS $name) {
             if (Server::TYPE_VIRTUAL == self::$hosts[$name]['type']) {
                 continue;
@@ -86,14 +87,15 @@ class Transfer extends \Myfox\App\Task
             $option = array_intersect_key((array)self::dist($name), $source);
             foreach ((array)$option AS $from => $dist) {
                 if ($this->replicate($from, $name, $this->option('path'))) {
-                    return self::WAIT;
+                    $return = self::WAIT;
+                    continue 2;
                 }
             }
 
             return self::FAIL;
         }
 
-        return self::SUCC;
+        return $return;
     }
     /* }}} */
 
@@ -106,6 +108,8 @@ class Transfer extends \Myfox\App\Task
      */
     public function wait()
     {
+        // xxx: 校验一致性
+        // 改路由
         return self::SUCC;
     }
     /* }}} */
