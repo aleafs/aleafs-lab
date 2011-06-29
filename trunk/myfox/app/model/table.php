@@ -15,6 +15,8 @@ class Table
 
     private static $objects	= array();
 
+    private static $mysql   = null;
+
     /* }}} */
 
     /* {{{ 成员变量 */
@@ -22,6 +24,10 @@ class Table
     public $queries = 0;
 
     private $option	= null;
+
+    private $column = array();
+
+    private $index  = array();
 
     /* }}} */
 
@@ -67,17 +73,66 @@ class Table
     public function get($key, $default = null)
     {
         if (null === $this->option) {
-            $mysql  = \Myfox\Lib\Mysql::instance('default');
-            $info   = $mysql->getRow($mysql->query(sprintf(
+            $info   = self::$mysql->getRow(self::$mysql->query(sprintf(
                 "SELECT * FROM %stable_list WHERE tabname = '%s'",
-                $mysql->option('prefix', ''),
-                $mysql->escape($this->tbname)
+                self::$mysql->option('prefix', ''),
+                self::$mysql->escape($this->tbname)
             )));
             $this->option   = (array)$info;
             $this->queries++;
         }
         $key	= strtolower(trim($key));
         return isset($this->option[$key]) ? $this->option[$key] : $default;
+    }
+    /* }}} */
+
+    /* {{{ public Mixture column() */
+    /**
+     * 返回表字段
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function column($sql = false)
+    {
+        if (empty($this->column)) {
+            $column = self::$mysql->getAll(self::$mysql->query(sprintf(
+                "SELECT * FROM %stable_column WHERE tabname='%s' ORDER BY colseqn ASC, autokid ASC",
+                self::$mysql->option('prefix'), self::$mysql->escape($this->tbname)
+            )));
+            $this->queries++;
+            $this->column   = array();
+            foreach ((array)$column AS $row) {
+                $this->column[$row['colname']]  = $row;
+            }
+        }
+
+        return $this->column;
+    }
+    /* }}} */
+
+    /* {{{ public Mixture index() */
+    /**
+     * 返回表索引
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function index($sql = false)
+    {
+        if (empty($this->index)) {
+            $index  = self::$mysql->getAll(self::$mysql->query(sprintf(
+                "SELECT * FROM %stable_index WHERE tabname='%s' ORDER BY idxseqn ASC, autokid ASC",
+                self::$mysql->option('prefix'), self::$mysql->escape($this->tbname)
+            )));
+            $this->queries++;
+            $this->index    = array();
+            foreach ((array)$index AS $row) {
+                $this->index[$row['colname']]  = $row;
+            }
+        }
+
+        return $this->index;
     }
     /* }}} */
 
@@ -92,6 +147,10 @@ class Table
     {
         $this->tbname   = strtolower(trim($tbname));
         $this->option   = null;
+
+        if (empty(self::$mysql)) {
+            self::$mysql    = \Myfox\Lib\Mysql::instance('default');
+        }
     }
     /* }}} */
 
