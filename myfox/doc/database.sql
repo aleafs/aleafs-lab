@@ -62,6 +62,7 @@ CREATE TABLE test_table_column (
 	tabname varchar(64) not null default '',
 	colname varchar(64) not null default '',
 	coltype varchar(15) not null default '',
+	dfltval varchar(100),
 	coldesc varchar(100) not null default '',
 	sqlchar varchar(200) not null default '',
 	addtime datetime not null default '0000-00-00 00:00:00',
@@ -71,10 +72,18 @@ CREATE TABLE test_table_column (
 	KEY idx_column_order (tabname,colseqn)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
+INSERT INTO test_table_column (colseqn,tabname,colname,coltype,dfltval,coldesc,sqlchar,addtime,modtime) VALUES (1,'numsplit','thedate','date','0000-00-00','数据日期',"thedate date not null default '0000-00-00'", NOW(), NOW());
+INSERT INTO test_table_column (colseqn,tabname,colname,coltype,dfltval,coldesc,sqlchar,addtime,modtime) VALUES (2,'numsplit','cid','uint','0','类目ID',"cid int(10) unsigned not null default 0", NOW(), NOW());
+INSERT INTO test_table_column (colseqn,tabname,colname,coltype,dfltval,coldesc,sqlchar,addtime,modtime) VALUES (3,'numsplit','num1','uint','0','整数',"num1 int(10) unsigned not null default 0", NOW(), NOW());
+INSERT INTO test_table_column (colseqn,tabname,colname,coltype,dfltval,coldesc,sqlchar,addtime,modtime) VALUES (4,'numsplit','num2','float','0.00','浮点数',"num2 decimal(20,14) not null default 0.00", NOW(), NOW());
+INSERT INTO test_table_column (colseqn,tabname,colname,coltype,dfltval,coldesc,sqlchar,addtime,modtime) VALUES (5,'numsplit','char1','char','','字符串',"char1 varchar(32) not null default ''", NOW(), NOW());
+INSERT INTO test_table_column (colseqn,tabname,colname,coltype,dfltval,coldesc,sqlchar,addtime,modtime) VALUES (100,'numsplit','autokid','uint','0','自增列',"autokid int(10) unsigned not null auto_increment", NOW(), NOW());
+
 DROP TABLE IF EXISTS test_table_index;
 CREATE TABLE test_table_index (
 	autokid int(10) unsigned not null auto_increment,
 	idxseqn smallint(5) unsigned not null default 0,
+	idxtype varchar(32) not null default '',
 	tabname varchar(64) not null default '',
 	idxname varchar(64) not null default '',
 	idxchar varchar(200) not null default '',
@@ -84,6 +93,7 @@ CREATE TABLE test_table_index (
 	UNIQUE KEY uk_index_name (tabname,idxname),
 	KEY idx_index_order (tabname,idxseqn)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
+INSERT INTO test_table_index (idxseqn,idxtype,tabname,idxname,idxchar,addtime,modtime) VALUES (1, '', 'numsplit','idx_split_cid','cid', NOW(), NOW());
 
 -- 路由表
 DROP TABLE IF EXISTS test_route_info;
@@ -100,8 +110,7 @@ CREATE TABLE IF NOT EXISTS test_route_info (
 	split_info text,
 	split_temp text,
 	PRIMARY KEY pk_route_id (autokid),
-	KEY idx_route_sign (idxsign, useflag),
-	KEY idx_route_date (hittime, useflag, isarchive)
+	KEY idx_route_sign (idxsign, useflag)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
 -- 系统状态表
