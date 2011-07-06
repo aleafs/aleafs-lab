@@ -19,11 +19,11 @@ class RouterTest extends \Myfox\Lib\TestShell
         \Myfox\Lib\Mysql::register('default', __DIR__ . '/ini/mysql.ini');
         self::$mysql    = \Myfox\Lib\Mysql::instance('default');
         self::$mysql->query(sprintf(
-            "DELETE FROM %stable_list WHERE tabname = 'i am not exists'",
+            "DELETE FROM %stable_list WHERE table_name = 'i am not exists'",
             self::$mysql->option('prefix')
         ));
         self::$mysql->query(sprintf(
-            "DELETE FROM %sroute_info WHERE tabname IN ('mirror', 'numsplit')",
+            "DELETE FROM %sroute_info WHERE table_name IN ('mirror', 'numsplit')",
             self::$mysql->option('prefix')
         ));
         self::$mysql->query(sprintf(
@@ -68,7 +68,7 @@ class RouterTest extends \Myfox\Lib\TestShell
                 Router::set('mirror', array(array('count' => 1300)))
             );
             if ($key == 0) {
-                $this->assertEquals(null, Router::get('mirror'));
+                $this->assertEquals(array(), Router::get('mirror'));
             }
         }
         $this->assertEquals(0, Setting::get('last_assign_node'));
@@ -150,7 +150,7 @@ class RouterTest extends \Myfox\Lib\TestShell
                 ),
             )
         ));
-        $this->assertEquals(null, Router::get('numsplit', array(
+        $this->assertEquals(array(), Router::get('numsplit', array(
             'thedate'   => '2011-6-10',
             'cid'       => 1,
             'blablala'  => 2,

@@ -97,7 +97,7 @@ INSERT INTO test_table_index (idxseqn,idxtype,tabname,idxname,idxchar,addtime,mo
 
 -- 路由表
 DROP TABLE IF EXISTS test_route_info;
-CREATE TABLE IF NOT EXISTS test_route_info (
+CREATE TABLE test_route_info (
 	autokid int(10) unsigned not null auto_increment,
 	idxsign int(10) unsigned not null default 0,
 	isarchive tinyint(2) unsigned not null default 0,
@@ -105,13 +105,13 @@ CREATE TABLE IF NOT EXISTS test_route_info (
 	addtime int(10) unsigned not null default 0,
 	modtime int(10) unsigned not null default 0,
 	hittime int(10) unsigned not null default 0,
-	tabname varchar(64) not null default '',
-	routes varchar(1024) not null default '',
-	split_info text,
-	split_temp text,
+	table_name varchar(64) not null default '',
+	nodes_list varchar(64) not null default '',
+	real_table varchar(128) not null default '',
+	route_text varchar(1024) not null default '',
 	PRIMARY KEY pk_route_id (autokid),
 	KEY idx_route_sign (idxsign, useflag)
-) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
+) ENGINE = InnoDB DEFAULT CHARSET=UTF8;
 
 -- 系统状态表
 DROP TABLE IF EXISTS test_settings;
