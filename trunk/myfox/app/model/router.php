@@ -67,16 +67,7 @@ class Router
     public static function get($tbname, $field = array(), $touch = false)
     {
         $table  = self::instance($tbname);
-        $routes = $table->load($table->filter((array)$field), true, $touch);
-        if (empty($routes)) {
-            return null;
-        }
-
-        return array(
-            'seqid' => sprintf('%s_%d', $routes['tabid'], $routes['seqid']),
-            'mtime' => $routes['mtime'],
-            'route' => self::parse($routes['route']),
-        );
+        return $table->load($table->filter((array)$field), true, $touch);
     }
     /* }}} */
 
@@ -123,57 +114,6 @@ class Router
         }
 
         return self::$objects[$tbname];
-    }
-    /* }}} */
-
-    /* {{{ private static Mixture parse() */
-    /**
-     * 路由结果解析
-     *
-     * @access private static
-     * @param  String $char
-     * @return Mixture
-     */
-    private static function parse($char)
-    {
-        if (empty($char)) {
-            return null;
-        }
-
-        $route	= array();
-        foreach (explode(';', trim($char)) AS $ln) {
-            $ln = explode(':', trim($ln, '[]'));
-            if (empty($ln[1])) {
-                continue;
-            }
-            $route[]	= array(
-                'node'	=> $ln[0],
-                'name'	=> $ln[1],
-            );
-        }
-
-        return $route;
-    }
-    /* }}} */
-
-    /* {{{ private static String build() */
-    /**
-     * 组织路由为字符串
-     *
-     * @access private static
-     * @return String
-     */
-    private static function build($route)
-    {
-        $rt = array();
-        foreach ((array)$route AS $row) {
-            if (empty($row['node']) || empty($row['table'])) {
-                continue;
-            }
-            $rt[]   = sprintf('[%s:%s]', $row['node'], $row['table']);
-        }
-
-        return implode(';', $rt);
     }
     /* }}} */
 
@@ -254,7 +194,7 @@ class Router
     private function load($char, $inuse = true, $touch = false)
     {
         $query  = sprintf(
-            "SELECT autokid,modtime,split_info FROM %s%%s WHERE tabname='%s' AND routes='%s' AND idxsign=%u",
+            "SELECT autokid,modtime,nodes_list,real_table FROM %s%%s WHERE table_name='%s' AND route_text='%s' AND idxsign=%u",
             self::$mysql->option('prefix', ''), self::$mysql->escape($this->tbname),
             self::$mysql->escape($char), $this->sign($char)
         );
@@ -266,23 +206,24 @@ class Router
             );
         }
 
+        $routes = array();
         foreach (array('route_info') AS $table) {
-            $rt = self::$mysql->getRow(self::$mysql->query(sprintf($query, $table)));
-            if (!empty($rt)) {
+            foreach ((array)self::$mysql->getAll(self::$mysql->query(sprintf($query, $table))) AS $rt) {
                 if ($touch) {
                     $this->flush[$table][]  = (int)$rt['autokid'];
                 }
 
-                return array(
+                $routes[]   = array(
                     'tabid' => $table,
                     'seqid' => (int)$rt['autokid'],
                     'mtime' => (int)$rt['modtime'],
-                    'route' => $rt['split_info'],
+                    'node'  => trim($rt['nodes_list'], '{}'),
+                    'name'  => trim($rt['real_table']),
                 );
             }
         }
 
-        return null;
+        return $routes;
     }
     /* }}} */
 
@@ -410,28 +351,35 @@ class Router
             'IF(cfgvalue + 0 > %d, cfgvalue, %d)', $cursor, $cursor
         ), $this->tbname, false);
 
-        foreach ($bucket AS $key => $val) {
-            $exists = $this->load($key, false);
-            $value  = self::$mysql->escape(self::build($val));
-            if (empty($exists)) {
+        //self::$mysql->begin();
+        $insert = sprintf(
+            "INSERT INTO %sroute_info (idxsign,isarchive,useflag,addtime,table_name,route_text,nodes_list,real_table)",
+            self::$mysql->option('prefix')
+        );
+        $time   = time();
+        foreach ($bucket AS $key => $slice) {
+            $sign   = $this->sign($key);
+            $key    = self::$mysql->escape($key);
+            foreach ($slice AS $rt) {
                 $query  = sprintf(
-                    "INSERT INTO %sroute_info (idxsign,isarchive,useflag,addtime,tabname,routes,split_temp)",
-                    self::$mysql->option('prefix')
-                );
-                $query  = sprintf(
-                    "%s VALUES (%d,0,%d,'%s','%s','%s','%s')",
-                    $query, $this->sign($key), self::FLAG_PRE_IMPORT, time(),
-                    $this->tbname, self::$mysql->escape($key), $value
-                );
-            } else {
-                $query  = sprintf(
-                    "UPDATE %s%s SET useflag=%d,split_temp='%s' WHERE autokid = %d",
-                    self::$mysql->option('prefix'), $exists['tabid'], self::FLAG_PRE_RESHIP,
-                    $value, $exists['seqid']
+                    "%s VALUES (%d,0,%d,%d,'%s','%s','{%s}','%s')",
+                    $insert, $sign, self::FLAG_PRE_IMPORT, $time, $this->tbname, $key, $rt['node'], $rt['table']
                 );
             }
-            self::$mysql->query($query);
         }
+
+        return $bucket;
+        $exists = $this->load($key, false);
+        $value  = self::$mysql->escape(self::build($val));
+        if (empty($exists)) {
+        } else {
+            $query  = sprintf(
+                "UPDATE %s%s SET useflag=%d,split_temp='%s' WHERE autokid = %d",
+                self::$mysql->option('prefix'), $exists['tabid'], self::FLAG_PRE_RESHIP,
+                $value, $exists['seqid']
+            );
+        }
+        self::$mysql->query($query);
 
         return $bucket;
     }
