@@ -106,8 +106,8 @@ CREATE TABLE test_route_info (
 	modtime int(10) unsigned not null default 0,
 	hittime int(10) unsigned not null default 0,
 	table_name varchar(64) not null default '',
-	nodes_list varchar(64) not null default '',
 	real_table varchar(128) not null default '',
+	nodes_list varchar(1024) not null default '',
 	route_text varchar(1024) not null default '',
 	PRIMARY KEY pk_route_id (autokid),
 	KEY idx_route_sign (idxsign, useflag)
