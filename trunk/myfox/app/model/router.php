@@ -139,6 +139,16 @@ class Router
     }
     /* }}} */
 
+    /* {{{ private static String  table() */
+    private static function table($route)
+    {
+        return sprintf(
+            '%sroute_info_%s',
+            self::$mysql->option('prefix'), substr(dechex($route), 0, 1)
+        );
+    }
+    /* }}} */
+
     /* {{{ private void __construct() */
     /**
      * 构造函数
@@ -193,10 +203,11 @@ class Router
      */
     private function load($char, $inuse = true, $touch = false)
     {
+        $sign   = $this->sign($char);
+        $table  = self::table($sign);
         $query  = sprintf(
-            "SELECT autokid,modtime,nodes_list,real_table FROM %s%%s WHERE table_name='%s' AND route_text='%s' AND idxsign=%u",
-            self::$mysql->option('prefix', ''), self::$mysql->escape($this->tbname),
-            self::$mysql->escape($char), $this->sign($char)
+            "SELECT autokid,modtime,nodes_list,real_table FROM %s WHERE table_name='%s' AND route_text='%s' AND idxsign=%u",
+            $table, self::$mysql->escape($this->tbname), self::$mysql->escape($char), $sign
         );
 
         if (false !== $inuse) {
@@ -207,20 +218,18 @@ class Router
         }
 
         $routes = array();
-        foreach (array('route_info') AS $table) {
-            foreach ((array)self::$mysql->getAll(self::$mysql->query(sprintf($query, $table))) AS $rt) {
-                if ($touch) {
-                    $this->flush[$table][]  = (int)$rt['autokid'];
-                }
-
-                $routes[]   = array(
-                    'tabid' => $table,
-                    'seqid' => (int)$rt['autokid'],
-                    'mtime' => (int)$rt['modtime'],
-                    'node'  => trim($rt['nodes_list'], '{}'),
-                    'name'  => trim($rt['real_table']),
-                );
+        foreach ((array)self::$mysql->getAll(self::$mysql->query($query)) AS $rt) {
+            if ($touch) {
+                $this->flush[$table][]  = (int)$rt['autokid'];
             }
+
+            $routes[]   = array(
+                'tabid' => $table,
+                'seqid' => (int)$rt['autokid'],
+                'mtime' => (int)$rt['modtime'],
+                'node'  => trim($rt['nodes_list'], '{}'),
+                'name'  => trim($rt['real_table']),
+            );
         }
 
         return $routes;
