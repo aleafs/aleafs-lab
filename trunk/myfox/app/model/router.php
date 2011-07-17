@@ -87,6 +87,18 @@ class Router
     }
     /* }}} */
 
+    /* {{{ public static Boolean effect() */
+    /**
+     * 装完数据，路由生效
+     *
+     * @access public static
+     * @return Boolean true or false
+     */
+    public static function effect($tbname, $field = array(), $bucket)
+    {
+    }
+    /* }}} */
+
     /* {{{ public static void clean() */
     /**
      * 清理实例对象 
@@ -142,6 +154,7 @@ class Router
     /* {{{ private static String  table() */
     private static function table($route)
     {
+        return sprintf('%sroute_info', self::$mysql->option('prefix'));
         return sprintf(
             '%sroute_info_%s',
             self::$mysql->option('prefix'), substr(dechex($route), 0, 1)
@@ -186,9 +199,8 @@ class Router
                 continue;
             }
             self::$mysql->query(sprintf(
-                'UPDATE %s%s SET hittime = %d WHERE autokid IN (%s)',
-                self::$mysql->option('prefix'), $table,
-                time(), implode(',', $ids)
+                'UPDATE %s SET hittime = %d WHERE autokid IN (%s)',
+                $table, time(), implode(',', $ids)
             ));
         }
     }
@@ -355,40 +367,35 @@ class Router
             }
             $cursor++;
         }
+
         Setting::set('last_assign_node', $last % $counts);
         Setting::set('table_route_count', sprintf(
             'IF(cfgvalue + 0 > %d, cfgvalue, %d)', $cursor, $cursor
         ), $this->tbname, false);
 
-        //self::$mysql->begin();
-        $insert = sprintf(
-            "INSERT INTO %sroute_info (idxsign,isarchive,useflag,addtime,table_name,route_text,nodes_list,real_table)",
-            self::$mysql->option('prefix')
-        );
         $time   = time();
         foreach ($bucket AS $key => $slice) {
             $sign   = $this->sign($key);
             $key    = self::$mysql->escape($key);
+            $values = array();
             foreach ($slice AS $rt) {
-                $query  = sprintf(
-                    "%s VALUES (%d,0,%d,%d,'%s','%s','{%s}','%s')",
-                    $insert, $sign, self::FLAG_PRE_IMPORT, $time, $this->tbname, $key, $rt['node'], $rt['table']
+                $values[]   = sprintf(
+                    "(%d,0,%d,%d,'%s','%s','{%s}','%s')",
+                    $sign, self::FLAG_PRE_IMPORT, $time, $this->tbname, $key, $rt['node'], $rt['table']
                 );
             }
-        }
 
-        return $bucket;
-        $exists = $this->load($key, false);
-        $value  = self::$mysql->escape(self::build($val));
-        if (empty($exists)) {
-        } else {
-            $query  = sprintf(
-                "UPDATE %s%s SET useflag=%d,split_temp='%s' WHERE autokid = %d",
-                self::$mysql->option('prefix'), $exists['tabid'], self::FLAG_PRE_RESHIP,
-                $value, $exists['seqid']
-            );
+            // xxx: 事务保证
+            self::$mysql->query(sprintf(
+                "UPDATE %s SET useflag=IF(useflag=%d,%d,%d) WHERE idxsign=%u AND table_name='%s' AND route_text='%s'",
+                self::table($sign), self::FLAG_NORMAL_USE, self::FLAG_PRE_RESHIP, self::FLAG_IS_DELETED,
+                $sign, $this->tbname, $key
+            ));
+            self::$mysql->query(sprintf(
+                'INSERT INTO %s (idxsign,isarchive,useflag,addtime,table_name,route_text,nodes_list,real_table) VALUES %s',
+                self::table($sign), implode(',', $values)
+            ));
         }
-        self::$mysql->query($query);
 
         return $bucket;
     }
