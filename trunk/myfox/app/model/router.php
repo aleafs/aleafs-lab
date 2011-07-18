@@ -66,7 +66,7 @@ class Router
      */
     public static function get($tbname, $field = array(), $touch = false)
     {
-        $table  = self::instance($tbname);
+        $table  = self::table($tbname);
         return $table->load($table->filter((array)$field), true, $touch);
     }
     /* }}} */
@@ -83,7 +83,7 @@ class Router
      */
     public static function set($tbname, $detail = array())
     {
-        return self::instance($tbname)->insert((array)$detail);
+        return self::table($tbname)->insert((array)$detail);
     }
     /* }}} */
 
@@ -96,7 +96,7 @@ class Router
      */
     public static function effect($tbname, $field = array(), $bucket)
     {
-        $table  = self::instance($tbname);
+        $table  = self::table($tbname);
         $where  = $table->where($field);
 
         return (bool)self::$mysql->query(sprintf(
@@ -140,14 +140,14 @@ class Router
     }
     /* }}} */
 
-    /* {{{ private static Object instance() */
+    /* {{{ public static Object table() */
     /**
      * 获取对象实例
      *
-     * @access private static
+     * @access public static
      * @return Object
      */
-    private static function instance($tbname)
+    public static function table($tbname)
     {
         if (empty(self::$objects[$tbname])) {
             self::$objects[$tbname] = new self($tbname);
@@ -179,8 +179,8 @@ class Router
     }
     /* }}} */
 
-    /* {{{ private static String  table() */
-    private static function table($route)
+    /* {{{ private static String  hello() */
+    private static function hello($route)
     {
         return sprintf('%sroute_info', self::$mysql->option('prefix'));
         return sprintf(
@@ -222,15 +222,37 @@ class Router
      */
     public function __destruct()
     {
+        $time   = time();
         foreach ($this->flush AS $table => $ids) {
             if (empty($ids)) {
                 continue;
             }
             self::$mysql->query(sprintf(
                 'UPDATE %s SET hittime = %d WHERE autokid IN (%s)',
-                $table, time(), implode(',', $ids)
+                $table, $time, implode(',', $ids)
             ));
         }
+    }
+    /* }}} */
+
+    /* {{{ public Mixture where() */
+    /**
+     * 根据路由字段构造WHERE条件
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function where($field = null)
+    {
+        $route  = $this->filter((array)$field);
+        $sign   = $this->sign($route);
+        return array(
+            'table' => self::hello($sign),
+            'where' => sprintf(
+                "idxsign=%u AND table_name='%s' AND route_text='%s'",
+                $sign, self::$mysql->escape($this->tbname), self::$mysql->escape($route)
+            )
+        );
     }
     /* }}} */
 
@@ -244,7 +266,7 @@ class Router
     private function load($char, $inuse = true, $touch = false)
     {
         $sign   = $this->sign($char);
-        $table  = self::table($sign);
+        $table  = self::hello($sign);
         $query  = sprintf(
             "SELECT autokid,modtime,nodes_list,real_table FROM %s WHERE table_name='%s' AND route_text='%s' AND idxsign=%u",
             $table, self::$mysql->escape($this->tbname), self::$mysql->escape($char), $sign
@@ -416,37 +438,16 @@ class Router
             // xxx: 事务保证
             self::$mysql->query(sprintf(
                 "UPDATE %s SET useflag=IF(useflag=%d,%d,%d) WHERE idxsign=%u AND table_name='%s' AND route_text='%s'",
-                self::table($sign), self::FLAG_NORMAL_USE, self::FLAG_PRE_RESHIP, self::FLAG_IS_DELETED,
+                self::hello($sign), self::FLAG_NORMAL_USE, self::FLAG_PRE_RESHIP, self::FLAG_IS_DELETED,
                 $sign, $this->tbname, $key
             ));
             self::$mysql->query(sprintf(
                 'INSERT INTO %s (idxsign,isarchive,useflag,addtime,table_name,route_text,nodes_list,real_table) VALUES %s',
-                self::table($sign), implode(',', $values)
+                self::hello($sign), implode(',', $values)
             ));
         }
 
         return $bucket;
-    }
-    /* }}} */
-
-    /* {{{ private Mixture where() */
-    /**
-     * 根据路由字段构造WHERE条件
-     *
-     * @access private
-     * @return Mixture
-     */
-    private function where($field = null)
-    {
-        $route  = $this->filter((array)$field);
-        $sign   = $this->sign($route);
-        return array(
-            'table' => self::table($sign),
-            'where' => sprintf(
-                "idxsign=%u AND table_name='%s' AND route_text='%s'",
-                $sign, self::$mysql->escape($this->tbname), self::$mysql->escape($route)
-            )
-        );
     }
     /* }}} */
 
