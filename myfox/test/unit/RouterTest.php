@@ -19,17 +19,20 @@ class RouterTest extends \Myfox\Lib\TestShell
         \Myfox\Lib\Mysql::register('default', __DIR__ . '/ini/mysql.ini');
         self::$mysql    = \Myfox\Lib\Mysql::instance('default');
         self::$mysql->query(sprintf(
-            "DELETE FROM %stable_list WHERE table_name = 'i am not exists'",
-            self::$mysql->option('prefix')
-        ));
-        self::$mysql->query(sprintf(
-            "DELETE FROM %sroute_info WHERE table_name IN ('mirror', 'numsplit')",
+            "DELETE FROM %stable_list WHERE tabname = 'i am not exists'",
             self::$mysql->option('prefix')
         ));
         self::$mysql->query(sprintf(
             "DELETE FROM %ssettings WHERE cfgname IN ('table_route_count', 'table_real_count')",
             self::$mysql->option('prefix')
         ));
+
+        $query  = sprintf("SHOW TABLES LIKE '%sroute_info%%'", self::$mysql->option('prefix'));
+        foreach (self::$mysql->getAll(self::$mysql->query($query)) AS $table) {
+            self::$mysql->query(sprintf(
+                "DELETE FROM %s WHERE table_name IN ('mirror', 'numsplit')", reset($table)
+            ));
+        }
 
         Setting::set('last_assign_node', 0);
     }
@@ -75,20 +78,35 @@ class RouterTest extends \Myfox\Lib\TestShell
         $this->assertEquals(4, Setting::get('table_route_count', 'mirror'));
         $this->assertEquals(0, (int)Setting::get('table_real_count', 'mirror'));
 
-        $this->assertEquals(false, self::$mysql->getOne(self::$mysql->query(sprintf(
-            'SELECT hittime FROM %sroute_info WHERE tabname=\'mirror\'',
-            self::$mysql->option('prefix')
-        ))));
+        $where  = Router::table('mirror')->where(null);
+        $route  = self::$mysql->getRow(self::$mysql->query(sprintf(
+            'SELECT real_table, hittime FROM %s WHERE table_name=\'mirror\' AND useflag=%d ORDER BY autokid DESC LIMIT 1',
+            $where['table'], Router::FLAG_PRE_IMPORT
+        )));
+        $this->assertEquals(0, $route['hittime']);
+        $real_table = $route['real_table'];
 
+        // xxx: 模拟数据装完
+        Router::effect('mirror', null, $route['real_table']);
+        $this->assertEquals(array(), Router::get('mirror'));
+
+        // xxx: 模拟路由生效
         Router::flush();
-        return;
-        // xxx: 刷新hittime
+
         $route  = Router::get('mirror', null, true);
+        $this->assertEquals(1, count($route));
+
+        $route  = reset($route);
+        $this->assertEquals(0, $route['mtime']);
+        $this->assertEquals('1,2,3', $route['node']);
+        $this->assertEquals($real_table, $route['name']);
+
         Router::removeAllCache();
-        $this->assertEquals(intval(time() / 2), intval(self::$mysql->getOne(self::$mysql->query(sprintf(
-            'SELECT hittime FROM %sroute_info WHERE tabname=\'mirror\'',
-            self::$mysql->option('prefix')
-        ))) / 2));
+        $query  = sprintf(
+            'SELECT hittime FROM %s WHERE %s AND useflag=%d ORDER BY autokid DESC LIMIT 1',
+            $where['table'], $where['where'], Router::FLAG_NORMAL_USE
+        );
+        $this->assertEquals(intval(time() / 2), intval(self::$mysql->getOne(self::$mysql->query($query)) / 2));
     }
     /* }}} */
 
