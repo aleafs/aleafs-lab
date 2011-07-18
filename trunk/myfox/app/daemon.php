@@ -14,29 +14,67 @@ namespace Myfox\App;
 class Daemon
 {
 
-	/* {{{ public static void run() */
-	/**
-	 * 进入工作模式
-	 *
-	 * @access public static
-	 * @return void
-	 */
-	public static function run($ini, $class, $args = null)
-	{
-	}
-	/* }}} */
+    /* {{{ 静态变量 */
 
-	/* {{{ private void __construct() */
-	/**
-	 * 构造函数
-	 *
-	 * @access private
-	 * @return void
-	 */
-	private function __construct($ini)
+    private static $scores = array();      /**<    记分板 */
+
+    /* }}} */
+
+    /* {{{ 成员变量 */
+
+    private $master = true;
+
+    private $worker = null;
+
+    private $isrun  = false;
+
+    /* }}} */
+
+    /* {{{ public static void run() */
+    /**
+     * 进入工作模式
+     *
+     * @access public static
+     * @return void
+     */
+    public static function run($ini, $class, $args = null)
     {
+        $master = new self($ini, $class);
+        $master->dispatch();
+    }
+    /* }}} */
+
+    /* {{{ private void __construct() */
+    /**
+     * 构造函数
+     *
+     * @access private
+     * @return void
+     */
+    private function __construct($ini, $class)
+    {
+        if (!extension_loaded('pcntl')) {
+            return false;
+        }
+
         Application::init($ini);
-	}
-	/* }}} */
+        $this->worker   = null;
+    }
+    /* }}} */
+
+    /* {{{ private void dispatch() */
+    /**
+     * 任务分发
+     *
+     * @access private
+     * @return void
+     */
+    private function dispatch()
+    {
+        set_time_limit(0);
+        while ($this->isrun) {
+        }
+    }
+    /* }}} */
 
 }
