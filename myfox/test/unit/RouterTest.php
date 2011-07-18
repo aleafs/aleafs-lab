@@ -75,15 +75,16 @@ class RouterTest extends \Myfox\Lib\TestShell
         $this->assertEquals(4, Setting::get('table_route_count', 'mirror'));
         $this->assertEquals(0, (int)Setting::get('table_real_count', 'mirror'));
 
-        return;
-        $this->assertEquals(0, self::$mysql->getOne(self::$mysql->query(sprintf(
+        $this->assertEquals(false, self::$mysql->getOne(self::$mysql->query(sprintf(
             'SELECT hittime FROM %sroute_info WHERE tabname=\'mirror\'',
             self::$mysql->option('prefix')
         ))));
 
+        Router::flush();
+        return;
         // xxx: 刷新hittime
         $route  = Router::get('mirror', null, true);
-        Router::clean();
+        Router::removeAllCache();
         $this->assertEquals(intval(time() / 2), intval(self::$mysql->getOne(self::$mysql->query(sprintf(
             'SELECT hittime FROM %sroute_info WHERE tabname=\'mirror\'',
             self::$mysql->option('prefix')

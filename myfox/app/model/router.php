@@ -96,17 +96,45 @@ class Router
      */
     public static function effect($tbname, $field = array(), $bucket)
     {
+        $table  = self::instance($tbname);
+        $where  = $table->where($field);
+
+        return (bool)self::$mysql->query(sprintf(
+            "UPDATE %s SET useflag = %d WHERE %s AND useflag=%d AND real_table='%s'",
+            $where['table'], self::FLAG_IMPORT_END, $where['where'], self::FLAG_PRE_IMPORT,
+            self::$mysql->escape(trim($bucket))
+        ));
     }
     /* }}} */
 
-    /* {{{ public static void clean() */
+    /* {{{ public static Boolean flush() */
+    /**
+     * 刷新路由
+     *
+     * @access public static
+     * @return Boolean true or false
+     */
+    public static function flush()
+    {
+        $query  = sprintf("SHOW TABLES LIKE '%sroute_info%%'", self::$mysql->option('prefix'));
+        foreach (self::$mysql->getAll(self::$mysql->query($query)) AS $table) {
+            self::$mysql->query(sprintf(
+                'UPDATE %s SET useflag=IF(useflag=%d,%d,%d) WHERE useflag IN (%d,%d)',
+                reset($table), self::FLAG_PRE_RESHIP, self::FLAG_IS_DELETED, self::FLAG_NORMAL_USE,
+                self::FLAG_PRE_RESHIP, self::FLAG_IMPORT_END
+            ));
+        }
+    }
+    /* }}} */
+
+    /* {{{ public static void removeAllCache() */
     /**
      * 清理实例对象 
      *
      * @access public static
      * @return void
      */
-    public static function clean()
+    public static function removeAllCache()
     {
         self::$objects  = array();
     }
@@ -398,6 +426,27 @@ class Router
         }
 
         return $bucket;
+    }
+    /* }}} */
+
+    /* {{{ private Mixture where() */
+    /**
+     * 根据路由字段构造WHERE条件
+     *
+     * @access private
+     * @return Mixture
+     */
+    private function where($field = null)
+    {
+        $route  = $this->filter((array)$field);
+        $sign   = $this->sign($route);
+        return array(
+            'table' => self::table($sign),
+            'where' => sprintf(
+                "idxsign=%u AND table_name='%s' AND route_text='%s'",
+                $sign, self::$mysql->escape($this->tbname), self::$mysql->escape($route)
+            )
+        );
     }
     /* }}} */
 

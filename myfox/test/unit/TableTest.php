@@ -64,7 +64,6 @@ class TableTest extends \Myfox\Lib\TestShell
     public function test_should_table_column_works_fine()
     {
         $table  = Table::instance('numsplit');
-        print_r($table->column());
     }
 
 }
