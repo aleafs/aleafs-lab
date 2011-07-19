@@ -86,7 +86,7 @@ CREATE TABLE test_table_index (
 	idxtype varchar(32) not null default '',
 	tabname varchar(64) not null default '',
 	idxname varchar(64) not null default '',
-	idxchar varchar(200) not null default '',
+	idxchar varchar(1000) not null default '',
 	addtime datetime not null default '0000-00-00 00:00:00',
 	modtime datetime not null default '0000-00-00 00:00:00',
 	PRIMARY KEY pk_index_id (autokid),
@@ -94,6 +94,7 @@ CREATE TABLE test_table_index (
 	KEY idx_index_order (tabname,idxseqn)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 INSERT INTO test_table_index (idxseqn,idxtype,tabname,idxname,idxchar,addtime,modtime) VALUES (1, '', 'numsplit','idx_split_cid','cid', NOW(), NOW());
+INSERT INTO test_table_index (idxseqn,idxtype,tabname,idxname,idxchar,addtime,modtime) VALUES (2, 'PRIMARY', 'numsplit','pk_split_id','autokid', NOW(), NOW());
 
 -- 路由表
 DROP TABLE IF EXISTS test_route_info;

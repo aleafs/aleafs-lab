@@ -61,9 +61,84 @@ class TableTest extends \Myfox\Lib\TestShell
     }
     /* }}} */
 
+    /* {{{ public void test_should_table_column_works_fine() */
     public function test_should_table_column_works_fine()
     {
-        $table  = Table::instance('numsplit');
+        Table::instance('numsplit')->queries    = 0;
+        $column = array();
+        foreach ((array)Table::instance('numsplit')->column() AS $key => $opt) {
+            $column[$key]   = array(
+                'type'      => $opt['coltype'],
+                'default'   => $opt['dfltval'],
+                'sqlchar'   => $opt['sqlchar'],
+            );
+        }
+
+        $expect = array(
+            'thedate'   => array(
+                'type'      => 'date',
+                'default'   => '0000-00-00',
+                'sqlchar'   => "thedate date not null default '0000-00-00'",
+            ),
+            'cid'       => array(
+                'type'      => 'uint',
+                'default'   => '0',
+                'sqlchar'   => 'cid int(10) unsigned not null default 0',
+            ),
+            'num1'       => array(
+                'type'      => 'uint',
+                'default'   => '0',
+                'sqlchar'   => 'num1 int(10) unsigned not null default 0',
+            ),
+            'num2'       => array(
+                'type'      => 'float',
+                'default'   => '0.00',
+                'sqlchar'   => 'num2 decimal(20,14) not null default 0.00',
+            ),
+            'char1'       => array(
+                'type'      => 'char',
+                'default'   => '',
+                'sqlchar'   => "char1 varchar(32) not null default ''",
+            ),
+            'autokid'       => array(
+                'type'      => 'uint',
+                'default'   => '0',
+                'sqlchar'   => "autokid int(10) unsigned not null auto_increment",
+            ),
+        );
+
+        foreach ($expect AS $key => $opt) {
+            $this->assertEquals($opt, $column[$key]);
+        }
+        $this->assertEquals(1, Table::instance('numsplit')->queries);
+
+        Table::instance('numsplit')->column();
+        $this->assertEquals(1, Table::instance('numsplit')->queries);
     }
+    /* }}} */
+
+    /* {{{ public void test_should_table_index_works_fine() */
+    public function test_should_table_index_works_fine()
+    {
+        $index  = array();
+        foreach ((array)Table::instance('numsplit')->index() AS $key => $opt) {
+            $index[$key]    = array(
+                'type'  => $opt['idxtype'],
+                'char'  => $opt['idxchar'],
+            );
+        }
+
+        $this->assertEquals(array(
+            'idx_split_cid' => array(
+                'type'  => '',
+                'char'  => 'cid',
+            ),
+            'pk_split_id'   => array(
+                'type'  => 'PRIMARY',
+                'char'  => 'autokid',
+            ),
+        ), $index);
+    }
+    /* }}} */
 
 }
