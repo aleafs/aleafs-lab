@@ -48,6 +48,43 @@ class Daemon
     }
     /* }}} */
 
+    /* {{{ public void sigaction() */
+    /**
+     * 信号处理
+     *
+     * @access public
+     * @return void
+     */
+    public function sigaction($signal)
+    {
+        $signal = (int)$signal;
+        if (empty(self::$signal[$signal])) {
+            posix_kill(posix_getpid(), SIGTERM);
+            return;
+        }
+
+        switch ($signal) {
+        case SIGTERM:
+            $this->isrun    = false;
+            $this->cleanup();
+
+            while (($pid = pcntl_fork()) < 0) {
+                usleep(100000);
+            }
+
+            if (!empty($pid)) {
+                exit();
+            }
+
+            posix_setsid();
+            break;
+
+        default:
+            break;
+        }
+    }
+    /* }}} */
+
     /* {{{ private void __construct() */
     /**
      * 构造函数
@@ -79,42 +116,22 @@ class Daemon
         foreach (self::$signal AS $sig => $txt) {
             pcntl_signal($sig, array(&$this, 'sigaction'));
         }
+        pcntl_signal_dispatch();
 
         while ($this->isrun) {
         }
     }
     /* }}} */
 
-    /* {{{ public void sigaction() */
+    /* {{{ private void cleanup() */
     /**
-     * 信号处理
+     * 程序退出清理
      *
-     * @access public
+     * @access private
      * @return void
      */
-    public function sigaction($sig)
+    private function cleanup()
     {
-        $sig    = (int)$sig;
-        if (empty(self::$signal[$sig])) {
-            return;
-        }
-
-        // write Log
-        if (SIGTERM === $sig) {
-            $this->isrun    = false;
-
-            while (($pid = pcntl_fork()) < 0) {
-                usleep(100000);
-            }
-
-            if (!empty($pid)) {
-                exit();
-            }
-
-            posix_setsid();
-        } else {
-            //
-        }
     }
     /* }}} */
 
