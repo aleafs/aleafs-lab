@@ -16,7 +16,11 @@ class Daemon
 
     /* {{{ 静态变量 */
 
-    private static $scores = array();      /**<    记分板 */
+    private static $scores  = array();      /**<    记分板 */
+
+    private static $signal  = array(
+        SIGTERM     => 'SIGTERM',
+    );
 
     /* }}} */
 
@@ -72,7 +76,44 @@ class Daemon
     private function dispatch()
     {
         set_time_limit(0);
+        foreach (self::$signal AS $sig => $txt) {
+            pcntl_signal($sig, array(&$this, 'sigaction'));
+        }
+
         while ($this->isrun) {
+        }
+    }
+    /* }}} */
+
+    /* {{{ public void sigaction() */
+    /**
+     * 信号处理
+     *
+     * @access public
+     * @return void
+     */
+    public function sigaction($sig)
+    {
+        $sig    = (int)$sig;
+        if (empty(self::$signal[$sig])) {
+            return;
+        }
+
+        // write Log
+        if (SIGTERM === $sig) {
+            $this->isrun    = false;
+
+            while (($pid = pcntl_fork()) < 0) {
+                usleep(100000);
+            }
+
+            if (!empty($pid)) {
+                exit();
+            }
+
+            posix_setsid();
+        } else {
+            //
         }
     }
     /* }}} */
