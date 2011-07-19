@@ -23,7 +23,7 @@ class Dispatcher
 
     private $config;
 
-    private static $timeout    = true;
+    private static $timeout    = false;
 
     /* }}} */
 
@@ -110,12 +110,14 @@ class Dispatcher
         set_time_limit($this->config->get('run.timeout', 30));
         register_shutdown_function(array(&$this, 'shutdownCallBack'));
         try {
+            self::$timeout  = true;
             $ctrl   = new $ctrl();
             $ctrl->execute($url->action(), $url->param(), $post);
             $this->log->debug('REQUEST', array(
                 'url'   => $this->url,
                 'post'  => $post,
             ));
+            self::$timeout  = false;
         } catch (\Exception $e) {
             $this->log->error('EXCEPTION', array(
                 'url'   => $this->url,
@@ -123,7 +125,6 @@ class Dispatcher
                 'error' => $e->getMessage(),
             ));
         }
-        self::$timeout  = false;
     }
     /* }}} */
 
