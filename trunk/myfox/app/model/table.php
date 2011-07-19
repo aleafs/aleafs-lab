@@ -93,7 +93,7 @@ class Table
      * @access public
      * @return Mixture
      */
-    public function column($sql = false)
+    public function column()
     {
         if (empty($this->column)) {
             $column = self::$mysql->getAll(self::$mysql->query(sprintf(
@@ -118,7 +118,7 @@ class Table
      * @access public
      * @return Mixture
      */
-    public function index($sql = false)
+    public function index()
     {
         if (empty($this->index)) {
             $index  = self::$mysql->getAll(self::$mysql->query(sprintf(
@@ -128,7 +128,7 @@ class Table
             $this->queries++;
             $this->index    = array();
             foreach ((array)$index AS $row) {
-                $this->index[$row['colname']]  = $row;
+                $this->index[$row['idxname']]  = $row;
             }
         }
 
