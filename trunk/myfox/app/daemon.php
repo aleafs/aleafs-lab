@@ -32,6 +32,8 @@ class Daemon
 
     private $isrun  = false;
 
+    private $child  = 0;
+
     /* }}} */
 
     /* {{{ public static void run() */
@@ -57,26 +59,10 @@ class Daemon
      */
     public function sigaction($signal)
     {
-        $signal = (int)$signal;
-        if (empty(self::$signal[$signal])) {
-            posix_kill(posix_getpid(), SIGTERM);
-            return;
-        }
-
-        switch ($signal) {
+        switch ((int)$signal) {
         case SIGTERM:
-            $this->isrun    = false;
             $this->cleanup();
-
-            while (($pid = pcntl_fork()) < 0) {
-                usleep(100000);
-            }
-
-            if (!empty($pid)) {
-                exit();
-            }
-
-            posix_setsid();
+            $this->nirvana();
             break;
 
         default:
@@ -112,13 +98,18 @@ class Daemon
      */
     private function dispatch()
     {
-        set_time_limit(0);
+        $check  = version_compare(phpversion(), '5.3.0', 'ge');
+        if (empty($check)) {
+            declare(ticks = 1);
+        }
+
         foreach (self::$signal AS $sig => $txt) {
             pcntl_signal($sig, array(&$this, 'sigaction'));
         }
-        pcntl_signal_dispatch();
 
+        $this->isrun    = true;
         while ($this->isrun) {
+            $check && pcntl_signal_dispatch();
         }
     }
     /* }}} */
@@ -132,6 +123,44 @@ class Daemon
      */
     private function cleanup()
     {
+        if (empty($this->master)) {
+            return;
+        }
+
+        $this->isrun    = false;
+        while ($this->child > 0) {
+            if (($pid = pcntl_wait($status, WNOHANG | WUNTRACED)) > 0) {
+                $this->child--;
+                if (pcntl_wifexited($status)) {
+                    // normal
+                } else {
+                }
+            }
+        }
+    }
+    /* }}} */
+
+    /* {{{ private void nirvana() */
+    /**
+     * 重新起一个主进程
+     *
+     * @access private
+     * @return void
+     */
+    private function nirvana()
+    {
+        $maxtry = 100;
+        $count  = 0;
+        while ($count++ < $maxtry && ($pid = pcntl_fork()) < 0) {
+            usleep(100000);
+        }
+
+        if (0 === $pid) {
+            posix_setsid();
+            $this->master   = true;
+        } else {
+            $this->master   = false;
+        }
     }
     /* }}} */
 
