@@ -34,6 +34,8 @@ class Daemon
 
     private $child  = 0;
 
+    private $log    = null;
+
     /* }}} */
 
     /* {{{ public static void run() */
@@ -85,7 +87,9 @@ class Daemon
         }
 
         Application::init($ini);
+
         $this->worker   = null;
+        $this->log      = new \Myfox\Lib\Blackhole();
     }
     /* }}} */
 
@@ -149,8 +153,12 @@ class Daemon
      */
     private function nirvana()
     {
-        $maxtry = 100;
+        if (empty($this->master)) {
+            return;
+        }
+
         $count  = 0;
+        $maxtry = 100;
         while ($count++ < $maxtry && ($pid = pcntl_fork()) < 0) {
             usleep(100000);
         }
@@ -159,6 +167,7 @@ class Daemon
             posix_setsid();
             $this->master   = true;
         } else {
+            // exit
             $this->master   = false;
         }
     }
