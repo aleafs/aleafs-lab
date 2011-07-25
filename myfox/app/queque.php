@@ -29,6 +29,8 @@ class Queque
 
     /* }}} */
 
+    /* {{{ 静态变量 */
+
     private static $mysql;
 
     private static $typemap = array(
@@ -36,6 +38,7 @@ class Queque
         self::TRANSFER  => 'Transfer',
         self::DELETE    => 'Delete',
     );
+    /* }}} */
 
     /* {{{ public static Mixture fetch() */
     /**
@@ -50,7 +53,7 @@ class Queque
         self::init();
 
         $row    = self::$mysql->getRow(self::$mysql->query(sprintf(
-            'SELECT autokid AS id,task_type,task_info FROM %stask_queque WHERE agentid IN (0,%d) '.
+            'SELECT autokid AS id,task_type,tmp_status,task_info FROM %stask_queque WHERE agentid IN (0,%d) '.
             ' AND task_flag=%d AND trytimes<%d ORDER BY priority ASC, trytimes ASC, autokid ASC LIMIT 1',
             self::$mysql->option('prefix', ''),
             $host, self::FLAG_WAIT, self::MAX_TRIES
@@ -65,7 +68,7 @@ class Queque
         }
 
         $class  = sprintf('Myfox\App\Task\%s', self::$typemap[$row['task_type']]);
-        return new $class($row['id'], json_decode($row['task_info'], true));
+        return new $class($row['id'], json_decode($row['task_info'], true), $row['tmp_status']);
     }
     /* }}} */
 
@@ -126,6 +129,7 @@ class Queque
             'task_type' => true,
             'adduser'   => true,
             'last_error'=> true,
+            'tmp_status'=> true,
         );
 
         $comma  = (array)$comma;

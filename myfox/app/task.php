@@ -25,6 +25,8 @@ abstract class Task
 
     protected $id;
 
+    protected $status;
+
     private $option;
 
     private $lastError;
@@ -50,10 +52,11 @@ abstract class Task
      * @param  Array $option
      * @return void
      */
-    public function __construct($id, $option)
+    public function __construct($id, $option, $status = '')
     {
         $this->id       = (int)$id;
         $this->option   = (array)$option;
+        $this->status   = $status;
     }
     /* }}} */
 

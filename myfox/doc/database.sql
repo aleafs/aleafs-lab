@@ -141,6 +141,7 @@ CREATE TABLE IF NOT EXISTS test_task_queque (
 	task_type smallint(5) unsigned not null default 0,
 	adduser varchar(100) not null default '',
 	last_error varchar(200) not null default '',
+	tmp_status varchar(1000) not null default '',
 	task_info text,
 	PRIMARY KEY pk_queque_id (autokid),
 	KEY idx_queque_flag (agentid, task_flag, trytimes),
