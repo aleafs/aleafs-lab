@@ -142,19 +142,17 @@ abstract class Task
      * @access public
      * @return Boolean true or false
      */
-    public function unlock($errno = 0, $error = '')
+    public function unlock($flag = Queque::FLAG_DONE, $option = null, $comma = null)
     {
-        $flag   = empty($errno) ? Queque::FLAG_DONE : Queque::FLAG_WAIT;
-        return Queque::update($this->id, array(
+        return Queque::update(array(
             'trytimes'  => sprintf('IF(task_flag=%d,trytimes,trytimes+1)', $flag),
             'endtime'   => sprintf("IF(task_flag=%d,endtime,'%s')", $flag, date('Y-m-d H:i:s')),
             'task_flag' => $flag,
-            'last_error'=> trim($error),
-        ), array(
+        ) + (array)$option, array(
             'trytimes'  => true,
             'endtime'   => true,
             'task_flag' => true,
-        ));
+        ) + (array)$comma);
     }
     /* }}} */
 
