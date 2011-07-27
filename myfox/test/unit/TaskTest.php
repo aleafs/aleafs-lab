@@ -65,6 +65,15 @@ class TaskTest extends \Myfox\Lib\TestShell
             'where' => '',
         ));
         $this->assertEquals(Task::FAIL, $task->execute());
+
+        $task   = new \Myfox\App\Task\Delete(-1, array(
+            'node'  => '1,2,-1,1',
+            'path'  => 'mirror_0.t_42_0_0',
+            'where' => '',
+        ));
+        $this->assertEquals(Task::WAIT, $task->execute());
+        $this->assertEquals(Task::SUCC, $task->wait());
+        $this->assertEquals('host_01_01,host_02_01', $task->result());
     }
     /* }}} */
 

@@ -41,8 +41,11 @@ class Delete extends \Myfox\App\Task
 
         $ignore = array_flip(explode(',', (string)$this->status));
         foreach (explode(',', trim($this->option('node', '{}'))) AS $node) {
+            if (empty(self::$nodes[$node])) {
+                continue;
+            }
             foreach (self::$nodes[$node] AS $host) {
-                if (isset($ignore[$host])) {
+                if (isset($ignore[$host]) || Server::TYPE_VIRTUAL == self::$hosts[$host]['type']) {
                     continue;
                 }
 
