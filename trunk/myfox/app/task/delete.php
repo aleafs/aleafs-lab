@@ -68,8 +68,7 @@ class Delete extends \Myfox\App\Task
             list($db, $key, $host)  = $pool;
             if (false === $key || false === $db->wait($key)) {
                 $rt = self::FAIL;
-                // xxx: lastError
-                $this->setError('aa');
+                $this->setError($db->lastError($key));
             } else {
                 $sc[$host]  = true;
                 if ($this->optimize) {
