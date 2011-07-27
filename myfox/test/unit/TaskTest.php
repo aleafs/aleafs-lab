@@ -119,7 +119,7 @@ class TaskTest extends \Myfox\Lib\TestShell
 
         // xxx: host_02_01 上不存在
         $this->assertEquals(Task::FAIL, $task->wait());
-        $this->assertContains('aa', $task->lastError());
+        $this->assertContains("Table 'mirror_0.task_test' doesn't exist", $task->lastError());
 
         $this->assertEquals(true,   self::check_table_exists('host_01_01', 'mirror_0.task_test'));
         $this->assertEquals(false,  self::check_table_exists('host_02_01', 'mirror_0.task_test'));

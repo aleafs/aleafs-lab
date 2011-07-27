@@ -308,6 +308,19 @@ class Mysql
     }
     /* }}} */
 
+    /* {{{ public Mixture lastError() */
+    /**
+     * 获取上一次错误描述
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function lastError()
+    {
+        return $this->error;
+    }
+    /* }}} */
+
     /* {{{ public Mixture getAll() */
     /**
      * 获取结果集
