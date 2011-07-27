@@ -12,12 +12,19 @@ namespace Myfox\App\Task;
 class Import extends \Myfox\App\Task
 {
 
+    /* {{{ public Integer execute() */
     public function execute()
     {
+        if (!$this->isReady('file', 'host', 'save', 'route')) {
+            return self::FAIL;
+        }
     }
+    /* }}} */
 
+    /* {{{ public Integer wait() */
     public function wait()
     {
     }
+    /* }}} */
 
 }
