@@ -64,6 +64,7 @@ class TaskTest extends \Myfox\Lib\TestShell
             'path'  => 'mirror_0.t_42_0',
             'where' => '',
         ));
+        $this->assertEquals(Task::FAIL, $task->execute());
     }
     /* }}} */
 

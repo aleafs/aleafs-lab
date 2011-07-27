@@ -17,14 +17,6 @@ class Transfer extends \Myfox\App\Task
 
     /* {{{ 静态变量 */
 
-    private static $inited  = false;
-
-    private static $mysql   = null;
-
-    private static $nodes   = array();
-
-    private static $hosts   = array();
-
     private static $dist    = array();
 
     /* }}} */
@@ -54,7 +46,10 @@ class Transfer extends \Myfox\App\Task
             return self::IGNO;
         }
 
-        self::init();
+        self::metadata($flush);
+        if ($flush) {
+            self::$dist = array();
+        }
 
         $target = array();
         foreach (explode(',', trim($this->option('save'), '{}')) AS $id) {
@@ -124,43 +119,6 @@ class Transfer extends \Myfox\App\Task
     private function replicate($from, $save, $path)
     {
         return true;
-    }
-    /* }}} */
-
-    /* {{{ private static void init() */
-    /**
-     * 初始化加载数据
-     *
-     * @access private static
-     * @return void
-     */
-    private static function init()
-    {
-        if (self::$inited) {
-            return;
-        }
-
-        self::$nodes    = array();
-        self::$hosts    = array();
-        self::$mysql    = \Myfox\Lib\Mysql::instance('default');
-
-        $query  = 'SELECT h.conn_host,h.host_name,h.host_type,n.node_id ';
-        $query  = sprintf(
-            '%s FROM %shost_list h,%snode_list n WHERE h.node_id=n.node_id AND h.host_stat <> %d',
-            $query, self::$mysql->option('prefix'), self::$mysql->option('prefix'),
-            Server::STAT_ISDOWN
-        );
-
-        foreach ((array)self::$mysql->getAll(self::$mysql->query($query)) AS $row) {
-            self::$hosts[$row['host_name']]   = array(
-                'type'  => (int)$row['host_type'],
-                'node'  => (int)$row['node_id'],
-                'pos'   => 0 + ip2long(gethostbyname(trim($row['conn_host']))),
-            );
-            self::$nodes[$row['node_id']][] = $row['host_name'];
-        }
-
-        self::$inited   = true;
     }
     /* }}} */
 
