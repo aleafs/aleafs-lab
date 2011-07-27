@@ -223,7 +223,7 @@ abstract class Task
         $flush  = true;
         self::$nodes    = array();
         self::$hosts    = array();
-        $query  = 'SELECT h.conn_host,h.host_name,h.host_type,n.node_id ';
+        $query  = 'SELECT h.conn_host,h.host_name,h.host_type,n.node_id,n.node_type ';
         $query  = sprintf(
             '%s FROM %shost_list h,%snode_list n WHERE h.node_id=n.node_id AND h.host_stat <> %d',
             $query, self::$mysql->option('prefix'), self::$mysql->option('prefix'),
@@ -234,6 +234,7 @@ abstract class Task
             self::$hosts[$row['host_name']]   = array(
                 'type'  => (int)$row['host_type'],
                 'node'  => (int)$row['node_id'],
+                'mark'  => (int)$row['node_type'],
                 'pos'   => 0 + ip2long(gethostbyname(trim($row['conn_host']))),
             );
             self::$nodes[$row['node_id']][] = $row['host_name'];
