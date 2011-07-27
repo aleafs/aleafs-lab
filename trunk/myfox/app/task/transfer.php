@@ -9,6 +9,7 @@
 
 namespace Myfox\App\Task;
 
+use \Myfox\App\Model\Router;
 use \Myfox\App\Model\Server;
 use \Myfox\App\Model\Table;
 
@@ -136,21 +137,28 @@ class Transfer extends \Myfox\App\Task
                 return array();
             }
 
-            $dt = array();
+            $aa = array();
+            $bb = array();
             $my = self::$hosts[$name];
             foreach (self::$hosts AS $key => $opt) {
                 if ($my['node'] == $opt['node'] || 0 == strcasecmp($key, $name)) {
                     continue;
                 }
-                $dt[$key]   = abs($opt['pos'] - $my['pos']);
+
+                $ds = abs($opt['pos'] - $my['pos']);
+                if (Router::ARCHIVE == $opt['mark']) {
+                    $bb[$key]   = $ds;
+                } else {
+                    $aa[$key]   = $ds;
+                }
             }
-            asort($dt, SORT_NUMERIC);
-            self::$dist[$name]  = $dt;
+            asort($aa, SORT_NUMERIC);
+            asort($bb, SORT_NUMERIC);
+            self::$dist[$name]  = $aa + $bb;
         }
 
         return self::$dist[$name];
     }
     /* }}} */
-
 
 }
