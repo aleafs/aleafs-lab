@@ -9,6 +9,8 @@
 
 namespace Myfox\App;
 
+use \Myfox\App\Model\Server;
+
 abstract class Task
 {
 
@@ -19,6 +21,20 @@ abstract class Task
     const WAIT  = 2;
     const IGNO  = 9;
 
+    const MAX_CACHE_TIME    = 900;
+
+    /* }}} */
+
+    /* {{{ 静态变量 */
+
+    protected static $mysql;
+
+    protected static $nodes;
+
+    protected static $hosts;
+
+    private static $load_ts = 0;
+
     /* }}} */
 
     /* {{{ 成员变量 */
@@ -26,6 +42,8 @@ abstract class Task
     protected $id;
 
     protected $status;
+
+    protected $result;
 
     private $option;
 
@@ -57,6 +75,10 @@ abstract class Task
         $this->id       = (int)$id;
         $this->option   = (array)$option;
         $this->status   = $status;
+
+        if (empty(self::$mysql)) {
+            self::$mysql    = \Myfox\Lib\Mysql::instance('default');
+        }
     }
     /* }}} */
 
@@ -109,6 +131,19 @@ abstract class Task
     public function option($key, $default = null)
     {
         return isset($this->option[$key]) ? $this->option[$key] : $default;
+    }
+    /* }}} */
+
+    /* {{{ public Mixture result() */
+    /**
+     * 返回执行结果
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function result()
+    {
+        return $this->result;
     }
     /* }}} */
 
@@ -167,6 +202,44 @@ abstract class Task
     protected function setError($error)
     {
         $this->lastError    = trim($error);
+    }
+    /* }}} */
+
+    /* {{{ protected void metadata() */
+    /**
+     * 加载节点、主机信息
+     *
+     * @access protected
+     * @return void
+     */
+    protected function metadata(&$flush)
+    {
+        $time   = time();
+        $flush  = false;
+        if ($time - (int)self::$load_ts <= self::MAX_CACHE_TIME) {
+            return;
+        }
+
+        $flush  = true;
+        self::$nodes    = array();
+        self::$hosts    = array();
+        $query  = 'SELECT h.conn_host,h.host_name,h.host_type,n.node_id ';
+        $query  = sprintf(
+            '%s FROM %shost_list h,%snode_list n WHERE h.node_id=n.node_id AND h.host_stat <> %d',
+            $query, self::$mysql->option('prefix'), self::$mysql->option('prefix'),
+            Server::STAT_ISDOWN
+        );
+
+        foreach ((array)self::$mysql->getAll(self::$mysql->query($query)) AS $row) {
+            self::$hosts[$row['host_name']]   = array(
+                'type'  => (int)$row['host_type'],
+                'node'  => (int)$row['node_id'],
+                'pos'   => 0 + ip2long(gethostbyname(trim($row['conn_host']))),
+            );
+            self::$nodes[$row['node_id']][] = $row['host_name'];
+        }
+
+        self::$load_ts  = $time;
     }
     /* }}} */
 
