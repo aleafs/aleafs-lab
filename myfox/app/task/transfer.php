@@ -26,6 +26,8 @@ class Transfer extends \Myfox\App\Task
 
     private $table;
 
+    private $pools;
+
     /* }}} */
 
     /* {{{ public Integer execute() */
@@ -74,24 +76,23 @@ class Transfer extends \Myfox\App\Task
             return self::FAIL;
         }
 
-        $return = self::SUCC;
+        $this->pools    = array();
+        $ignore = array_flip(explode(',', (string)$this->status));
         foreach ($target AS $name) {
-            if (Server::TYPE_VIRTUAL == self::$hosts[$name]['type']) {
+            if (isset($ignore[$name]) || Server::TYPE_VIRTUAL == self::$hosts[$name]['type']) {
                 continue;
             }
 
             $option = array_intersect_key((array)self::dist($name), $source);
             foreach ((array)$option AS $from => $dist) {
                 if ($this->replicate($from, $name, $this->option('path'))) {
-                    $return = self::WAIT;
-                    continue 2;
+                    $ignore[$name]  = true;
+                    break;
                 }
             }
-
-            return self::FAIL;
         }
 
-        return $return;
+        return self::WAIT;
     }
     /* }}} */
 
@@ -119,6 +120,52 @@ class Transfer extends \Myfox\App\Task
      */
     private function replicate($from, $save, $path)
     {
+        list($dbname, $tbname)  = explode('.', $path, 2);
+
+        $create = array();
+        foreach ($this->table->column() AS $key => $val) {
+            $create[]   = $val['sqlchar'];
+        }
+        foreach ($this->table->index() AS $key => $val) {
+            $create[]   = trim(sprintf(
+                '%s KEY %s (%s)', $val['idxtype'], $key, trim($val['idxchar'], '()')
+            ));
+        }
+
+        $column = implode(',', $create);
+        $source = Server::instance($from);
+        $create = sprintf(
+            "CREATE TABLE %s.%s_fed (%s) ENGINE = FEDERATED DEFAULT CHARSET=UTF8 CONNECTION='mysql://%s@%s:%d/%s/%s'",
+            $dbname, $tbname, $column, $source->option('user_ro'), $source->option('conn_host'),
+            $source->option('conn_port'), $dbname, $tbname
+        );
+
+        $querys = array(
+            sprintf(
+                'DROP TABLE IF EXISTS %s.%s, %s.%s_fed',
+                $dbname, $tbname, $dbname, $tbname
+            ),
+            sprintf('CREATE DATABASE IF NOT EXISTS %s', $dbname),
+            $create,
+            sprintf(
+                'CREATE TABLE %s.%s (%s) ENGINE = MyISAM DEFAULT CHARSET=UTF8',
+                $dbname, $tbname, $column
+            ),
+        );
+
+        $target = Server::instance($save)->getlink();
+        foreach ($querys AS $sql) {
+            if (false === $target->query($sql)) {
+                $this->setError($target->lastError());
+                return false;
+            }
+        }
+
+        $this->pools[]  = array($target, $target->async(sprintf(
+            'INSERT INTO %s.%s SELECT * FROM %s.%s_fed',
+            $dbname, $tbname, $dbname, $tbname
+        )), $save);
+
         return true;
     }
     /* }}} */

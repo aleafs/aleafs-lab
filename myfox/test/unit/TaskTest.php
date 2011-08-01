@@ -65,21 +65,6 @@ class TaskTest extends \Myfox\Lib\TestShell
     }
     /* }}} */
 
-    /* {{{ public void test_should_transfer_task_works_fine() */
-    public function test_should_transfer_task_works_fine()
-    {
-        $task	= new \Myfox\App\Task\Transfer(-1, array(
-            'from'  => '1,2',
-            'save'  => '3',
-            'table' => 'numsplit',
-            'path'  => 'numsplit_0.numsplit_563_2',
-        ));
-
-        $this->assertEquals(Task::WAIT, $task->execute());
-        $this->assertEquals(Task::SUCC, $task->wait());
-    }
-    /* }}} */
-
     /* {{{ public void test_should_delete_task_works_fine() */
     public function test_should_delete_task_works_fine()
     {
@@ -123,6 +108,21 @@ class TaskTest extends \Myfox\Lib\TestShell
 
         $this->assertEquals(true,   self::check_table_exists('host_01_01', 'mirror_0.task_test'));
         $this->assertEquals(false,  self::check_table_exists('host_02_01', 'mirror_0.task_test'));
+    }
+    /* }}} */
+
+    /* {{{ public void test_should_transfer_task_works_fine() */
+    public function test_should_transfer_task_works_fine()
+    {
+        $task	= new \Myfox\App\Task\Transfer(-1, array(
+            'from'  => '1,2',
+            'save'  => '3',
+            'table' => 'numsplit',
+            'path'  => 'numsplit_0.numsplit_563_2',
+        ));
+
+        $this->assertEquals(Task::WAIT, $task->execute());
+        $this->assertEquals(Task::SUCC, $task->wait());
     }
     /* }}} */
 
