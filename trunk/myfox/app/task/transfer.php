@@ -105,8 +105,27 @@ class Transfer extends \Myfox\App\Task
      */
     public function wait()
     {
+        $result = array();
+        $allok  = true;
+        foreach ($this->pools AS $pool) {
+            list($db, $key, $host)  = $pool;
+            if (false === $key || false === $db->wait($key)) {
+                $allok  = false;
+                $this->setError($db->lastError($key));
+            } else {
+                $result[$host]  = true;
+            }
+        }
+        $this->pools    = array();
+        if (true !== $allok) {
+            return self::FAIL;
+        }
+
         // xxx: 校验一致性
         // 改路由
+
+        $this->result   = implode(',', $result);
+
         return self::SUCC;
     }
     /* }}} */
