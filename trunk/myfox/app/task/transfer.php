@@ -72,7 +72,7 @@ class Transfer extends \Myfox\App\Task
             }
         }
         if (empty($source)) {
-            $this->setError(sprintf('Empty transfer source nodes, input:', $this->option('from')));
+            $this->setError(sprintf('Empty transfer source nodes, input:%s', $this->option('from')));
             return self::FAIL;
         }
 
