@@ -30,17 +30,28 @@ class TaskTest extends \Myfox\Lib\TestShell
     /* {{{ private static Boolean create_test_table() */
     private static function create_test_table($host, $table, $like)
     {
-        $mysql  = \Myfox\App\Model\Server::instance($host)->getlink();
-        $mysql->query(sprintf('DROP TABLE IF EXISTS %s', $table));
-        $mysql->query(sprintf('CREATE TABLE %s LIKE %s', $table, $like));
+        self::drop_test_table($host, $table);
+        return \Myfox\App\Model\Server::instance($host)->getlink()->query(sprintf(
+            'CREATE TABLE %s LIKE %s', $table, $like
+        ));
+    }
+    /* }}} */
+
+    /* {{{ private static Boolean drop_test_table() */
+    private static function drop_test_table($host, $table)
+    {
+        return (bool)\Myfox\App\Model\Server::instance($host)->getlink()->query(sprintf(
+            'DROP TABLE IF EXISTS %s', $table
+        ));
     }
     /* }}} */
 
     /* {{{ private static Boolean check_table_exists() */
     private static function check_table_exists($host, $table)
-    {
-        $mysql  = \Myfox\App\Model\Server::instance($host)->getlink();
-        return (bool)$mysql->query(sprintf('DESC %s', $table));
+    { 
+        return (bool)\Myfox\App\Model\Server::instance($host)->getlink()->query(sprintf(
+            'DESC %s', $table
+        ));
     }
     /* }}} */
 
@@ -114,15 +125,67 @@ class TaskTest extends \Myfox\Lib\TestShell
     /* {{{ public void test_should_transfer_task_works_fine() */
     public function test_should_transfer_task_works_fine()
     {
+        self::drop_test_table('host_03_01', 'mirror_0.task_test');
+        self::drop_test_table('host_02_01', 'mirror_0.task_test');
+
+        self::create_test_table('host_01_01', 'mirror_0.task_test', 'mirror_0.mirror_583_2');
+
         $task	= new \Myfox\App\Task\Transfer(-1, array(
-            'from'  => '1,2',
-            'save'  => '3',
-            'table' => 'numsplit',
-            'path'  => 'numsplit_0.numsplit_563_2',
+            'from'  => '1,-1,1',
+            'save'  => '3,8,3,2',
+            'table' => 'mirror',
+            'path'  => 'mirror_0.task_test',
+            'copy'  => true,
         ));
 
         $this->assertEquals(Task::WAIT, $task->execute());
         $this->assertEquals(Task::SUCC, $task->wait());
+        $this->assertEquals(true, self::check_table_exists('host_03_01', 'mirror_0.mirror_583_2'));
+        $this->assertEquals(true, self::check_table_exists('host_02_01', 'mirror_0.mirror_583_2'));
+
+        $this->assertEquals('', $task->result());
+    }
+    /* }}} */
+
+    /* {{{ public void test_should_transfer_exception_works_fine() */
+    public function test_should_transfer_exception_works_fine()
+    {
+        $task   = new \Myfox\App\Task\Transfer(-1, array(
+            'table' => 'mirror'
+        ));
+        $this->assertEquals(Task::FAIL, $task->execute());
+
+        $task	= new \Myfox\App\Task\Transfer(-1, array(
+            'from'  => '1,2,-1,1',
+            'save'  => '3,8',
+            'table' => 'i am not exists',
+            'path'  => 'mirror_0.task_test',
+            'copy'  => true,
+        ));
+        $this->assertEquals(Task::IGNO, $task->execute());
+        $this->assertContains('Undefined table named as "i am not exists"', $task->lastError());
+
+        /* xxx:  */
+        $task	= new \Myfox\App\Task\Transfer(-1, array(
+            'from'  => '-1,10',
+            'save'  => '3,8',
+            'table' => 'mirror',
+            'path'  => 'mirror_0.task_test',
+            'copy'  => true,
+        ));
+        $this->assertEquals(Task::FAIL, $task->execute());
+        $this->assertContains('Empty transfer source nodes, input:-1,10', $task->lastError());
+
+        // xxx: empty target
+        $task	= new \Myfox\App\Task\Transfer(-1, array(
+            'from'  => '1,2,-1,1',
+            'save'  => '-1,10000',
+            'table' => 'mirror',
+            'path'  => 'mirror_0.task_test',
+            'copy'  => true,
+        ));
+        $this->assertEquals(Task::IGNO, $task->execute());
+        $this->assertContains('Empty transfer target nodes, input:-1,10000', $task->lastError());
     }
     /* }}} */
 
