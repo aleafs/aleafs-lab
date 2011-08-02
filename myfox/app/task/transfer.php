@@ -85,7 +85,6 @@ class Transfer extends \Myfox\App\Task
 
             $option = array_intersect_key((array)self::dist($name), $source);
             foreach ((array)$option AS $from => $dist) {
-                // xxx: 这里有问题，异步的过程，实际上起不到容灾的作用
                 if ($this->replicate($from, $name, $this->option('path'))) {
                     $ignore[$name]  = true;
                     break;
@@ -176,6 +175,8 @@ class Transfer extends \Myfox\App\Task
                 $dbname, $tbname, $struct, $source->option('user_ro'), $source->option('conn_host'),
                 $source->option('conn_port'), $dbname, $tbname
             ),
+            /**<    检查federated创建是否OK用的 */
+            sprintf('SELECT * FROM %s.%s_fed LIMIT 1', $dbname, $tbname),
             sprintf(
                 'CREATE TABLE %s.%s (%s) ENGINE = MyISAM DEFAULT CHARSET=UTF8',
                 $dbname, $tbname, implode(',', $create)
