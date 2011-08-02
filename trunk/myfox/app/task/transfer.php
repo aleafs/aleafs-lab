@@ -199,6 +199,18 @@ class Transfer extends \Myfox\App\Task
     }
     /* }}} */
 
+    /* {{{ private Boolean modifyRoute() */
+    /**
+     * 更改路由
+     *
+     * @access private
+     * @return Boolean true or false
+     */
+    private function modifyRoute()
+    {
+    }
+    /* }}} */
+
     /* {{{ private static Mixture dist() */
     /**
      * 获取机器距离表
