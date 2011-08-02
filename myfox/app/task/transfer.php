@@ -85,6 +85,7 @@ class Transfer extends \Myfox\App\Task
 
             $option = array_intersect_key((array)self::dist($name), $source);
             foreach ((array)$option AS $from => $dist) {
+                // xxx: 这里有问题，异步的过程，实际上起不到容灾的作用
                 if ($this->replicate($from, $name, $this->option('path'))) {
                     $ignore[$name]  = true;
                     break;
@@ -117,6 +118,7 @@ class Transfer extends \Myfox\App\Task
             }
         }
         $this->pools    = array();
+
         if (true !== $allok) {
             return self::FAIL;
         }
@@ -141,8 +143,20 @@ class Transfer extends \Myfox\App\Task
     {
         list($dbname, $tbname)  = explode('.', $path, 2);
 
+        $source = Server::instance($from);
+        $mysql  = $source->getlink();
+        $create = $mysql->getRow($mysql->query(sprintf('SHOW CREATE TABLE %s', $path)));
+        if (empty($create) || empty($create['Create Table'])) {
+            $this->setError($mysql->lastError());
+            return false;
+        }
+
+        preg_match('/\((.+)\)/s', $create['Create Table'], $match);
+        $struct = trim($match[1]);
+
         $create = array();
-        foreach ($this->table->column() AS $key => $val) {
+        $column = $this->table->column();
+        foreach ($column AS $key => $val) {
             $create[]   = $val['sqlchar'];
         }
         foreach ($this->table->index() AS $key => $val) {
@@ -151,24 +165,20 @@ class Transfer extends \Myfox\App\Task
             ));
         }
 
-        $column = implode(',', $create);
-        $source = Server::instance($from);
-        $create = sprintf(
-            "CREATE TABLE %s.%s_fed (%s) ENGINE = FEDERATED DEFAULT CHARSET=UTF8 CONNECTION='mysql://%s@%s:%d/%s/%s'",
-            $dbname, $tbname, $column, $source->option('user_ro'), $source->option('conn_host'),
-            $source->option('conn_port'), $dbname, $tbname
-        );
-
         $querys = array(
             sprintf(
                 'DROP TABLE IF EXISTS %s.%s, %s.%s_fed',
                 $dbname, $tbname, $dbname, $tbname
             ),
             sprintf('CREATE DATABASE IF NOT EXISTS %s', $dbname),
-            $create,
+            sprintf(
+                "CREATE TABLE %s.%s_fed (%s) ENGINE = FEDERATED DEFAULT CHARSET=UTF8 CONNECTION='mysql://%s@%s:%d/%s/%s'",
+                $dbname, $tbname, $struct, $source->option('user_ro'), $source->option('conn_host'),
+                $source->option('conn_port'), $dbname, $tbname
+            ),
             sprintf(
                 'CREATE TABLE %s.%s (%s) ENGINE = MyISAM DEFAULT CHARSET=UTF8',
-                $dbname, $tbname, $column
+                $dbname, $tbname, implode(',', $create)
             ),
         );
 
@@ -181,8 +191,8 @@ class Transfer extends \Myfox\App\Task
         }
 
         $this->pools[]  = array($target, $target->async(sprintf(
-            'INSERT INTO %s.%s SELECT * FROM %s.%s_fed',
-            $dbname, $tbname, $dbname, $tbname
+            'INSERT INTO %s.%s SELECT %s FROM %s.%s_fed',
+            $dbname, $tbname, implode(',', array_keys($column)), $dbname, $tbname
         )), $save);
 
         return true;
