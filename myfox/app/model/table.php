@@ -25,6 +25,8 @@ class Table
 
     private $option	= null;
 
+    private $route  = null;
+
     private $column = array();
 
     private $index  = array();
@@ -133,6 +135,34 @@ class Table
         }
 
         return $this->index;
+    }
+    /* }}} */
+
+    /* {{{ public Mixture route() */
+    /**
+     * 获取表的路由类型
+     *
+     * @access public
+     * @return Mixture
+     */
+    public function route()
+    {
+        if (null === $this->route) {
+            $column = preg_split(
+                '/[\s,;\/]+/',
+                trim($this->get('route_fields'), "{}\t\r\n "),
+                -1, PREG_SPLIT_NO_EMPTY
+            );
+
+            $this->route    = array();
+            foreach ((array)$column AS $item) {
+                list($name, $type) = array_pad(explode(':', $item, 2), 2, 'int');
+                $this->route[strtolower(trim($name))]  = strtolower(trim($type));
+            }
+            ksort($this->route);
+        }
+
+        return $this->route;
     }
     /* }}} */
 
