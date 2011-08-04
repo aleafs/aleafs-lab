@@ -28,6 +28,8 @@ class Transfer extends \Myfox\App\Task
 
     private $pools;
 
+    private $route;
+
     /* }}} */
 
     /* {{{ public Integer execute() */
@@ -78,6 +80,7 @@ class Transfer extends \Myfox\App\Task
 
         $this->pools    = array();
         $ignore = array_flip(explode(',', (string)$this->status));
+        $realtb = $this->option('path');
         foreach ($target AS $name) {
             if (isset($ignore[$name]) || Server::TYPE_VIRTUAL == self::$hosts[$name]['type']) {
                 continue;
@@ -85,7 +88,11 @@ class Transfer extends \Myfox\App\Task
 
             $option = array_intersect_key((array)self::dist($name), $source);
             foreach ((array)$option AS $from => $dist) {
-                if ($this->replicate($from, $name, $this->option('path'))) {
+                if (!$this->getRoute($realtb, $from)) {
+                    return self::IGNO;
+                }
+
+                if ($this->replicate($from, $name, $realtb)) {
                     $ignore[$name]  = true;
                     break;
                 }
@@ -195,6 +202,32 @@ class Transfer extends \Myfox\App\Task
             'INSERT INTO %s.%s SELECT %s FROM %s.%s_fed',
             $dbname, $tbname, implode(',', array_keys($column)), $dbname, $tbname
         )), $save);
+
+        return true;
+    }
+    /* }}} */
+
+    /* {{{ private Boolean getRoute() */
+    /**
+     * 获取分片中的路由数据
+     *
+     * @access private
+     * @return Boolean true or false
+     */
+    private function getRoute($path, $host)
+    {
+        $mysql  = Server::instance($host)->getlink();
+        $column = $this->table->route();
+        if (!empty($column)) {
+            $routes = $mysql->getAll($mysql->query(sprintf(
+                'SELECT DISTINCT %s FROM %s', implode(',', array_keys($column)), $path
+            )));
+        }
+
+        $exists = false;
+        $routes = empty($routes) ? array(null) : (array)$routes;
+        foreach ($routes AS $row) {
+        }
 
         return true;
     }

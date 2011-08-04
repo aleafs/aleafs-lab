@@ -308,18 +308,7 @@ class Router
     private function filter($column = array())
     {
         if (null === $this->rfield) {
-            $fields = preg_split(
-                '/[\s,;\/]+/',
-                trim($this->table->get('route_fields', ''), "{}\t\r\n "),
-                -1, PREG_SPLIT_NO_EMPTY
-            );
-
-            $this->rfield   = array();
-            foreach ((array)$fields AS $item) {
-                list($name, $type) = array_pad(explode(':', $item, 2), 2, 'int');
-                $this->rfield[strtolower(trim($name))]  = strtolower(trim($type));
-            }
-            ksort($this->rfield);
+            $this->rfield   = $this->table->route();
         }
 
         $routes = array();
