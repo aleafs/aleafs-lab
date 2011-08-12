@@ -49,19 +49,18 @@ class Queque
      * 获取一条任务
      *
      * @access public static
-     * @param  Integer $host
      * @return Mixture
      */
-    public static function fetch($host)
+    public static function fetch()
     {
         self::init();
 
         $row    = self::$mysql->getRow(self::$mysql->query(sprintf(
             'SELECT autokid AS id,task_type,tmp_status,task_info FROM %stask_queque WHERE '.
-            ' task_flag=%d AND trytimes<%d ORDER BY priority ASC, trytimes ASC, ' .
+            ' task_flag=%d AND trytimes < %d ORDER BY priority ASC, trytimes ASC, ' .
             ' ABS(agentpos - %u) ASC, autokid ASC LIMIT 1',
             self::$mysql->option('prefix', ''),
-            $host, self::FLAG_WAIT, self::MAX_TRIES, self::$mypos
+            self::FLAG_WAIT, self::MAX_TRIES, self::$mypos
         )));
 
         if (empty($row)) {
@@ -101,7 +100,7 @@ class Queque
             }
         }
         $column['addtime']  = date('Y-m-d H:i:s');
-        $column['agentid']  = (int)$agent;
+        $column['agentpos'] = (int)$agent;
         $column['task_type']= (int)$type;
         $column['task_info']= self::$mysql->escape(json_encode($info));
 
