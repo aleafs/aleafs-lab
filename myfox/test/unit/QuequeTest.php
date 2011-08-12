@@ -19,7 +19,7 @@ class QuequeTest extends \Myfox\Lib\TestShell
         self::$mysql    = \Myfox\Lib\Mysql::instance('default');
 
         self::$mysql->query(sprintf(
-            "DELETE FROM %s.%stask_queque WHERE adduser = 'UNITTEST'",
+            'TRUNCATE TABLE %s.%stask_queque',
             self::$mysql->option('dbname', 'meta_myfox_config'),
             self::$mysql->option('prefix', '')
         ));
@@ -51,6 +51,7 @@ class QuequeTest extends \Myfox\Lib\TestShell
 
         try {
             $task   = Queque::fetch(1);
+            var_dump($task);
             $this->assertTrue(false);
         } catch (\Exception $e) {
             $this->assertContains('Undefined task type as "99"', $e->getMessage());
