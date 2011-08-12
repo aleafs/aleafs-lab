@@ -36,18 +36,18 @@ class ServerTest extends \Myfox\Lib\TestShell
 			$this->assertContains('Undefined mysql server named as "unittest01"', $e->getMessage());
 		}
 
-		$this->assertEquals('host_01_01', Server::instance('host_01_01')->option('host_name'));
-		$this->assertEquals(Server::TYPE_VIRTUAL, Server::instance('host_01_02')->option('host_type'));
+		$this->assertEquals('edp1_9801', Server::instance('edp1_9801')->option('host_name'));
+		$this->assertEquals(Server::TYPE_VIRTUAL, Server::instance('edp1_9901')->option('host_type'));
 	}
 	/* }}} */
 
 	/* {{{ public void test_should_server_get_link_works_fine() */
 	public function test_should_server_get_link_works_fine()
 	{
-		$ob	= Server::instance('host_01_01')->getlink();
+		$ob	= Server::instance('edp1_9801')->getlink();
 		$this->assertTrue($ob instanceof \Myfox\Lib\Mysql);
 
-		$my	= Server::instance('host_01_01')->getlink();
+		$my	= Server::instance('edp1_9801')->getlink();
 		$this->assertEquals($ob, $my);
 	}
 	/* }}} */

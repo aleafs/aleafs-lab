@@ -25,7 +25,7 @@ class Delete extends \Myfox\App\Task
     /* {{{ public Integer execute() */
     public function execute()
     {
-        if (!$this->isReady('node', 'path')) {
+        if (!$this->isReady('host', 'path')) {
             return self::FAIL;
         }
 
@@ -40,19 +40,19 @@ class Delete extends \Myfox\App\Task
         }
 
         $ignore = array_flip(explode(',', (string)$this->status));
-        foreach (explode(',', trim($this->option('node', '{}'))) AS $node) {
-            if (empty(self::$nodes[$node])) {
+        foreach (explode(',', trim($this->option('host', '{}'))) AS $id) {
+            if (!isset(self::$hosts[$id]) || isset($ignore[$id])) {
                 continue;
             }
-            foreach (self::$nodes[$node] AS $host) {
-                if (isset($ignore[$host]) || Server::TYPE_VIRTUAL == self::$hosts[$host]['type']) {
-                    continue;
-                }
 
-                $ignore[$host]  = true;
-                $db = Server::instance($host)->getlink();
-                $this->dbpools[]    = array($db, $db->async($query), $host);
+            $ignore[$id]    = true;
+            $server = self::$hosts[$id];
+            if (Server::TYPE_VIRTUAL == $server['type']) {
+                continue;
             }
+
+            $db = Server::instance($server['name'])->getlink();
+            $this->dbpools[]    = array($db, $db->async($query), $server['name']);
         }
 
         return self::WAIT;
