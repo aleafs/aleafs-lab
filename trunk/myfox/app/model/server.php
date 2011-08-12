@@ -13,8 +13,9 @@ class Server
 
     /* {{{ 静态常量 */
 
-    const TYPE_REALITY  = 0;
-    const TYPE_VIRTUAL  = 1;
+    const TYPE_VIRTUAL  = 0;
+    const TYPE_REALITY  = 1;
+    const TYPE_ARCHIVE  = 2;
 
     const STAT_ONLINE   = 0;
     const STAT_PREPARE  = 1;
@@ -89,11 +90,13 @@ class Server
             \Myfox\Lib\Mysql::register($id, array(
                 'persist'   => false,
                 'master'    => array(sprintf(
-                    'mysql://%s@%s:%d', $this->option['user_rw'],
+                    'mysql://%s:%s@%s:%d', rawurlencode($this->option['write_user']),
+                    rawurlencode($this->option('write_pass')),
                     $this->option['conn_host'], $this->option['conn_port']
                 )),
                 'slave'     => array(sprintf(
-                    'mysql://%s@%s:%d', $this->option['user_ro'],
+                    'mysql://%s:%s@%s:%d', rawurlencode($this->option['read_user']),
+                    rawurlencode($this->option('read_pass')),
                     $this->option['conn_host'], $this->option['conn_port']
                 )),
             ));

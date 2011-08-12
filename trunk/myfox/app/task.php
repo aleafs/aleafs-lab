@@ -29,8 +29,6 @@ abstract class Task
 
     protected static $mysql;
 
-    protected static $nodes;
-
     protected static $hosts;
 
     private static $load_ts = 0;
@@ -221,23 +219,19 @@ abstract class Task
         }
 
         $flush  = true;
-        self::$nodes    = array();
         self::$hosts    = array();
-        $query  = 'SELECT h.conn_host,h.host_name,h.host_type,n.node_id,n.node_type ';
+        $query  = 'SELECT host_id,host_name,host_type,host_pos';
         $query  = sprintf(
-            '%s FROM %shost_list h,%snode_list n WHERE h.node_id=n.node_id AND h.host_stat <> %d',
-            $query, self::$mysql->option('prefix'), self::$mysql->option('prefix'),
-            Server::STAT_ISDOWN
+            '%s FROM %shost_list WHERE host_stat <> %d AND host_type <> %d',
+            $query, self::$mysql->option('prefix'), Server::STAT_ISDOWN, Server::TYPE_VIRTUAL
         );
 
         foreach ((array)self::$mysql->getAll(self::$mysql->query($query)) AS $row) {
-            self::$hosts[$row['host_name']]   = array(
+            self::$hosts[$row['host_id']] = array(
+                'name'  => trim(strtolower($row['host_name'])),
                 'type'  => (int)$row['host_type'],
-                'node'  => (int)$row['node_id'],
-                'mark'  => (int)$row['node_type'],
-                'pos'   => 0 + ip2long(gethostbyname(trim($row['conn_host']))),
+                'pos'   => (int)$row['host_pos'],
             );
-            self::$nodes[$row['node_id']][] = $row['host_name'];
         }
 
         self::$load_ts  = $time;

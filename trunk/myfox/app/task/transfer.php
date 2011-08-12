@@ -58,42 +58,43 @@ class Transfer extends \Myfox\App\Task
 
         $target = array();
         foreach (explode(',', trim($this->option('save'), '{}')) AS $id) {
-            if (!empty(self::$nodes[$id])) {
-                $target += self::$nodes[$id];
+            if (!empty(self::$hosts[$id])) {
+                $target[]   = $id;
             }
         }
         if (empty($target)) {
-            $this->setError(sprintf('Empty transfer target nodes, input:%s', $this->option('save')));
+            $this->setError(sprintf('Empty transfer target servers, input:%s', $this->option('save')));
             return self::IGNO;
         }
 
         $source = array();
         foreach (explode(',', trim($this->option('from'), '{}')) AS $id) {
-            if (!empty(self::$nodes[$id])) {
-                $source += array_flip(self::$nodes[$id]);
+            if (isset(self::$hosts[$id])) {
+                $source[]   = $id;
             }
         }
         if (empty($source)) {
-            $this->setError(sprintf('Empty transfer source nodes, input:%s', $this->option('from')));
+            $this->setError(sprintf('Empty transfer source servers, input:%s', $this->option('from')));
             return self::FAIL;
         }
 
         $this->pools    = array();
         $ignore = array_flip(explode(',', (string)$this->status));
         $realtb = $this->option('path');
-        foreach ($target AS $name) {
-            if (isset($ignore[$name]) || Server::TYPE_VIRTUAL == self::$hosts[$name]['type']) {
+        foreach ($target AS $id) {
+            if (isset($ignore[$id]) || !isset(self::$hosts[$id])) {
                 continue;
             }
 
-            $option = array_intersect_key((array)self::dist($name), $source);
+            $option = array_intersect_key((array)self::dist($id), $source);
             foreach ((array)$option AS $from => $dist) {
+                $from   = self::$hosts[$from]['name'];
                 if (!$this->getRoute($realtb, $from)) {
                     return self::IGNO;
                 }
 
-                if ($this->replicate($from, $name, $realtb)) {
-                    $ignore[$name]  = true;
+                if ($this->replicate($from, self::$hosts[$id]['name'], $realtb)) {
+                    $ignore[$id]    = true;
                     break;
                 }
             }
@@ -178,9 +179,9 @@ class Transfer extends \Myfox\App\Task
             ),
             sprintf('CREATE DATABASE IF NOT EXISTS %s', $dbname),
             sprintf(
-                "CREATE TABLE %s.%s_fed (%s) ENGINE = FEDERATED DEFAULT CHARSET=UTF8 CONNECTION='mysql://%s@%s:%d/%s/%s'",
-                $dbname, $tbname, $struct, $source->option('user_ro'), $source->option('conn_host'),
-                $source->option('conn_port'), $dbname, $tbname
+                "CREATE TABLE %s.%s_fed (%s) ENGINE = FEDERATED DEFAULT CHARSET=UTF8 CONNECTION='mysql://%s:%s@%s:%d/%s/%s'",
+                $dbname, $tbname, $struct, $source->option('read_user'), $source->option('read_pass'),
+                $source->option('conn_host'), $source->option('conn_port'), $dbname, $tbname
             ),
             /**<    检查federated创建是否OK用的 */
             sprintf('SELECT * FROM %s.%s_fed LIMIT 1', $dbname, $tbname),
@@ -252,23 +253,23 @@ class Transfer extends \Myfox\App\Task
      * @access private static
      * @return Mixture
      */
-    private static function dist($name)
+    private static function dist($id)
     {
-        if (empty(self::$dist[$name])) {
-            if (empty(self::$hosts[$name])) {
+        if (empty(self::$dist[$id])) {
+            if (empty(self::$hosts[$id])) {
                 return array();
             }
 
             $aa = array();
             $bb = array();
-            $my = self::$hosts[$name];
+            $my = self::$hosts[$id];
             foreach (self::$hosts AS $key => $opt) {
-                if ($my['node'] == $opt['node'] || 0 == strcasecmp($key, $name)) {
+                if ($id == $key) {
                     continue;
                 }
 
                 $ds = abs($opt['pos'] - $my['pos']);
-                if (Router::ARCHIVE == $opt['mark']) {
+                if (Server::TYPE_ARCHIVE == $opt['type']) {
                     $bb[$key]   = $ds;
                 } else {
                     $aa[$key]   = $ds;
@@ -276,10 +277,10 @@ class Transfer extends \Myfox\App\Task
             }
             asort($aa, SORT_NUMERIC);
             asort($bb, SORT_NUMERIC);
-            self::$dist[$name]  = $aa + $bb;
+            self::$dist[$id]  = $aa + $bb;
         }
 
-        return self::$dist[$name];
+        return self::$dist[$id];
     }
     /* }}} */
 

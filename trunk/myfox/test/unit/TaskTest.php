@@ -80,34 +80,33 @@ class TaskTest extends \Myfox\Lib\TestShell
     public function test_should_delete_task_works_fine()
     {
         $task   = new \Myfox\App\Task\Delete(-1, array(
-            'host'  => 'host_01_01',
             'path'  => 'mirror_0.t_42_0',
             'where' => '',
         ));
         $this->assertEquals(Task::FAIL, $task->execute());
 
-        self::create_test_table('host_01_01', 'mirror_0.task_test', 'mirror_0.mirror_583_2');
-        self::create_test_table('host_02_01', 'mirror_0.task_test', 'mirror_0.mirror_583_2');
+        self::create_test_table('edp1_9801', 'mirror_0.task_test', 'mirror_0.mirror_583_2');
+        self::create_test_table('edp2_9902', 'mirror_0.task_test', 'mirror_0.mirror_583_2');
 
-        $this->assertEquals(true,   self::check_table_exists('host_01_01', 'mirror_0.task_test'));
-        $this->assertEquals(true,   self::check_table_exists('host_02_01', 'mirror_0.task_test'));
+        $this->assertEquals(true,   self::check_table_exists('edp1_9801', 'mirror_0.task_test'));
+        $this->assertEquals(true,   self::check_table_exists('edp2_9902', 'mirror_0.task_test'));
 
         $task   = new \Myfox\App\Task\Delete(-1, array(
-            'node'  => '1,2,-1,1',
+            'host'  => '1,3,-1,2,1',
             'path'  => 'mirror_0.task_test',
             'where' => '',
         ));
         $this->assertEquals(Task::WAIT, $task->execute());
         $this->assertEquals(Task::SUCC, $task->wait());
-        $this->assertEquals('host_01_01,host_02_01', $task->result());
-        $this->assertEquals(false,  self::check_table_exists('host_01_01', 'mirror_0.task_test'));
-        $this->assertEquals(false,  self::check_table_exists('host_02_01', 'mirror_0.task_test'));
+        $this->assertEquals('edp1_9801,edp2_9902', $task->result());
+        $this->assertEquals(false,  self::check_table_exists('edp1_9801', 'mirror_0.task_test'));
+        $this->assertEquals(false,  self::check_table_exists('edp2_9902', 'mirror_0.task_test'));
 
         // xxx: 带WHERE条件的
-        self::create_test_table('host_01_01', 'mirror_0.task_test', 'mirror_0.mirror_583_2');
+        self::create_test_table('edp1_9801', 'mirror_0.task_test', 'mirror_0.mirror_583_2');
 
         $task   = new \Myfox\App\Task\Delete(-1, array(
-            'node'  => '1,2,-1,1',
+            'host'  => '1,3,-1,2,1',
             'path'  => 'mirror_0.task_test',
             'where' => '1=1 AND 0 < 2',
         ));
@@ -117,22 +116,22 @@ class TaskTest extends \Myfox\Lib\TestShell
         $this->assertEquals(Task::FAIL, $task->wait());
         $this->assertContains("Table 'mirror_0.task_test' doesn't exist", $task->lastError());
 
-        $this->assertEquals(true,   self::check_table_exists('host_01_01', 'mirror_0.task_test'));
-        $this->assertEquals(false,  self::check_table_exists('host_02_01', 'mirror_0.task_test'));
+        $this->assertEquals(true,   self::check_table_exists('edp1_9801', 'mirror_0.task_test'));
+        $this->assertEquals(false,  self::check_table_exists('edp2_9902', 'mirror_0.task_test'));
     }
     /* }}} */
 
     /* {{{ public void test_should_transfer_task_works_fine() */
     public function test_should_transfer_task_works_fine()
     {
-        self::drop_test_table('host_03_01', 'mirror_0.task_test');
-        self::drop_test_table('host_02_01', 'mirror_0.task_test');
+        self::drop_test_table('edp2_8510', 'mirror_0.task_test');
+        self::drop_test_table('edp2_9902', 'mirror_0.task_test');
 
-        self::create_test_table('host_01_01', 'mirror_0.task_test', 'mirror_0.mirror_583_2');
+        self::create_test_table('edp1_9801', 'mirror_0.task_test', 'mirror_0.mirror_583_2');
 
         $task	= new \Myfox\App\Task\Transfer(-1, array(
             'from'  => '1,-1,1',
-            'save'  => '3,8,3',
+            'save'  => '3,4,3,2',
             'table' => 'mirror',
             'path'  => 'mirror_0.task_test',
             'copy'  => true,
@@ -143,7 +142,7 @@ class TaskTest extends \Myfox\Lib\TestShell
 
         // xxx: host_02_01 没有装federated
         //$this->assertEquals(true, self::check_table_exists('host_03_01', 'mirror_0.task_test'));
-        $this->assertEquals(true, self::check_table_exists('host_03_01', 'mirror_0.task_test'));
+        $this->assertEquals(true, self::check_table_exists('edp2_8510', 'mirror_0.task_test'));
 
         //$this->assertEquals('', $task->result());
     }
@@ -170,13 +169,13 @@ class TaskTest extends \Myfox\Lib\TestShell
         /* xxx: empty source */
         $task	= new \Myfox\App\Task\Transfer(-1, array(
             'from'  => '-1,10',
-            'save'  => '3,8',
+            'save'  => '1,2',
             'table' => 'mirror',
             'path'  => 'mirror_0.task_test',
             'copy'  => true,
         ));
         $this->assertEquals(Task::FAIL, $task->execute());
-        $this->assertContains('Empty transfer source nodes, input:-1,10', $task->lastError());
+        $this->assertContains('Empty transfer source servers, input:-1,10', $task->lastError());
 
         // xxx: empty target
         $task	= new \Myfox\App\Task\Transfer(-1, array(
@@ -187,7 +186,7 @@ class TaskTest extends \Myfox\Lib\TestShell
             'copy'  => true,
         ));
         $this->assertEquals(Task::IGNO, $task->execute());
-        $this->assertContains('Empty transfer target nodes, input:-1,10000', $task->lastError());
+        $this->assertContains('Empty transfer target servers, input:-1,10000', $task->lastError());
     }
     /* }}} */
 
