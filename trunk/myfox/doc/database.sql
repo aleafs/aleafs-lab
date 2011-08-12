@@ -1,38 +1,31 @@
 
--- 节点表
-DROP TABLE IF EXISTS test_node_list;
-CREATE TABLE test_node_list (
-	node_id smallint(5) unsigned not null auto_increment,
-	node_type tinyint(2) unsigned not null default 0,
-	node_name char(16) not null default '',
-	addtime datetime not null default '0000-00-00 00:00:00',
-	modtime datetime not null default '0000-00-00 00:00:00',
-	PRIMARY KEY pk_node_id (node_id),
-	UNIQUE KEY uk_node_name (node_name)
-) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
-
-INSERT INTO test_node_list (node_id,node_type,node_name,addtime,modtime) VALUES (1,0,'online_01',NOW(),NOW());
-INSERT INTO test_node_list (node_id,node_type,node_name,addtime,modtime) VALUES (2,0,'online_02',NOW(),NOW());
-INSERT INTO test_node_list (node_id,node_type,node_name,addtime,modtime) VALUES (3,1,'archive_01',NOW(),NOW());
-
 -- 机器表
 DROP TABLE IF EXISTS test_host_list;
 CREATE TABLE test_host_list (
 	host_id int(10) unsigned not null auto_increment,
-	node_id smallint(5) unsigned not null default 0,
 	host_type tinyint(2) unsigned not null default 0,
 	host_stat tinyint(2) unsigned not null default 0,
+	host_pos int(10) unsigned not null default 0,
 	host_name char(16) not null default '',
 	addtime datetime not null default '0000-00-00 00:00:00',
 	modtime datetime not null default '0000-00-00 00:00:00',
 	conn_host varchar(64) not null default '',
 	conn_port smallint(5) unsigned not null default 0,
-	user_rw varchar(128) not null default '',
-	user_ro varchar(128) not null default '',
+	read_user varchar(64) not null default '',
+	read_pass varchar(64) not null default '',
+	write_user varchar(64) not null default '',
+	write_pass varchar(64) not null default '',
 	PRIMARY KEY pk_host_id (host_id),
 	UNIQUE KEY uk_host_name (host_name),
-	KEY idx_host_node (node_id,host_stat,host_type)
+	KEY idx_host_stat (host_stat, host_type)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
+
+INSERT INTO test_host_list (host_id,host_type,host_stat,host_name,conn_host,conn_port,read_user,read_pass,write_user,write_pass) VALUES (1, 1, 0, 'edp1_9801', '10.232.132.78', 9801, 'db_read', '123456', 'db_write', '123456');
+INSERT INTO test_host_list (host_id,host_type,host_stat,host_name,conn_host,conn_port,read_user,read_pass,write_user,write_pass) VALUES (2, 0, 0, 'edp1_9901', '10.232.132.78', 9901, 'db_read', '123456', 'db_write', '123456');
+INSERT INTO test_host_list (host_id,host_type,host_stat,host_name,conn_host,conn_port,read_user,read_pass,write_user,write_pass) VALUES (3, 1, 0, 'edp2_9902', '10.232.36.110', 9902, 'db_read', '123456', 'db_write', '123456');
+INSERT INTO test_host_list (host_id,host_type,host_stat,host_name,conn_host,conn_port,read_user,read_pass,write_user,write_pass) VALUES (4, 2, 0, 'edp2_8510', '10.232.36.110', 8510, 'db_read', '123456', 'db_write', '123456');
+
+UPDATE test_host_list SET host_pos = INET_ATON(conn_host), addtime = NOW(), modtime = NOW();
 
 -- 配置表
 DROP TABLE IF EXISTS test_table_list;
@@ -131,7 +124,7 @@ CREATE TABLE IF NOT EXISTS test_settings (
 DROP TABLE IF EXISTS test_task_queque;
 CREATE TABLE IF NOT EXISTS test_task_queque (
 	autokid bigint(20) unsigned not null auto_increment,
-	agentid smallint(5) unsigned not null default 0,
+	agentpos smallint(5) unsigned not null default 0,
 	priority smallint(5) unsigned not null default 0,
 	trytimes tinyint(2) unsigned not null default 0,
 	addtime datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
@@ -144,10 +137,8 @@ CREATE TABLE IF NOT EXISTS test_task_queque (
 	tmp_status varchar(1000) not null default '',
 	task_info text,
 	PRIMARY KEY pk_queque_id (autokid),
-	KEY idx_queque_flag (agentid, task_flag, trytimes),
+	KEY idx_queque_flag (task_flag, trytimes),
 	KEY idx_queque_prio (priority),
 	KEY idx_queque_time (addtime)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
-
--- SELECT ... FROM test_task_queque WHERE task_flag = ? AND trytimes < ? ORDER BY priority ASC, trytimes ASC, autokid ASC-- SELECT ... FROM test_task_queque WHERE addtime < ?
 

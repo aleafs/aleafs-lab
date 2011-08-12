@@ -61,5 +61,13 @@ class ContextTest extends \Myfox\Lib\TestShell
     }
     /* }}} */
 
+    /* {{{ public void test_should_addr_works_fine() */
+    public function test_should_addr_works_fine()
+    {
+        $ip = trim(`hostname -i`);
+        $this->assertEquals($ip, Context::addr());
+    }
+    /* }}} */
+
 }
 
