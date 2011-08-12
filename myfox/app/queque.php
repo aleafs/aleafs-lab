@@ -10,6 +10,8 @@
 
 namespace Myfox\App;
 
+use \Myfox\Lib\Context;
+
 class Queque
 {
 
@@ -30,6 +32,8 @@ class Queque
     /* }}} */
 
     /* {{{ 静态变量 */
+
+    private static $mypos;
 
     private static $mysql;
 
@@ -53,10 +57,11 @@ class Queque
         self::init();
 
         $row    = self::$mysql->getRow(self::$mysql->query(sprintf(
-            'SELECT autokid AS id,task_type,tmp_status,task_info FROM %stask_queque WHERE agentid IN (0,%d) '.
-            ' AND task_flag=%d AND trytimes<%d ORDER BY priority ASC, trytimes ASC, autokid ASC LIMIT 1',
+            'SELECT autokid AS id,task_type,tmp_status,task_info FROM %stask_queque WHERE '.
+            ' task_flag=%d AND trytimes<%d ORDER BY priority ASC, trytimes ASC, ' .
+            ' ABS(agentpos - %u) ASC, autokid ASC LIMIT 1',
             self::$mysql->option('prefix', ''),
-            $host, self::FLAG_WAIT, self::MAX_TRIES
+            $host, self::FLAG_WAIT, self::MAX_TRIES, self::$mypos
         )));
 
         if (empty($row)) {
@@ -120,7 +125,7 @@ class Queque
         self::init();
 
         $column = array(
-            'agentid'   => true,
+            'agentpos'  => true,
             'priority'  => true,
             'trytimes'  => true,
             'begtime'   => true,
@@ -162,6 +167,10 @@ class Queque
     {
         if (empty(self::$mysql)) {
             self::$mysql    = \Myfox\Lib\Mysql::instance('default');
+        }
+
+        if (empty(self::$mypos)) {
+            self::$mypos    = Context::addr();
         }
     }
     /* }}} */

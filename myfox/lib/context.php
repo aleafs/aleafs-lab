@@ -87,6 +87,24 @@ class Context
     }
     /* }}} */
 
+    /* {{{ public static Mixture addr() */
+    /**
+     * 获取本地IP地址
+     *
+     * @access public static
+     * @return Mixture
+     */
+    public static function addr($int = false)
+    {
+        if (null === ($ip = self::get('__addr__'))) {
+            $ip = trim(exec('hostname -i'));
+            self::register('__addr__', $ip);
+        }
+
+        return $int ? sprintf('%u', ip2long($ip)) : $ip;
+    }
+    /* }}} */
+
     /* {{{ public static Mixture userip() */
     /**
      * 获取当前用户IP
