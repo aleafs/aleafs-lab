@@ -177,15 +177,18 @@ abstract class Task
      */
     public function unlock($flag = Queque::FLAG_DONE, $option = null, $comma = null)
     {
-        return Queque::update(array(
-            'trytimes'  => sprintf('IF(task_flag=%d,trytimes,trytimes+1)', $flag),
-            'endtime'   => sprintf("IF(task_flag=%d,endtime,'%s')", $flag, date('Y-m-d H:i:s')),
-            'task_flag' => $flag,
-        ) + (array)$option, array(
-            'trytimes'  => true,
-            'endtime'   => true,
-            'task_flag' => true,
-        ) + (array)$comma);
+        return Queque::update(
+            $this->id,
+            array(
+                'trytimes'  => sprintf('IF(task_flag=%d,trytimes,trytimes+1)', $flag),
+                'endtime'   => sprintf("IF(task_flag=%d,endtime,'%s')", $flag, date('Y-m-d H:i:s')),
+                'task_flag' => $flag,
+            ) + (array)$option, array(
+                'trytimes'  => true,
+                'endtime'   => true,
+                'task_flag' => true,
+            ) + (array)$comma
+        );
     }
     /* }}} */
 
