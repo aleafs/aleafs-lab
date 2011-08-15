@@ -11,6 +11,7 @@ namespace Myfox\App\Model;
 use \Myfox\Lib\Mysql;
 use \Myfox\App\Setting;
 use \Myfox\App\Model\Table;
+use \Myfox\App\Model\Server;
 
 class Router
 {
@@ -26,9 +27,6 @@ class Router
     const MIRROR    = 0;            /**<    镜像表 */
     const SHARDING  = 1;            /**<    分区   */
 
-    const ONLINE    = 1;            /**<    正常节点 */
-    const ARCHIVE   = 2;            /**<    归档节点 */
-
     const TABLES_PER_DB = 400;
 
     /* }}} */
@@ -37,7 +35,9 @@ class Router
 
     private static $mysql   = null;
 
-    private static $nodes   = array();
+    private static $hostall = null;
+
+    private static $onlines = null;
 
     private static $objects = array();
 
@@ -66,7 +66,7 @@ class Router
      */
     public static function get($tbname, $field = array(), $touch = false)
     {
-        $table  = self::table($tbname);
+        $table  = self::instance($tbname);
         return $table->load($table->filter((array)$field), true, $touch);
     }
     /* }}} */
@@ -83,7 +83,7 @@ class Router
      */
     public static function set($tbname, $detail = array())
     {
-        return self::table($tbname)->insert((array)$detail);
+        return self::instance($tbname)->insert((array)$detail);
     }
     /* }}} */
 
@@ -96,7 +96,7 @@ class Router
      */
     public static function effect($tbname, $field = array(), $bucket)
     {
-        $table  = self::table($tbname);
+        $table  = self::instance($tbname);
         $where  = $table->where($field);
 
         return (bool)self::$mysql->query(sprintf(
@@ -140,14 +140,14 @@ class Router
     }
     /* }}} */
 
-    /* {{{ public static Object table() */
+    /* {{{ public static Object instance() */
     /**
      * 获取对象实例
      *
      * @access public static
      * @return Object
      */
-    public static function table($tbname)
+    public static function instance($tbname)
     {
         if (empty(self::$objects[$tbname])) {
             self::$objects[$tbname] = new self($tbname);
@@ -157,30 +157,39 @@ class Router
     }
     /* }}} */
 
-    /* {{{ private static Mixture nodelist() */
+    /* {{{ private static void metadata() */
     /**
-     * 获取节点列表
+     * 加载服务器列表数据
      *
      * @access private static
-     * @return Mixture
+     * @return Boolean true or false
      */
-    private static function nodelist($type = 0)
+    private static function metadata()
     {
-        $type   = (int)$type;
-        if (!isset(self::$nodes[$type])) {
-            self::$nodes[$type] = (array)self::$mysql->getAll(self::$mysql->query(sprintf(
-                'SELECT node_id FROM %snode_list %s ORDER BY node_id ASC',
-                self::$mysql->option('prefix', ''),
-                !empty($type) ? sprintf(' WHERE node_type = %d', $type) : ''
-            )));
-        }
+        $query  = sprintf(
+            'SELECT host_id, host_type FROM %shost_list ORDER BY host_pos ASC, host_id ASC',
+            self::$mysql->option('prefix', '')
+        );
 
-        return self::$nodes[$type];
+        self::$hostall  = array();
+        self::$onlines  = array();
+        foreach ((array)self::$mysql->getAll(self::$mysql->query($query)) AS $row) {
+            self::$hostall[]    = (int)$row['host_id'];
+            if (Server::TYPE_ARCHIVE != $row['host_type']) {
+                self::$onlines[]    = (int)$row['host_id'];
+            }
+        }
     }
     /* }}} */
 
-    /* {{{ private static String  hello() */
-    private static function hello($route)
+    /* {{{ private static String  table() */
+    /**
+     * 计算路由表表名
+     *
+     * @access private static
+     * @return String
+     */
+    private static function table($route)
     {
         return sprintf('%sroute_info', self::$mysql->option('prefix'));
         return sprintf(
@@ -209,6 +218,10 @@ class Router
 
         if (empty(self::$mysql)) {
             self::$mysql    = \Myfox\Lib\Mysql::instance('default');
+        }
+
+        if (null === self::$hostall || null === self::$onlines) {
+            self::metadata();
         }
     }
     /* }}} */
@@ -247,7 +260,7 @@ class Router
         $route  = $this->filter((array)$field);
         $sign   = $this->sign($route);
         return array(
-            'table' => self::hello($sign),
+            'table' => self::table($sign),
             'where' => sprintf(
                 "idxsign=%u AND table_name='%s' AND route_text='%s'",
                 $sign, self::$mysql->escape($this->tbname), self::$mysql->escape($route)
@@ -266,9 +279,9 @@ class Router
     private function load($char, $inuse = true, $touch = false)
     {
         $sign   = $this->sign($char);
-        $table  = self::hello($sign);
+        $table  = self::table($sign);
         $query  = sprintf(
-            "SELECT autokid,modtime,nodes_list,real_table FROM %s WHERE table_name='%s' AND route_text='%s' AND idxsign=%u",
+            "SELECT autokid,modtime,hosts_list,real_table FROM %s WHERE table_name='%s' AND route_text='%s' AND idxsign=%u",
             $table, self::$mysql->escape($this->tbname), self::$mysql->escape($char), $sign
         );
 
@@ -286,11 +299,11 @@ class Router
             }
 
             $routes[]   = array(
-                'tabid' => $table,
+                'tbidx' => $table,
                 'seqid' => (int)$rt['autokid'],
                 'mtime' => (int)$rt['modtime'],
-                'node'  => trim($rt['nodes_list'], '{}'),
-                'name'  => trim($rt['real_table']),
+                'hosts' => trim($rt['hosts_list'], '{}'),
+                'table' => trim($rt['real_table']),
             );
         }
 
@@ -358,15 +371,15 @@ class Router
     private function insert($detail = array())
     {
         if (self::MIRROR == $this->table->get('route_method')) {
-            $nodes  = self::nodelist(0);
-            $backup = count($nodes);
+            $hosts  = self::$hostall;
+            $backup = count($hosts);
             $chunks = array(array(array(
                 'data' => '',
                 'size' => empty($detail[0]['count']) ? 0 : $detail[0]['count'],
             )));
         } else {
-            $nodes  = self::nodelist(self::ONLINE);
-            $backup = max(1, $this->table->get('backups'));
+            $hosts  = self::$onlines;
+            $backup = min(max(1, $this->table->get('backups')), count(self::$onlines));
 
             $bucket = new \Myfox\App\Bucket(
                 $this->table->get('split_threshold', 2000000),
@@ -378,8 +391,9 @@ class Router
             $chunks = $bucket->allot();
         }
 
-        $counts = count($nodes);
-        $last   = (int)Setting::get('last_assign_node');
+        $counts = count($hosts);
+        $skips  = (int)ceil($counts / $backup);
+        $last   = (int)Setting::get('last_assign_host');
         $bucket = array();
 
         $cursor = (int)Setting::get('table_route_count', $this->tbname);
@@ -388,7 +402,7 @@ class Router
         foreach ($chunks AS $items) {
             $ns = array();
             for ($i = 0; $i < $backup; $i++) {
-                $ns[]   = $nodes[($last++) % $counts]['node_id'];
+                $ns[]   = $hosts[(($i * $skips) + $last) % $counts];
             }
 
             $ns = implode(',', $ns);
@@ -400,14 +414,15 @@ class Router
             foreach ($items AS $it) {
                 $bucket[$it['data']][]  = array(
                     'rows'  => $it['size'],
-                    'node'  => $ns,
+                    'hosts' => $ns,
                     'table' => $tb,
                 );
             }
             $cursor++;
+            $last++;
         }
 
-        Setting::set('last_assign_node', $last % $counts);
+        Setting::set('last_assign_host', $last % $counts);
         Setting::set('table_route_count', sprintf(
             'IF(cfgvalue + 0 > %d, cfgvalue, %d)', $cursor, $cursor
         ), $this->tbname, false);
@@ -420,19 +435,19 @@ class Router
             foreach ($slice AS $rt) {
                 $values[]   = sprintf(
                     "(%d,0,%d,%d,'%s','%s','{%s}','%s')",
-                    $sign, self::FLAG_PRE_IMPORT, $time, $this->tbname, $key, $rt['node'], $rt['table']
+                    $sign, self::FLAG_PRE_IMPORT, $time, $this->tbname, $key, $rt['hosts'], $rt['table']
                 );
             }
 
             // xxx: 事务保证
             self::$mysql->query(sprintf(
                 "UPDATE %s SET useflag=IF(useflag=%d,%d,%d) WHERE idxsign=%u AND table_name='%s' AND route_text='%s'",
-                self::hello($sign), self::FLAG_NORMAL_USE, self::FLAG_PRE_RESHIP, self::FLAG_IS_DELETED,
+                self::table($sign), self::FLAG_NORMAL_USE, self::FLAG_PRE_RESHIP, self::FLAG_IS_DELETED,
                 $sign, $this->tbname, $key
             ));
             self::$mysql->query(sprintf(
-                'INSERT INTO %s (idxsign,isarchive,useflag,addtime,table_name,route_text,nodes_list,real_table) VALUES %s',
-                self::hello($sign), implode(',', $values)
+                'INSERT INTO %s (idxsign,isarchive,useflag,addtime,table_name,route_text,hosts_list,real_table) VALUES %s',
+                self::table($sign), implode(',', $values)
             ));
         }
 

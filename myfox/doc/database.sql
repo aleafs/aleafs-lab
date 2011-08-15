@@ -17,7 +17,8 @@ CREATE TABLE test_host_list (
 	write_pass varchar(64) not null default '',
 	PRIMARY KEY pk_host_id (host_id),
 	UNIQUE KEY uk_host_name (host_name),
-	KEY idx_host_stat (host_stat, host_type)
+	KEY idx_host_stat (host_stat, host_type),
+	KEY idx_host_pos (host_pos)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
 INSERT INTO test_host_list (host_id,host_type,host_stat,host_name,conn_host,conn_port,read_user,read_pass,write_user,write_pass) VALUES (1, 1, 0, 'edp1_9801', '10.232.132.78', 9801, 'db_read', '123456', 'db_write', '123456');
@@ -46,7 +47,7 @@ CREATE TABLE test_table_list (
 	UNIQUE KEY uk_table_name (tabname)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
-INSERT INTO test_table_list (addtime,modtime,loadtype,tabname,split_threshold,split_drift,route_method,route_fields) VALUES (NOW(),NOW(),1,'mirror',1000,0.2,0,''), (NOW(),NOW(),0,'numsplit',1000,0.4,1,'{thedate:date,cid:int}');
+INSERT INTO test_table_list (addtime,modtime,backups,loadtype,tabname,split_threshold,split_drift,route_method,route_fields) VALUES (NOW(),NOW(),2,1,'mirror',1000,0.2,0,''), (NOW(),NOW(),2,0,'numsplit',1000,0.4,1,'{thedate:date,cid:int}');
 
 DROP TABLE IF EXISTS test_table_column;
 CREATE TABLE test_table_column (
@@ -101,7 +102,7 @@ CREATE TABLE test_route_info (
 	hittime int(10) unsigned not null default 0,
 	table_name varchar(64) not null default '',
 	real_table varchar(128) not null default '',
-	nodes_list varchar(1024) not null default '',
+	hosts_list varchar(1024) not null default '',
 	route_text varchar(1024) not null default '',
 	PRIMARY KEY pk_route_id (autokid),
 	KEY idx_route_sign (idxsign, useflag)
