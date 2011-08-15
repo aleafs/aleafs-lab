@@ -16,14 +16,9 @@ class TableTest extends \Myfox\Lib\TestShell
         parent::setUp();
 
         \Myfox\Lib\Mysql::register('default', __DIR__ . '/ini/mysql.ini');
-        self::$mysql    = \Myfox\Lib\Mysql::instance('default');
-
-        self::$mysql->query(sprintf(
-            "REPLACE INTO %s.%stable_list (addtime,modtime,loadtype,tabname, split_threshold,split_drift,route_method,route_fields) VALUES (NOW(),NOW(),1,'mirror',1000,0.2,0,''), (NOW(),NOW(),0,'numsplit',1000,0.2,1,'thedate:date,cid')",
-            self::$mysql->option('dbname', 'meta_myfox_config'),
-            self::$mysql->option('prefix', '')
-        ));
         Table::cleanAllStatic();
+
+        self::$mysql    = \Myfox\Lib\Mysql::instance('default');
     }
     /* }}} */
 

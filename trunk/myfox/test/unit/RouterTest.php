@@ -30,11 +30,11 @@ class RouterTest extends \Myfox\Lib\TestShell
         $query  = sprintf("SHOW TABLES LIKE '%sroute_info%%'", self::$mysql->option('prefix'));
         foreach (self::$mysql->getAll(self::$mysql->query($query)) AS $table) {
             self::$mysql->query(sprintf(
-                "DELETE FROM %s WHERE table_name IN ('mirror', 'numsplit')", reset($table)
+                'TRUNCATE TABLE %s', reset($table)
             ));
         }
 
-        Setting::set('last_assign_node', 0);
+        Setting::set('last_assign_host', 0);
     }
     /* }}} */
 
@@ -58,12 +58,13 @@ class RouterTest extends \Myfox\Lib\TestShell
 
         $mirror = \Myfox\App\Model\Table::instance('mirror');
         foreach (array(0, 1, 2, 0) AS $key => $id) {
+            Setting::set('last_assign_host', 0);
             $this->assertEquals(
                 array(
                     ''  => array(
                         array(
                             'rows'  => 1300,
-                            'node'  => '1,2,3',
+                            'hosts' => '3,4,1,2',
                             'table' => 'mirror_0.t_' . $mirror->get('autokid') . '_' . $id,
                         ),
                     ),
@@ -74,11 +75,12 @@ class RouterTest extends \Myfox\Lib\TestShell
                 $this->assertEquals(array(), Router::get('mirror'));
             }
         }
-        $this->assertEquals(0, Setting::get('last_assign_node'));
+
+        $this->assertEquals(1, Setting::get('last_assign_host'));
         $this->assertEquals(4, Setting::get('table_route_count', 'mirror'));
         $this->assertEquals(0, (int)Setting::get('table_real_count', 'mirror'));
 
-        $where  = Router::table('mirror')->where(null);
+        $where  = Router::instance('mirror')->where(null);
         $route  = self::$mysql->getRow(self::$mysql->query(sprintf(
             'SELECT real_table, hittime FROM %s WHERE table_name=\'mirror\' AND useflag=%d ORDER BY autokid DESC LIMIT 1',
             $where['table'], Router::FLAG_PRE_IMPORT
@@ -98,8 +100,8 @@ class RouterTest extends \Myfox\Lib\TestShell
 
         $route  = reset($route);
         $this->assertEquals(0, $route['mtime']);
-        $this->assertEquals('1,2,3', $route['node']);
-        $this->assertEquals($real_table, $route['name']);
+        $this->assertEquals('3,4,1,2', $route['hosts']);
+        $this->assertEquals($real_table, $route['table']);
 
         Router::removeAllCache();
         $query  = sprintf(
@@ -132,19 +134,19 @@ class RouterTest extends \Myfox\Lib\TestShell
                 '1:cid;20110610:thedate'    => array(
                     array(
                         'rows'  => 1000,
-                        'node'  => 1,
+                        'hosts' => '3,2',
                         'table' => 'numsplit_0.t_' . $table->get('autokid') . '_0',
                     ),
                     array(
                         'rows'  => 201,
-                        'node'  => 2,
+                        'hosts' => '1,3',
                         'table' => 'numsplit_0.t_' . $table->get('autokid') . '_1',
                     ),
                 ),
                 '2:cid;20110610:thedate'    => array(
                     array(
                         'rows'  => 998,
-                        'node'  => 2,
+                        'hosts' => '1,3',
                         'table' => 'numsplit_0.t_' . $table->get('autokid') . '_1',
                     ),
                 ),
@@ -192,14 +194,16 @@ class RouterTest extends \Myfox\Lib\TestShell
 
         $this->assertEquals(array(
             array(
+                'tbidx' => 'test_route_info',
                 'mtime' => 1111,
-                'node'  => 2,
-                'name'  => sprintf('numsplit_0.t_%d_1', $table->get('autokid')),
+                'hosts' => '3,2',
+                'table' => sprintf('numsplit_0.t_%d_0', $table->get('autokid')),
             ),
             array(
+                'tbidx' => 'test_route_info',
                 'mtime' => 1111,
-                'node'  => 1,
-                'name'  => sprintf('numsplit_0.t_%d_0', $table->get('autokid')),
+                'hosts' => '1,3',
+                'table' => sprintf('numsplit_0.t_%d_1', $table->get('autokid')),
             ),
         ), $result);
     }
