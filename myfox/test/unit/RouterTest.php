@@ -134,19 +134,19 @@ class RouterTest extends \Myfox\Lib\TestShell
                 '1:cid;20110610:thedate'    => array(
                     array(
                         'rows'  => 1000,
-                        'hosts' => '3,2',
+                        'hosts' => '3,1',
                         'table' => 'numsplit_0.t_' . $table->get('autokid') . '_0',
                     ),
                     array(
                         'rows'  => 201,
-                        'hosts' => '1,3',
+                        'hosts' => '1,2',
                         'table' => 'numsplit_0.t_' . $table->get('autokid') . '_1',
                     ),
                 ),
                 '2:cid;20110610:thedate'    => array(
                     array(
                         'rows'  => 998,
-                        'hosts' => '1,3',
+                        'hosts' => '1,2',
                         'table' => 'numsplit_0.t_' . $table->get('autokid') . '_1',
                     ),
                 ),
@@ -196,13 +196,13 @@ class RouterTest extends \Myfox\Lib\TestShell
             array(
                 'tbidx' => 'test_route_info',
                 'mtime' => 1111,
-                'hosts' => '3,2',
+                'hosts' => '3,1',
                 'table' => sprintf('numsplit_0.t_%d_0', $table->get('autokid')),
             ),
             array(
                 'tbidx' => 'test_route_info',
                 'mtime' => 1111,
-                'hosts' => '1,3',
+                'hosts' => '1,2',
                 'table' => sprintf('numsplit_0.t_%d_1', $table->get('autokid')),
             ),
         ), $result);

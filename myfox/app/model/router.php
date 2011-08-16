@@ -392,7 +392,7 @@ class Router
         }
 
         $counts = count($hosts);
-        $skips  = (int)ceil($counts / $backup);
+        $skips  = (int)($counts / $backup);
         $last   = (int)Setting::get('last_assign_host');
         $bucket = array();
 
