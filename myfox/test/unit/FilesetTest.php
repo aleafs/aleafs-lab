@@ -44,6 +44,7 @@ class FilesetTest extends \Myfox\Lib\TestShell
 	/* {{{ public void test_should_get_file_from_ftp_works_fine() */
 	public function test_should_get_file_from_ftp_works_fine()
 	{
+		$this->assertEquals(true, Fileset::getfile('ftp://www.taobao.com', null, true));
 	}
 	/* }}} */
 
