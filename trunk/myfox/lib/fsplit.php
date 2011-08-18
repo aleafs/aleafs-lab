@@ -13,13 +13,27 @@ namespace Myfox\Lib;
 class Fsplit
 {
 
-	/* {{{ 成员变量 */
+    /* {{{ 静态常量 */
 
-	private $nline	= 1000;
+    const BUFFER_SIZE   = 1048576;      /**<    1M */
 
-	private $bsize	= 0;
+    const END_OF_LINE   = '\n';
 
-	/* }}} */
+    /* }}} */
+
+    /* {{{ 成员变量 */
+
+    private $fname  = null;
+
+    private $fsize  = null;
+
+    private $offset = 0;
+
+    private $sline  = 0;                /**<    平均每行大小 */
+
+    private $error  = null;
+
+    /* }}} */
 
     /* {{{ public static Mixture chunk() */
     /**
@@ -28,19 +42,98 @@ class Fsplit
      * @access public static
      * @return Mixture
      */
-    public static function chunk($fname, $slice, $nline = 1000, $bsize = 0)
-	{
-		$ob	= new self($nline, $bsize);
-		return $ob->split($fname, $slice);
+    public static function chunk($fname, $slice, $sline = 0)
+    {
+        $ob	= new self($fname, $sline);
+        return $ob->split($slice);
     }
     /* }}} */
 
-	private function __construct($nline, $bsize)
-	{
-	}
+    /* {{{ public String lastError() */
+    /**
+     * 返回上次错误
+     *
+     * @access public
+     * @return String
+     */
+    public function lastError()
+    {
+        return $this->error;
+    }
+    /* }}} */
 
-	private function split($fname, $slice)
-	{
-	}
+    /* {{{ private void __construct() */
+    /**
+     * 构造函数
+     *
+     * @access private
+     * @return void
+     */
+    private function __construct($fname, $sline = 0)
+    {
+        $this->fname    = trim($fname);
+        $this->sline    = 0 + $sline;
+        $this->offset   = 0;
+    }
+    /* }}} */
+
+    /* {{{ private void split() */
+    /**
+     * 进行文件切分
+     *
+     * @access private
+     * @return void
+     */
+    private function split($slice)
+    {
+        $fn = realpath($this->fname);
+        if (empty($fn)) {
+            $this->error    = sprintf('No such file named as "%s".', $this->fname);
+            return false;
+        }
+
+        $this->fname    = $fn;
+        $this->fsize    = filesize($fn);
+        if ($this->sline < 1 && empty($this->test())) {
+            return false;
+        }
+
+        $chunks = array();
+        foreach ((array)$slice AS $line) {
+            $buffer = ceil($line * $this->sline);
+        }
+
+        return $chunks;
+    }
+    /* }}} */
+
+    /* {{{ private Boolean test() */
+    /**
+     * 探测文件行大小
+     *
+     * @access private
+     * @return Boolean true or false
+     */
+    private function test()
+    {
+        $buffer = min($this->fsize, self::BUFFER_SIZE);
+        $header = explode(self::END_OF_LINE, 
+            (string)@file_get_contents($this->fname, false, null, 0, $buffer)
+        );
+
+        if (empty($header) || !isset($header[1])) {
+            $this->error    = sprintf(
+                'File "%s" read failed, or has longer line than %d.',
+                $this->fname, $buffer
+            );
+            return false;
+        }
+
+        array_pop($header);
+        $this->sline    = strlen(implode(self::END_OF_LINE, $header)) / count($header);
+
+        return true;
+    }
+    /* }}} */
 
 }
