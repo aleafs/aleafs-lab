@@ -94,7 +94,7 @@ class Fsplit
 
         $this->fname    = $fn;
         $this->fsize    = filesize($fn);
-        if ($this->sline < 1 && empty($this->test())) {
+        if ($this->sline < 1 && !$this->test()) {
             return false;
         }
 
