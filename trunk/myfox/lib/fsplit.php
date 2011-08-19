@@ -15,9 +15,11 @@ class Fsplit
 
     /* {{{ 静态常量 */
 
+    const SPLIT_PATH    = '/tmp/myfox/split';
+
     const BUFFER_SIZE   = 1048576;      /**<    1M */
 
-    const END_OF_LINE   = '\n';
+    const END_OF_LINE   = "\n";
 
     /* }}} */
 
@@ -42,17 +44,16 @@ class Fsplit
      * @access public static
      * @return Mixture
      */
-    public static function chunk($fname, $slice, $sline = 0)
+    public static function chunk($fname, $slice, $spath = self::SPLIT_PATH, $sline = 0)
     {
         $ob	= new self($fname, $sline);
-        return $ob->split($slice);
+        return $ob->split($slice, $spath);
     }
     /* }}} */
 
     /* {{{ public String lastError() */
     /**
      * 返回上次错误
-     *
      * @access public
      * @return String
      */
@@ -84,11 +85,16 @@ class Fsplit
      * @access private
      * @return void
      */
-    private function split($slice)
+    private function split($slice, $spath = '')
     {
         $fn = realpath($this->fname);
         if (empty($fn)) {
             $this->error    = sprintf('No such file named as "%s".', $this->fname);
+            return false;
+        }
+
+        if (!is_dir($spath) && !mkdir($spath, 0755, true)) {
+            $this->error    = sprintf('Directory "%s" created failed.', $spath);
             return false;
         }
 
@@ -99,8 +105,34 @@ class Fsplit
         }
 
         $chunks = array();
-        foreach ((array)$slice AS $line) {
-            $buffer = ceil($line * $this->sline);
+        $spath  = sprintf('%s/%s', realpath($spath), basename($this->fname));
+        foreach ((array)$slice AS $idx => $line) {
+            $sname  = $spath . '_' . $idx;
+            if (is_file($sname) && !unlink($sname)) {
+                $this->error    = sprintf('File "%s" already exists, and unlink failed.', $sname);
+                return false;
+            }
+
+            $chunks[]   = $sname;
+            $until  = (int)ceil(($line + 10) * $this->sline);
+            do {
+                $bytes  = $until < self::BUFFER_SIZE ? $until : self::BUFFER_SIZE;
+                $buffer = file_get_contents($this->fname, false, null, $this->offset, $bytes);
+                if (($until -= self::BUFFER_SIZE) <= 0) {
+                    $ps = strrpos($buffer, self::END_OF_LINE);
+                    // xxx: 最后一个分片里没有换行符
+                    if (false === $ps) {
+                        break;
+                    }
+                    $buffer = substr($buffer, 0, $ps + 1);
+                }
+
+                $this->offset   += strlen($buffer);
+                if (!file_put_contents($sname, $buffer, FILE_APPEND, null)) {
+                    $this->error    = sprintf('File "%s" append failed.', $sname);
+                    return false;
+                }
+            } while ($until > 0);
         }
 
         return $chunks;
