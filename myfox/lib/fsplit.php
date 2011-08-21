@@ -27,9 +27,9 @@ class Fsplit
 
     private $fname  = null;
 
-    private $offset = 0;
+    private $bfsize = 0;
 
-    private $sline  = 0;                /**<    平均每行大小 */
+    private $buffer = '';
 
     private $error  = null;
 
@@ -44,9 +44,9 @@ class Fsplit
      * @access public static
      * @return Mixture
      */
-    public static function chunk($fname, $slice, $spath = self::SPLIT_PATH, $sline = 0)
+    public static function chunk($fname, $slice, $spath = self::SPLIT_PATH)
     {
-        $ob	= new self($fname, $sline);
+        $ob	= new self($fname);
         return $ob->split($slice, $spath);
     }
     /* }}} */
@@ -63,6 +63,20 @@ class Fsplit
     }
     /* }}} */
 
+    /* {{{ public void __construct() */
+    /**
+     * 构造函数
+     *
+     * @access public
+     * @return void
+     */
+    public function __construct($fname, $bfsize = self::BUFFER_SIZE)
+    {
+        $this->fname    = trim($fname);
+        $this->bfsize   = (int)$bfsize;
+    }
+    /* }}} */
+
     /* {{{ public void __destruct() */
     /**
      * 析构函数
@@ -72,25 +86,7 @@ class Fsplit
      */
     public function __destruct()
     {
-        if ($this->handle) {
-            fclose($this->handle);
-            $this->handle   = null;
-        }
-    }
-    /* }}} */
-
-    /* {{{ private void __construct() */
-    /**
-     * 构造函数
-     *
-     * @access private
-     * @return void
-     */
-    private function __construct($fname, $sline = 0)
-    {
-        $this->fname    = trim($fname);
-        $this->sline    = 0 + $sline;
-        $this->offset   = 0;
+        $this->close();
     }
     /* }}} */
 
@@ -120,75 +116,84 @@ class Fsplit
             return false;
         }
 
-        if ($this->sline < 1 && !$this->test()) {
+        $spath  = sprintf('%s/%s', realpath($spath), basename($this->fname));
+        $slice  = (array)$slice;
+
+        $buffer = '';
+        $offset = current($slice);
+        $wfname = $spath . '_' . key($slice);
+        if (!$this->truncate($wfname)) {
+            $this->close();
             return false;
         }
 
-        $chunks = array();
-        $spath  = sprintf('%s/%s', realpath($spath), basename($this->fname));
-
-        $this->offset   = 0;
-
-        foreach ((array)$slice AS $idx => $line) {
-            $sname  = $spath . '_' . $idx;
-            if (is_file($sname) && !unlink($sname)) {
-                $this->error    = sprintf('File "%s" already exists, and unlink failed.', $sname);
-                return false;
-            }
-
-            $chunks[]   = $sname;
-            fseek($this->handle, $this->offset, SEEK_SET);
-            $offset = (int)ceil(($line + 10) * $this->sline);
-            $goon   = false;
-
-            while (!feof($this->handle) && ($goon || $offset > 0)) {
-                $buffer = fread($this->handle, self::BUFFER_SIZE);
-                if (($offset -= self::BUFFER_SIZE) <= 0) {
-                    if (false === ($ps = strrpos($buffer, self::END_OF_LINE))) {
-                        $goon   = true;
-                    } else {
-                        $goon   = false;
-                        $buffer = substr($buffer, 0, $ps + 1);
-                    }
-                }
-
-                $this->offset   += strlen($buffer);
-                if (false === file_put_contents($sname, $buffer, FILE_APPEND, null)) {
-                    $this->error    = sprintf('File "%s" append failed.', $sname);
+        $chunks = array($wfname);
+        while (1) {
+            $buffer .= fread($this->handle, $this->bfsize);
+            if (false !== ($pos = strpos($buffer, self::END_OF_LINE, $offset - 1))) {
+                if (!file_put_contents($wfname, substr($buffer, 0, $pos + 1), FILE_APPEND)) {
+                    $this->error    = sprintf('Append to file "%s" failed.', $wfname);
+                    $this->close();
                     return false;
                 }
+
+                $buffer = substr($buffer, $pos);
+                if (false !== ($pos = next($slice))) {
+                    $offset = $pos;
+                    $wfname = $spath . '_' . key($slice);
+                    if (!$this->truncate($wfname)) {
+                        $this->close();
+                        return false;
+                    }
+                    $chunks[]   = $wfname;
+                }
+            }
+
+            if (feof($this->handle)) {
+                // xxx: flush
+                break;
             }
         }
+        $this->close();
 
         return $chunks;
     }
     /* }}} */
 
-    /* {{{ private Boolean test() */
+    /* {{{ private Boolean truncate() */
     /**
-     * 探测文件行大小
+     * 清理已有文件
      *
      * @access private
      * @return Boolean true or false
      */
-    private function test()
+    private function truncate($fname)
     {
-        fseek($this->handle, 0, SEEK_SET);
-        if (false === ($buffer = fread($this->handle, self::BUFFER_SIZE))) {
-            $this->error    = sprintf('File "%s" read failed.', $this->fname);
-            return false;
+        $rt = true;
+        if (is_file($fname)) {
+            if (!unlink($fname)) {
+                $this->error    = sprintf('File "%s" already exists, and unlink failed.', $fname);
+                $rt = false;
+            }
         }
 
-        $header = explode(self::END_OF_LINE, $buffer);
-        if (empty($header) || !isset($header[1])) {
-            $this->error    = sprintf('Line is longer than %d, or bad formmat.', strlen($buffer));
-            return false;
+        return $rt;
+    }
+    /* }}} */
+
+    /* {{{ private void close() */
+    /**
+     * 关闭文件句柄
+     *
+     * @access private
+     * @return void
+     */
+    private function close()
+    {
+        if ($this->handle) {
+            fclose($this->handle);
+            $this->handle   = null;
         }
-
-        array_pop($header);
-        $this->sline    = strlen(implode(self::END_OF_LINE, $header)) / count($header);
-
-        return true;
     }
     /* }}} */
 
