@@ -35,6 +35,8 @@ class Fsplit
 
     private $error  = null;
 
+    private $handle = null;
+
     /* }}} */
 
     /* {{{ public static Mixture chunk() */
@@ -60,6 +62,22 @@ class Fsplit
     public function lastError()
     {
         return $this->error;
+    }
+    /* }}} */
+
+    /* {{{ public void __destruct() */
+    /**
+     * 析构函数
+     *
+     * @access public
+     * @return void
+     */
+    public function __destruct()
+    {
+        if ($this->handle) {
+            fclose($this->handle);
+            $this->handle   = null;
+        }
     }
     /* }}} */
 
@@ -99,6 +117,11 @@ class Fsplit
         }
 
         $this->fname    = $fn;
+        if (false === ($this->handle = fopen($this->fname, 'rb'))) {
+            $this->error    = sprintf('File "%s" open failed.', $this->fname);
+            return false;
+        }
+
         $this->fsize    = filesize($fn);
         if ($this->sline < 1 && !$this->test()) {
             return false;
@@ -148,16 +171,15 @@ class Fsplit
      */
     private function test()
     {
-        $buffer = min($this->fsize, self::BUFFER_SIZE);
-        $header = explode(self::END_OF_LINE, 
-            (string)@file_get_contents($this->fname, false, null, 0, $buffer)
-        );
+        fseek($this->handle, 0, SEEK_SET);
+        if (false === ($buffer = fread($this->handle, self::BUFFER_SIZE))) {
+            $this->error    = sprintf('File "%s" read failed.', $this->fname);
+            return false;
+        }
 
+        $header = explode(self::END_OF_LINE, $buffer);
         if (empty($header) || !isset($header[1])) {
-            $this->error    = sprintf(
-                'File "%s" read failed, or has longer line than %d.',
-                $this->fname, $buffer
-            );
+            $this->error    = sprintf('Line is longer than %d, or bad formmat.', strlen($buffer));
             return false;
         }
 
