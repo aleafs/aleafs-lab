@@ -27,8 +27,6 @@ class Fsplit
 
     private $fname  = null;
 
-    private $fsize  = null;
-
     private $offset = 0;
 
     private $sline  = 0;                /**<    平均每行大小 */
@@ -122,13 +120,15 @@ class Fsplit
             return false;
         }
 
-        $this->fsize    = filesize($fn);
         if ($this->sline < 1 && !$this->test()) {
             return false;
         }
 
         $chunks = array();
         $spath  = sprintf('%s/%s', realpath($spath), basename($this->fname));
+
+        $this->offset   = 0;
+
         foreach ((array)$slice AS $idx => $line) {
             $sname  = $spath . '_' . $idx;
             if (is_file($sname) && !unlink($sname)) {
@@ -137,25 +137,27 @@ class Fsplit
             }
 
             $chunks[]   = $sname;
-            $until  = (int)ceil(($line + 10) * $this->sline);
-            do {
-                $bytes  = $until < self::BUFFER_SIZE ? $until : self::BUFFER_SIZE;
-                $buffer = file_get_contents($this->fname, false, null, $this->offset, $bytes);
-                if (($until -= self::BUFFER_SIZE) <= 0) {
-                    $ps = strrpos($buffer, self::END_OF_LINE);
-                    // xxx: 最后一个分片里没有换行符
-                    if (false === $ps) {
-                        break;
+            fseek($this->handle, $this->offset, SEEK_SET);
+            $offset = (int)ceil(($line + 10) * $this->sline);
+            $goon   = false;
+
+            while (!feof($this->handle) && ($goon || $offset > 0)) {
+                $buffer = fread($this->handle, self::BUFFER_SIZE);
+                if (($offset -= self::BUFFER_SIZE) <= 0) {
+                    if (false === ($ps = strrpos($buffer, self::END_OF_LINE))) {
+                        $goon   = true;
+                    } else {
+                        $goon   = false;
+                        $buffer = substr($buffer, 0, $ps + 1);
                     }
-                    $buffer = substr($buffer, 0, $ps + 1);
                 }
 
                 $this->offset   += strlen($buffer);
-                if (!file_put_contents($sname, $buffer, FILE_APPEND, null)) {
+                if (false === file_put_contents($sname, $buffer, FILE_APPEND, null)) {
                     $this->error    = sprintf('File "%s" append failed.', $sname);
                     return false;
                 }
-            } while ($until > 0);
+            }
         }
 
         return $chunks;
