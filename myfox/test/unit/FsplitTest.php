@@ -31,6 +31,18 @@ class FsplitTest extends \Myfox\Lib\TestShell
 	}
 	/* }}} */
 
+    /* {{{ private static Integer fileline() */
+    private static function fileline($fname)
+    {
+        $rt = exec(sprintf('wc -l "%s"', $fname), $output, $code);
+        if (false === $rt || !empty($code)) {
+            return false;
+        }
+
+        return (int)$rt;
+    }
+    /* }}} */
+
 	/* {{{ private static Boolean prepare_test_file() */
 	/**
 	 * 准备测试文件
@@ -75,7 +87,11 @@ class FsplitTest extends \Myfox\Lib\TestShell
 			__DIR__ . '/tmp/fsplit_test.txt_0',
 			__DIR__ . '/tmp/fsplit_test.txt_1',
 			__DIR__ . '/tmp/fsplit_test.txt_2',
-		), Fsplit::chunk($fname, array(10000, 10000, 6000), __DIR__ . '/tmp'));
+        ), Fsplit::chunk($fname, array(10000, 10000, 6000), __DIR__ . '/tmp'));
+
+        $this->assertEquals(10000,  self::fileline(__DIR__ . '/tmp/fsplit_test.txt_0'));
+        $this->assertEquals(10000,  self::fileline(__DIR__ . '/tmp/fsplit_test.txt_1'));
+        $this->assertEquals(7000,   self::fileline(__DIR__ . '/tmp/fsplit_test.txt_2'));
 	}
 	/* }}} */
 

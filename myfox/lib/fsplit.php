@@ -29,7 +29,9 @@ class Fsplit
 
     private $bfsize = 0;
 
-    private $buffer = '';
+    private $lnsize = 0;
+
+    private $eofl   = self::END_OF_LINE;
 
     private $error  = null;
 
@@ -70,10 +72,13 @@ class Fsplit
      * @access public
      * @return void
      */
-    public function __construct($fname, $bfsize = self::BUFFER_SIZE)
+    public function __construct($fname, $bfsize = self::BUFFER_SIZE, $eofl = self::END_OF_LINE)
     {
         $this->fname    = trim($fname);
         $this->bfsize   = (int)$bfsize;
+        if (strlen($eofl) > 0) {
+            $this->eofl = $eofl;
+        }
     }
     /* }}} */
 
@@ -116,47 +121,92 @@ class Fsplit
             return false;
         }
 
+        if (empty($this->lnsize) && !$this->test()) {
+            return false;
+        }
+
         $spath  = sprintf('%s/%s', realpath($spath), basename($this->fname));
         $slice  = (array)$slice;
 
-        $buffer = '';
-        $offset = current($slice);
         $wfname = $spath . '_' . key($slice);
         if (!$this->truncate($wfname)) {
             $this->close();
             return false;
         }
 
+        fseek($this->handle, 0, SEEK_SET);
         $chunks = array($wfname);
+        $buffer = '';
+        $offset = (int)ceil(current($slice) * $this->lnsize);
         while (1) {
-            $buffer .= fread($this->handle, $this->bfsize);
-            if (false !== ($pos = strpos($buffer, self::END_OF_LINE, $offset - 1))) {
-                if (!file_put_contents($wfname, substr($buffer, 0, $pos + 1), FILE_APPEND)) {
-                    $this->error    = sprintf('Append to file "%s" failed.', $wfname);
+            while ($offset >= $this->bfsize) {
+                if (!$this->append($wfname, fread($this->handle, $this->bfsize))) {
                     $this->close();
                     return false;
                 }
 
-                $buffer = substr($buffer, $pos);
-                if (false !== ($pos = next($slice))) {
-                    $offset = $pos;
-                    $wfname = $spath . '_' . key($slice);
-                    if (!$this->truncate($wfname)) {
-                        $this->close();
-                        return false;
-                    }
-                    $chunks[]   = $wfname;
+                $offset -= $this->bfsize;
+                if (feof($this->handle)) {
+                    break 2;
                 }
             }
 
+            do {
+                $buffer .= fread($this->handle, $this->bfsize);
+                $pos    = strpos($buffer, $this->eofl, $offset);
+                var_dump($offset, $pos);
+            } while (false === $pos && !feof($this->handle));
+
             if (feof($this->handle)) {
-                // xxx: flush
+                if (!$this->append($wfname, $buffer)) {
+                    $this->close();
+                    return false;
+                }
                 break;
+            }
+
+            if (!$this->append($wfname, substr($buffer, 0, $pos + 1))) {
+                $this->close();
+                return false;
+            }
+
+            $buffer = substr($buffer, $pos + 1);
+            if (false !== ($next = next($slice))) {
+                //var_dump($next);
+                $offset = (int)ceil($pos * $this->lnsize);
+                $wfname = $spath . '_' . key($slice);
+                if (!$this->truncate($wfname)) {
+                    $this->close();
+                    return false;
+                }
+                $chunks[]   = $wfname;
             }
         }
         $this->close();
 
         return $chunks;
+    }
+    /* }}} */
+
+    /* {{{ private Boolean test() */
+    /**
+     * 测试文件, 读取每行大小
+     *
+     * @access private
+     * @return Boolean true or false
+     */
+    private function test()
+    {
+        $bf = explode($this->eofl, (string)fread($this->handle, self::BUFFER_SIZE));
+        if (empty($bf) || !isset($bf[1])) {
+            $this->error    = sprintf('xx');
+            return false;
+        }
+
+        array_pop($bf);
+        $this->lnsize   = strlen(implode($this->eofl, $bf)) / count($bf);
+
+        return true;
     }
     /* }}} */
 
@@ -178,6 +228,24 @@ class Fsplit
         }
 
         return $rt;
+    }
+    /* }}} */
+
+    /* {{{ private Boolean append() */
+    /**
+     * 写入文件
+     *
+     * @access private
+     * @return Boolean true or false
+     */
+    private function append($fname, $data)
+    {
+        if (false === file_put_contents($fname, $data, FILE_APPEND, null)) {
+            $this->error    = sprintf('Append file "%s" failed.', $fname);
+            return false;
+        }
+
+        return true;
     }
     /* }}} */
 
