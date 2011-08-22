@@ -29,6 +29,8 @@ class Fsplit
 
     private $bfsize = 0;
 
+    private $buffer = '';
+
     private $lnsize = 0;
 
     private $eofl   = self::END_OF_LINE;
@@ -95,6 +97,22 @@ class Fsplit
     }
     /* }}} */
 
+    /* {{{ private void close() */
+    /**
+     * 关闭文件句柄
+     *
+     * @access private
+     * @return void
+     */
+    private function close()
+    {
+        if ($this->handle) {
+            fclose($this->handle);
+            $this->handle   = null;
+        }
+    }
+    /* }}} */
+
     /* {{{ private void split() */
     /**
      * 进行文件切分
@@ -154,7 +172,6 @@ class Fsplit
             do {
                 $buffer .= fread($this->handle, $this->bfsize);
                 $pos    = strpos($buffer, $this->eofl, $offset);
-                var_dump($offset, $pos);
             } while (false === $pos && !feof($this->handle));
 
             if (feof($this->handle)) {
@@ -197,14 +214,18 @@ class Fsplit
      */
     private function test()
     {
-        $bf = explode($this->eofl, (string)fread($this->handle, self::BUFFER_SIZE));
-        if (empty($bf) || !isset($bf[1])) {
-            $this->error    = sprintf('xx');
+        $this->buffer   = (string)fread($this->handle, self::BUFFER_SIZE);
+        $buffer = explode($this->eofl, $this->buffer);
+        if (empty($buffer) || !isset($buffer[1])) {
+            $this->error    = sprintf(
+                'Unrecognized text formmat, or line size larger than %d.', self::BUFFER_SIZE
+            );
             return false;
         }
 
-        array_pop($bf);
-        $this->lnsize   = strlen(implode($this->eofl, $bf)) / count($bf);
+        $count  = count($buffer) - 1;
+        $buffer[$count] = $this->eofl;
+        $this->lnsize   = strlen(implode($this->eofl, $buffer)) / $count;
 
         return true;
     }
@@ -246,22 +267,6 @@ class Fsplit
         }
 
         return true;
-    }
-    /* }}} */
-
-    /* {{{ private void close() */
-    /**
-     * 关闭文件句柄
-     *
-     * @access private
-     * @return void
-     */
-    private function close()
-    {
-        if ($this->handle) {
-            fclose($this->handle);
-            $this->handle   = null;
-        }
     }
     /* }}} */
 
