@@ -79,7 +79,7 @@ class FsplitTest extends \Myfox\Lib\TestShell
 	/* }}} */
 
 	/* {{{ public void test_should_file_split_by_line_works_fine() */
-	public function _test_should_file_split_by_line_works_fine()
+	public function test_should_file_split_by_line_works_fine()
     {
         $expect = array(
             __DIR__ . '/tmp/fsplit_test.txt_0'  => 10000,
