@@ -157,33 +157,45 @@ class Fsplit
 
         $buffer = $this->buffer;
         $this->buffer   = '';
-        while (!feof($this->handle) || !empty($buffer)) {
+
+        while (1) {
             $buffer .= fread($this->handle, $this->bfsize);
             $length = strlen($buffer);
-            if ($length < $offset || feof($this->handle)) {
-                if ($this->append($wfname, $buffer)) {
-                    $buffer = '';
-                    $offset -= $length;
-                }
-            } else {
+
+            while ($length >= $offset) {
                 $endpos = strpos($buffer, $this->eofl, $offset);
-                if (false !== $endpos) {
-                    if (!$this->append($wfname, substr($buffer, 0, $endpos + 1))) {
+                if (false === $endpos) {
+                    break;
+                }
+
+                if (!$this->append($wfname, substr($buffer, 0, $endpos + 1))) {
+                    $this->close();
+                    return false;
+                }
+
+                $buffer = substr($buffer, $endpos + 1);
+                $length = strlen($buffer);
+                if (false !== ($next = next($slice))) {
+                    $wfname = $spath . '_' . key($slice);
+                    $offset = (int)ceil($this->lnsize * $next);
+                    if (!$this->truncate($wfname)) {
                         $this->close();
                         return false;
                     }
-
-                    $buffer = substr($buffer, $endpos + 1);
-                    if (false !== ($next = next($slice))) {
-                        $wfname = $spath . '_' . key($slice);
-                        $offset = (int)ceil($this->lnsize * $next);
-                        if (!$this->truncate($wfname)) {
-                            $this->close();
-                            return false;
-                        }
-                        $chunks[]   = $wfname;
-                    }
+                    $chunks[]   = $wfname;
                 }
+            }
+
+            if (feof($this->handle)) {
+                if ($length > 0) {
+                    if (!$this->append($wfname, $buffer)) {
+                        $this->close();
+                        return false;
+                    }
+                    $buffer = '';
+                    $length = 0;
+                }
+                break;
             }
         }
         $this->close();
