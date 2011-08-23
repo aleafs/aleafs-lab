@@ -74,7 +74,7 @@ class Fsplit
      * @access public
      * @return void
      */
-    public function __construct($fname, $bfsize = self::BUFFER_SIZE, $eofl = self::END_OF_LINE)
+    public function __construct($fname, $eofl = self::END_OF_LINE, $bfsize = self::BUFFER_SIZE)
     {
         $this->fname    = trim($fname);
         $this->bfsize   = (int)$bfsize;
@@ -97,30 +97,14 @@ class Fsplit
     }
     /* }}} */
 
-    /* {{{ private void close() */
-    /**
-     * 关闭文件句柄
-     *
-     * @access private
-     * @return void
-     */
-    private function close()
-    {
-        if ($this->handle) {
-            fclose($this->handle);
-            $this->handle   = null;
-        }
-    }
-    /* }}} */
-
-    /* {{{ private void split() */
+    /* {{{ public Mixture split() */
     /**
      * 进行文件切分
      *
-     * @access private
-     * @return void
+     * @access public
+     * @return Mixture
      */
-    private function split($slice, $spath = '')
+    public function split($slice, $spath = '')
     {
         $fn = realpath($this->fname);
         if (empty($fn)) {
@@ -128,7 +112,7 @@ class Fsplit
             return false;
         }
 
-        if (!is_dir($spath) && !mkdir($spath, 0755, true)) {
+        if (!is_dir($spath) && !@mkdir($spath, 0755, true)) {
             $this->error    = sprintf('Directory "%s" created failed.', $spath);
             return false;
         }
@@ -204,6 +188,22 @@ class Fsplit
     }
     /* }}} */
 
+    /* {{{ private void close() */
+    /**
+     * 关闭文件句柄
+     *
+     * @access private
+     * @return void
+     */
+    private function close()
+    {
+        if ($this->handle) {
+            fclose($this->handle);
+            $this->handle   = null;
+        }
+    }
+    /* }}} */
+
     /* {{{ private Boolean test() */
     /**
      * 测试文件, 读取每行大小
@@ -240,11 +240,9 @@ class Fsplit
     private function truncate($fname)
     {
         $rt = true;
-        if (is_file($fname)) {
-            if (!unlink($fname)) {
-                $this->error    = sprintf('File "%s" already exists, and unlink failed.', $fname);
-                $rt = false;
-            }
+        if (is_file($fname) && !unlink($fname)) {
+            $this->error    = sprintf('File "%s" already exists, and unlink failed.', $fname);
+            $rt = false;
         }
 
         return $rt;
