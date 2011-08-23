@@ -118,5 +118,26 @@ class FsplitTest extends \Myfox\Lib\TestShell
     }
     /* }}} */
 
+    /* {{{ public void test_should_get_last_error_works_fine() */
+    public function test_should_get_last_error_works_fine()
+    {
+        $object = new Fsplit('/i/am/not/exits');
+        $this->assertEquals(false, $object->split(array(100)));
+        $this->assertContains('No such file named as "/i/am/not/exits"', $object->lastError());
+
+        $object = new Fsplit(__FILE__);
+        $this->assertEquals(false, $object->split(array(100), '/created/denied'));
+        $this->assertContains('Directory "/created/denied" created failed', $object->lastError());
+
+        $fname	= __DIR__ . '/tmp/fsplit_test.txt';
+        !is_dir(dirname($fname)) && @mkdir(dirname($fname), 0755, true);
+        file_put_contents($fname, 'bbbbbbb');
+
+        $object = new Fsplit($fname);
+        $this->assertEquals(false, $object->split(array(100), __DIR__ . '/tmp'));
+        $this->assertContains('Unrecognized text formmat, or line size larger than ' . Fsplit::BUFFER_SIZE, $object->lastError());
+    }
+    /* }}} */
+
 }
 
