@@ -152,53 +152,39 @@ class Fsplit
             return false;
         }
 
-        fseek($this->handle, 0, SEEK_SET);
         $chunks = array($wfname);
-        $buffer = '';
+        $buffer = $this->buffer;
         $offset = (int)ceil(current($slice) * $this->lnsize);
-        while (1) {
-            while ($offset >= $this->bfsize) {
-                if (!$this->append($wfname, fread($this->handle, $this->bfsize))) {
-                    $this->close();
-                    return false;
+        while (!feof($this->handle)) {
+            $buffer .= fread($this->handle, $this->bfsize);
+            $length = strlen($buffer);
+            if ($length < $offset || feof($this->handle)) {
+                if ($this->append($wfname, $buffer)) {
+                    $buffer = '';
+                    $offset -= $length;
                 }
+            } else {
+                $endpos = strpos($buffer, $this->eofl, $offset);
+                if (false !== $endpos) {
+                    if (!$this->append($wfname, substr($buffer, 0, $endpos + 1))) {
+                        $this->close();
+                        return false;
+                    }
 
-                $offset -= $this->bfsize;
-                if (feof($this->handle)) {
-                    break 2;
+                    $buffer = substr($buffer, $endpos + 1);
+                    if (false !== ($next = next($slice))) {
+                        $wfname = $spath . '_' . key($slice);
+                        $offset = (int)ceil($this->lnsize * $next);
+                        if (!$this->truncate($wfname)) {
+                            $this->close();
+                            return false;
+                        }
+                        $chunks[]   = $wfname;
+                    }
                 }
-            }
-
-            do {
-                $buffer .= fread($this->handle, $this->bfsize);
-                $pos    = strpos($buffer, $this->eofl, $offset);
-            } while (false === $pos && !feof($this->handle));
-
-            if (feof($this->handle)) {
-                if (!$this->append($wfname, $buffer)) {
-                    $this->close();
-                    return false;
-                }
-                break;
-            }
-
-            if (!$this->append($wfname, substr($buffer, 0, $pos + 1))) {
-                $this->close();
-                return false;
-            }
-
-            $buffer = substr($buffer, $pos + 1);
-            if (false !== ($next = next($slice))) {
-                //var_dump($next);
-                $offset = (int)ceil($pos * $this->lnsize);
-                $wfname = $spath . '_' . key($slice);
-                if (!$this->truncate($wfname)) {
-                    $this->close();
-                    return false;
-                }
-                $chunks[]   = $wfname;
             }
         }
+        $this->buffer   = '';
         $this->close();
 
         return $chunks;

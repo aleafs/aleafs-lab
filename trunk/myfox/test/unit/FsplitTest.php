@@ -80,18 +80,29 @@ class FsplitTest extends \Myfox\Lib\TestShell
 
 	/* {{{ public void test_should_file_split_by_line_works_fine() */
 	public function test_should_file_split_by_line_works_fine()
-	{
-		$fname	= __DIR__ . '/tmp/fsplit_test.txt';
-		$this->assertTrue(self::prepare_test_file($fname, 27000));
-		$this->assertEquals(array(
-			__DIR__ . '/tmp/fsplit_test.txt_0',
-			__DIR__ . '/tmp/fsplit_test.txt_1',
-			__DIR__ . '/tmp/fsplit_test.txt_2',
-        ), Fsplit::chunk($fname, array(10000, 10000, 6000), __DIR__ . '/tmp'));
+    {
+        $expect = array(
+            __DIR__ . '/tmp/fsplit_test.txt_0'  => 10000,
+            __DIR__ . '/tmp/fsplit_test.txt_1'  => 10000,
+            __DIR__ . '/tmp/fsplit_test.txt_2'  => 6000,
+        );
 
-        $this->assertEquals(10000,  self::fileline(__DIR__ . '/tmp/fsplit_test.txt_0'));
-        $this->assertEquals(10000,  self::fileline(__DIR__ . '/tmp/fsplit_test.txt_1'));
-        $this->assertEquals(7000,   self::fileline(__DIR__ . '/tmp/fsplit_test.txt_2'));
+		$fname	= __DIR__ . '/tmp/fsplit_test.txt';
+        $this->assertTrue(self::prepare_test_file($fname, 27000));
+        $this->assertEquals(
+            array_keys($expect),
+            Fsplit::chunk($fname, array_values($expect), __DIR__ . '/tmp')
+        );
+
+        $total  = 0;
+        foreach ($expect AS $fname => $lines) {
+            $realn  = self::fileline($fname);
+            $total  += $realn;
+            if (false !== next($expect)) {
+                $this->assertTrue($lines * 0.95 < $realn && $lines * 1.05 > $realn);
+            }
+        }
+        $this->assertEquals(27000, $total);
 	}
 	/* }}} */
 
