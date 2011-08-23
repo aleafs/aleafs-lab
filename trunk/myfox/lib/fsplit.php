@@ -153,9 +153,11 @@ class Fsplit
         }
 
         $chunks = array($wfname);
-        $buffer = $this->buffer;
         $offset = (int)ceil(current($slice) * $this->lnsize);
-        while (!feof($this->handle)) {
+
+        $buffer = $this->buffer;
+        $this->buffer   = '';
+        while (!feof($this->handle) || !empty($buffer)) {
             $buffer .= fread($this->handle, $this->bfsize);
             $length = strlen($buffer);
             if ($length < $offset || feof($this->handle)) {
@@ -184,7 +186,6 @@ class Fsplit
                 }
             }
         }
-        $this->buffer   = '';
         $this->close();
 
         return $chunks;

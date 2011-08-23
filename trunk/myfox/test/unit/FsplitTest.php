@@ -79,7 +79,7 @@ class FsplitTest extends \Myfox\Lib\TestShell
 	/* }}} */
 
 	/* {{{ public void test_should_file_split_by_line_works_fine() */
-	public function test_should_file_split_by_line_works_fine()
+	public function _test_should_file_split_by_line_works_fine()
     {
         $expect = array(
             __DIR__ . '/tmp/fsplit_test.txt_0'  => 10000,
@@ -105,6 +105,18 @@ class FsplitTest extends \Myfox\Lib\TestShell
         $this->assertEquals(27000, $total);
 	}
 	/* }}} */
+
+    /* {{{ public void test_should_ignore_chunks_more_than_total_line() */
+    public function test_should_ignore_chunks_more_than_total_line()
+    {
+		$fname	= __DIR__ . '/tmp/fsplit_test.txt';
+        $this->assertTrue(self::prepare_test_file($fname, 2700));
+        $this->assertEquals(array(
+            __DIR__ . '/tmp/fsplit_test.txt_0',
+            __DIR__ . '/tmp/fsplit_test.txt_1',
+        ), Fsplit::chunk($fname, array(2000, 1000, 1000), __DIR__ . '/tmp'));
+    }
+    /* }}} */
 
 }
 
