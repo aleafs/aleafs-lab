@@ -146,3 +146,17 @@ CREATE TABLE IF NOT EXISTS test_task_queque (
 	KEY idx_queque_time (addtime)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
+-- 准入权限表
+DROP TABLE IF EXISTS test_auth_list;
+CREATE TABLE IF NOT EXISTS test_auth_list (
+	autokid int(10) unsigned not null auto_increment,
+	appname varchar(64) not null default '',
+	actname varchar(64) not null default '',
+	ipaddr varchar(20) not null default '',
+	authvalue int(10) unsigned not null default 0,
+	addtime datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+	modtime datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+	remark varchar(100) not null default '',
+	PRIMARY KEY pk_user_id (autokid),
+	UNIQUE KEY uk_auth_token (appname, actname)
+)ENGINE = MyISAM DEFAULT CHARSET=UTF8;
