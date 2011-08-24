@@ -95,7 +95,7 @@ class Table
      * @access public
      * @return Mixture
      */
-    public function column()
+    public function column($excepts = null)
     {
         if (empty($this->column)) {
             $column = self::$mysql->getAll(self::$mysql->query(sprintf(
@@ -109,7 +109,7 @@ class Table
             }
         }
 
-        return $this->column;
+        return self::filter($this->column, $excepts, 'excepts');
     }
     /* }}} */
 
@@ -120,7 +120,7 @@ class Table
      * @access public
      * @return Mixture
      */
-    public function index()
+    public function index($excepts = null)
     {
         if (empty($this->index)) {
             $index  = self::$mysql->getAll(self::$mysql->query(sprintf(
@@ -134,7 +134,7 @@ class Table
             }
         }
 
-        return $this->index;
+        return self::filter($this->index, $excepts, 'excepts');
     }
     /* }}} */
 
@@ -166,6 +166,20 @@ class Table
     }
     /* }}} */
 
+    /* {{{ public String getsql() */
+    /**
+     * 获取建表SQL
+     *
+     * @access public
+     * @param  Mixture $excepts : 特殊条件
+     * @param  Boolean $infobright : 是否InfoBright表
+     * @return String
+     */
+    public function getsql($excepts = null, $infobright = false)
+    {
+    }
+    /* }}} */
+
     /* {{{ private void __construct() */
     /**
      * 构造函数
@@ -181,6 +195,23 @@ class Table
         if (empty(self::$mysql)) {
             self::$mysql    = \Myfox\Lib\Mysql::instance('default');
         }
+    }
+    /* }}} */
+
+    /* {{{ private static Mixture filter() */
+    /**
+     * 过滤excepts条件
+     *
+     * @access private static
+     * @return Mixture
+     */
+    private static function filter($data, $excepts = null, $key = 'excepts')
+    {
+        if (empty($excepts)) {
+            return $data;
+        }
+
+        return $data;
     }
     /* }}} */
 
