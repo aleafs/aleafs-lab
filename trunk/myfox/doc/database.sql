@@ -53,8 +53,10 @@ DROP TABLE IF EXISTS test_table_column;
 CREATE TABLE test_table_column (
 	autokid int(10) unsigned not null auto_increment,
 	colseqn smallint(5) unsigned not null default 0,
+	isextra tinyint(2) unsigned not null default 0,
 	tabname varchar(64) not null default '',
 	colname varchar(64) not null default '',
+	excepts varchar(100) not null default '',
 	coltype varchar(15) not null default '',
 	dfltval varchar(100),
 	coldesc varchar(100) not null default '',
@@ -62,7 +64,7 @@ CREATE TABLE test_table_column (
 	addtime datetime not null default '0000-00-00 00:00:00',
 	modtime datetime not null default '0000-00-00 00:00:00',
 	PRIMARY KEY pk_column_id (autokid),
-	UNIQUE KEY uk_column_name (tabname,colname),
+	UNIQUE KEY uk_column_name (tabname,colname,excepts),
 	KEY idx_column_order (tabname,colseqn)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
@@ -71,7 +73,7 @@ INSERT INTO test_table_column (colseqn,tabname,colname,coltype,dfltval,coldesc,s
 INSERT INTO test_table_column (colseqn,tabname,colname,coltype,dfltval,coldesc,sqlchar,addtime,modtime) VALUES (3,'numsplit','num1','uint','0','整数',"num1 int(10) unsigned not null default 0", NOW(), NOW());
 INSERT INTO test_table_column (colseqn,tabname,colname,coltype,dfltval,coldesc,sqlchar,addtime,modtime) VALUES (4,'numsplit','num2','float','0.00','浮点数',"num2 decimal(20,14) not null default 0.00", NOW(), NOW());
 INSERT INTO test_table_column (colseqn,tabname,colname,coltype,dfltval,coldesc,sqlchar,addtime,modtime) VALUES (5,'numsplit','char1','char','','字符串',"char1 varchar(32) not null default ''", NOW(), NOW());
-INSERT INTO test_table_column (colseqn,tabname,colname,coltype,dfltval,coldesc,sqlchar,addtime,modtime) VALUES (100,'numsplit','autokid','uint','0','自增列',"autokid int(10) unsigned not null auto_increment", NOW(), NOW());
+INSERT INTO test_table_column (colseqn,tabname,colname,coltype,dfltval,coldesc,sqlchar,addtime,modtime,isextra) VALUES (100,'numsplit','autokid','uint','0','自增列',"autokid int(10) unsigned not null auto_increment", NOW(), NOW(), 1);
 
 DROP TABLE IF EXISTS test_table_index;
 CREATE TABLE test_table_index (
@@ -80,11 +82,12 @@ CREATE TABLE test_table_index (
 	idxtype varchar(32) not null default '',
 	tabname varchar(64) not null default '',
 	idxname varchar(64) not null default '',
+	excepts varchar(100) not null default '',
 	idxchar varchar(1000) not null default '',
 	addtime datetime not null default '0000-00-00 00:00:00',
 	modtime datetime not null default '0000-00-00 00:00:00',
 	PRIMARY KEY pk_index_id (autokid),
-	UNIQUE KEY uk_index_name (tabname,idxname),
+	UNIQUE KEY uk_index_name (tabname,idxname,excepts),
 	KEY idx_index_order (tabname,idxseqn)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 INSERT INTO test_table_index (idxseqn,idxtype,tabname,idxname,idxchar,addtime,modtime) VALUES (1, '', 'numsplit','idx_split_cid','cid', NOW(), NOW());
