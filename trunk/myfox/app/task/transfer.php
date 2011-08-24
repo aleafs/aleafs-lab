@@ -158,6 +158,7 @@ class Transfer extends \Myfox\App\Task
             return false;
         }
 
+        // xxx: federated bug : 不要索引
         preg_match('/\((.+)\)/s', $create['Create Table'], $match);
         $struct = trim($match[1]);
 
