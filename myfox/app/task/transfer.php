@@ -152,16 +152,17 @@ class Transfer extends \Myfox\App\Task
 
         $source = Server::instance($from);
         $mysql  = $source->getlink();
-        $create = $mysql->getRow($mysql->query(sprintf('SHOW CREATE TABLE %s', $path)));
-        if (empty($create) || empty($create['Create Table'])) {
-            $this->setError($mysql->lastError());
+        $struct = array();
+        foreach ((array)$mysql->getAll($mysql->query(sprintf('DESC %s', $path))) AS $row) {
+            $struct[]   = sprintf('%s %s', $row['Field'], $row['Type']);
+        }
+
+        if (empty($struct)) {
+            $this->setError(sprintf('show columns failed: %s', $mysql->lastError()));
             return false;
         }
 
-        // xxx: federated bug : 不要索引
-        preg_match('/\((.+)\)/s', $create['Create Table'], $match);
-        $struct = trim($match[1]);
-
+        $struct = implode(',', $struct);
         $create = array();
         $column = $this->table->column();
         foreach ($column AS $key => $val) {
@@ -195,6 +196,7 @@ class Transfer extends \Myfox\App\Task
         $target = Server::instance($save)->getlink();
         foreach ($querys AS $sql) {
             if (false === $target->query($sql)) {
+                var_dump($sql);
                 $this->setError($target->lastError());
                 return false;
             }
