@@ -136,4 +136,10 @@ class TableTest extends \Myfox\Lib\TestShell
     }
     /* }}} */
 
+    /* {{{ public void test_should_table_extends_sql_works_fine() */
+    public function test_should_table_extends_sql_works_fine()
+    {
+    }
+    /* }}} */
+
 }

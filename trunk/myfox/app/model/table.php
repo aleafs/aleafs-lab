@@ -177,6 +177,12 @@ class Table
      */
     public function getsql($excepts = null, $infobright = false)
     {
+        $column = $this->column($excepts);
+        if (empty($infobright)) {
+            $indexs = $this->index($excepts);
+        }
+
+        var_dump($column);
     }
     /* }}} */
 
@@ -207,11 +213,18 @@ class Table
      */
     private static function filter($data, $excepts = null, $key = 'excepts')
     {
-        if (empty($excepts)) {
-            return $data;
+        $rt = array();
+        foreach ((array)$data AS $id => $row) {
+            if (!isset($row[$key])) {
+                return false;
+            }
+
+            if (empty($row[$key]) || $excepts == $row[$key]) {
+                $rt[$id]    = $row;
+            }
         }
 
-        return $data;
+        return $rt;
     }
     /* }}} */
 
