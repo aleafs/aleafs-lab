@@ -72,7 +72,9 @@ class Dispatcher
      */
     private function __construct($ini)
     {
+        require_once __DIR__ . '/application.php';
         Application::init($ini);
+
         $this->config   = \Myfox\Lib\Config::instance('default');
         $this->prefix   = rtrim($this->config->get('url.prefix', ''), '/');
 

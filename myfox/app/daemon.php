@@ -86,6 +86,7 @@ class Daemon
             return false;
         }
 
+        require_once __DIR__ . '/application.php';
         Application::init($ini);
 
         $this->worker   = null;
