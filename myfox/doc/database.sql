@@ -125,6 +125,7 @@ CREATE TABLE IF NOT EXISTS test_settings (
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
 -- 任务队列表
+-- namespace支持
 DROP TABLE IF EXISTS test_task_queque;
 CREATE TABLE IF NOT EXISTS test_task_queque (
 	autokid bigint(20) unsigned not null auto_increment,
