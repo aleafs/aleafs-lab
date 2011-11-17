@@ -196,7 +196,6 @@ class Transfer extends \Myfox\App\Task
         $target = Server::instance($save)->getlink();
         foreach ($querys AS $sql) {
             if (false === $target->query($sql)) {
-                var_dump($sql);
                 $this->setError($target->lastError());
                 return false;
             }
