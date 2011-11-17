@@ -37,6 +37,8 @@ class Queque
 
     private static $mysql;
 
+    private static $objects = array();
+
     private static $typemap = array(
         self::IMPORT    => 'Import',
         self::TRANSFER  => 'Transfer',
@@ -44,24 +46,45 @@ class Queque
     );
     /* }}} */
 
-    /* {{{ public static Mixture fetch() */
+    /* {{{ 成员变量 */
+
+    private $name;
+
+    /* }}} */
+
+    /* {{{ public static Object instance() */
+    /**
+     * 获取一个队列实例
+     *
+     * @access public static
+     * @return Object
+     */
+    public static function instance($name = '')
+    {
+        $name   = strtolower(trim($name, "_ \t\r\n"));
+        if (empty(self::$objects[$name])) {
+            self::$objects[$name]   = new self($name);
+        }
+
+        return self::$objects[$name];
+    }
+    /* }}} */
+
+    /* {{{ public Mixture fetch() */
     /**
      * 获取一条任务
      *
-     * @access public static
+     * @access public
      * @return Mixture
      */
-    public static function fetch()
+    public function fetch()
     {
-        self::init();
-
         $row    = self::$mysql->getRow(self::$mysql->query(sprintf(
-            'SELECT autokid AS id,task_type,tmp_status,task_info FROM %stask_queque WHERE '.
-            ' task_flag=%d AND trytimes < %d ORDER BY priority ASC, trytimes ASC, ' .
+            'SELECT autokid AS id,task_type,tmp_status,task_info FROM %stask_queque%s WHERE '.
+            ' task_flag=%d AND trytimes > 0 ORDER BY priority ASC, trytimes ASC, ' .
             ' ABS(agentpos - %u) ASC, autokid ASC LIMIT 1',
-            self::$mysql->option('prefix', ''),
-            self::FLAG_WAIT, self::MAX_TRIES, self::$mypos
-        )));
+                self::$mysql->option('prefix', ''), $this->name, self::FLAG_WAIT, self::$mypos
+            )));
 
         if (empty($row)) {
             return null;
@@ -76,20 +99,18 @@ class Queque
     }
     /* }}} */
 
-    /* {{{ public static Boolean insert() */
+    /* {{{ public Boolean insert() */
     /**
      * 插入一条队列
      *
-     * @access public static
+     * @access public
      * @return Boolean true or false
      */
-    public static function insert($type, $info, $agent = 0, $option = null)
+    public function insert($type, $info, $agent = 0, $option = null)
     {
-        self::init();
-
         $column = array(
             'priority'  => 100,
-            'trytimes'  => 0,
+            'trytimes'  => self::MAX_TRIES,
             'task_flag' => self::FLAG_WAIT,
             'adduser'   => '',
         );
@@ -105,24 +126,22 @@ class Queque
         $column['task_info']= self::$mysql->escape(json_encode($info));
 
         return (bool)self::$mysql->query(sprintf(
-            "INSERT INTO %stask_queque (%s) VALUES ('%s')",
-            self::$mysql->option('prefix', ''),
+            "INSERT INTO %stask_queque%s (%s) VALUES ('%s')",
+            self::$mysql->option('prefix', ''), $this->name,
             implode(',', array_keys($column)), implode("','", $column)
         ));
     }
     /* }}} */
 
-    /* {{{ public static Boolean update() */
+    /* {{{ public Boolean update() */
     /**
      * 任务队列更改
      *
-     * @access public static
+     * @access public
      * @return Boolean true or false
      */
-    public static function update($id, $option, $comma = null)
+    public function update($id, $option, $comma = null)
     {
-        self::init();
-
         $column = array(
             'agentpos'  => true,
             'priority'  => true,
@@ -154,16 +173,28 @@ class Queque
         }
 
         return self::$mysql->query(sprintf(
-            'UPDATE %stask_queque SET %s WHERE autokid = %d',
-            self::$mysql->option('prefix', ''),
+            'UPDATE %stask_queque%s SET %s WHERE autokid = %d',
+            self::$mysql->option('prefix', ''), $this->name,
             implode(',', $update), $id
         ));
     }
     /* }}} */
 
-    /* {{{ private static void init() */
-    private static function init()
+    /* {{{ private void __construct() */
+    /**
+     * 构造函数
+     *
+     * @access private
+     * @return void
+     */
+    private function __construct($name)
     {
+        if (empty($name)) {
+            $this->name = '';
+        } else {
+            $this->name = '_' . $name;
+        }
+
         if (empty(self::$mysql)) {
             self::$mysql    = \Myfox\Lib\Mysql::instance('default');
         }
