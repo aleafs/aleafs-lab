@@ -154,7 +154,7 @@ abstract class Task
      */
     public function lock()
     {
-        return Queque::update(
+        return Queque::instance()->update(
             $this->id,
             array(
                 'begtime'   => sprintf(
@@ -177,7 +177,7 @@ abstract class Task
      */
     public function unlock($flag = Queque::FLAG_DONE, $option = null, $comma = null)
     {
-        return Queque::update(
+        return Queque::instance()->update(
             $this->id,
             array(
                 'trytimes'  => sprintf('IF(task_flag=%d,trytimes,trytimes+1)', $flag),
