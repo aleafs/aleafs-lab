@@ -36,7 +36,8 @@ class QuequeTest extends \Myfox\Lib\TestShell
     /* {{{ public void test_should_throw_exception_when_undefined_task_type() */
     public function test_should_throw_exception_when_undefined_task_type()
     {
-        $this->assertTrue(Queque::insert(
+        $queque = Queque::instance();
+        $this->assertTrue($queque->insert(
             99,
             array(
                 'src' => 'http://www.taobao.com',
@@ -50,8 +51,7 @@ class QuequeTest extends \Myfox\Lib\TestShell
         ));
 
         try {
-            $task   = Queque::fetch(1);
-            var_dump($task);
+            $task   = $queque->fetch(1);
             $this->assertTrue(false);
         } catch (\Exception $e) {
             $this->assertContains('Undefined task type as "99"', $e->getMessage());
@@ -62,7 +62,8 @@ class QuequeTest extends \Myfox\Lib\TestShell
     /* {{{ public void test_should_queque_insert_and_fetch_works_fine() */
     public function test_should_queque_insert_and_fetch_works_fine()
     {
-        $this->assertTrue(Queque::insert(
+        $queque = Queque::instance();
+        $this->assertTrue($queque->insert(
             Queque::IMPORT, array(
                 'src' => 'http://www.taobao.com',
             ),
@@ -74,11 +75,11 @@ class QuequeTest extends \Myfox\Lib\TestShell
             )
         ));
 
-        $task   = Queque::fetch(1);
+        $task   = $queque->fetch(1);
         $this->assertTrue($task instanceof \Myfox\App\Task\Import);
         $this->assertEquals('http://www.taobao.com', $task->option('src',''));
 
-        $this->assertTrue(Queque::insert(
+        $this->assertTrue($queque->insert(
             Queque::TRANSFER, array(
                 'from'  => 1,
                 'to'    => 9,
@@ -89,7 +90,7 @@ class QuequeTest extends \Myfox\Lib\TestShell
                 'trytimes'  => 2,
             )
         ));
-        $this->assertTrue(Queque::insert(
+        $this->assertTrue($queque->insert(
             Queque::TRANSFER, array(
                 'from'  => 2,
                 'to'    => 10,
@@ -101,12 +102,12 @@ class QuequeTest extends \Myfox\Lib\TestShell
             )
         ));
 
-        $task   = Queque::fetch(1);
+        $task   = $queque->fetch(1);
         $this->assertTrue($task instanceof \Myfox\App\Task\Transfer);
         $this->assertEquals(2, $task->option('from'));
         $this->assertEquals(10, $task->option('to'));
 
-        $this->assertEquals(1, Queque::update($task->id, array(
+        $this->assertEquals(1, $queque->update($task->id, array(
             'trytimes'  => 'trytimes + 1',
             'priority'  => 202,
         ), array(
