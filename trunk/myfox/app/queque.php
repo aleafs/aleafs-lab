@@ -18,10 +18,10 @@ class Queque
     /* {{{ 静态常量 */
 
     const FLAG_NEW	= 0;
-    const FLAG_WAIT	= 1;
-    const FLAG_LOCK	= 2;
-    const FLAG_IGN  = 7;
-    const FLAG_DONE	= 9;
+    const FLAG_WAIT	= 100;
+    const FLAG_LOCK	= 200;
+    const FLAG_IGNO = 300;
+    const FLAG_DONE	= 900;
 
     const MAX_TRIES = 3;
 
@@ -48,7 +48,9 @@ class Queque
 
     /* {{{ 成员变量 */
 
-    private $name;
+    private $name;          /**<    队列名字,作为表名后缀 */
+
+    private $mpos;          /**<    客户端位置 */
 
     /* }}} */
 
@@ -75,21 +77,46 @@ class Queque
      * 获取一条任务
      *
      * @access public
+     * @param  Integer $limit : count of tasks
+     * @param  Integer $pos   : agent position
      * @return Mixture
      */
-    public function fetch()
+    public function fetch($limit = 1, $pos = 0, $area = true, $type = self::FLAG_WAIT)
     {
-        $row    = self::$mysql->getRow(self::$mysql->query(sprintf(
-            'SELECT autokid AS id,task_type,tmp_status,task_info FROM %stask_queque%s WHERE '.
-            ' task_flag=%d AND trytimes > 0 ORDER BY priority ASC, trytimes ASC, ' .
-            ' ABS(agentpos - %u) ASC, autokid ASC LIMIT 1',
-                self::$mysql->option('prefix', ''), $this->name, self::FLAG_WAIT, self::$mypos
-            )));
+        $query  = sprintf(
+            'SELECT autokid AS `id`,task_type AS `type`,tmp_status AS `status`,task_info AS `info` FROM %stask_queque%s',
+            self::$mysql->option('prefix', ''), $this->name
+        );
+        $where  = array(
+            sprintf('task_flag=%u', $type),
+            'trytimes > 0',
+        );
+        $order  = array(
+            'priority ASC',
+            'trytimes ASC',
+        );
 
-        if (empty($row)) {
+        $pos    = empty($pos) ? self::$mypos : $pos;
+        if (true === $area) {
+            $where[]    = sprintf('agentpos=%u', $pos);
+        } else {
+            $order[]    = sprintf('ABS(agentpos - %u) ASC', $pos);
+        }
+
+        $tasks  = self::$mysql->getAll(self::$mysql->query(sprintf(
+            '%s WHERE %s ORDER BY %s LIMIT 0, %d',
+            $query, implode(' AND ', $where), implode('', $order), $limit
+        )));
+
+        if (empty($tasks)) {
             return null;
         }
 
+        if ($limit == 1) {
+            $tasks  = reset($tasks);
+        }
+
+        return $tasks;
         if (empty(self::$typemap[$row['task_type']])) {
             throw new \Myfox\Lib\Exception(sprintf('Undefined task type as "%s"', $row['task_type']));
         }
@@ -189,18 +216,12 @@ class Queque
      */
     private function __construct($name)
     {
-        if (empty($name)) {
-            $this->name = '';
-        } else {
-            $this->name = '_' . $name;
-        }
-
+        $this->name = empty($name) ? '' : '_' . $name;
         if (empty(self::$mysql)) {
             self::$mysql    = \Myfox\Lib\Mysql::instance('default');
         }
-
         if (empty(self::$mypos)) {
-            self::$mypos    = Context::addr();
+            self::$mypos    = Context::addr(true);
         }
     }
     /* }}} */
