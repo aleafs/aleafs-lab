@@ -23,6 +23,10 @@ abstract class Task
 
     const MAX_CACHE_TIME    = 900;
 
+    const IMPORT    = 1;
+    const TRANSFER  = 2;
+    const DELETE    = 3;
+
     /* }}} */
 
     /* {{{ 静态变量 */
@@ -32,6 +36,12 @@ abstract class Task
     protected static $hosts;
 
     private static $load_ts = 0;
+
+    private static $typemap = array(
+        self::IMPORT    => 'Import',
+        self::TRANSFER  => 'Transfer',
+        self::DELETE    => 'Delete',
+    );
 
     /* }}} */
 
@@ -47,6 +57,30 @@ abstract class Task
 
     private $lastError;
 
+    /* }}} */
+
+    /* {{{ public static Object create() */
+    /**
+     * 工厂模式创建任务
+     *
+     * @access public static
+     * @return Object
+     */
+    final public static function create($info)
+    {
+        foreach (array('id', 'type', 'status', 'info') AS $k) {
+            if (!isset($info[$k])) {
+                throw new \Myfox\Lib\Exception(sprintf('Field "%s" is required for Task::create', $k));
+            }
+        }
+
+        if (empty(self::$typemap[(int)$info['type']])) {
+            throw new \Myfox\Lib\Exception(sprintf('Undefined task type as "%s"', $info['type']));
+        }
+
+        $class  = sprintf('%s\Task\%s', __NAMESPACE__, self::$typemap[(int)$info['type']]);
+        return new $class((int)$info['id'], json_decode($info['info'], true), $info['status']);
+    }
     /* }}} */
 
     /* {{{ abstract public Integer execute() */

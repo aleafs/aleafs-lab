@@ -25,10 +25,6 @@ class Queque
 
     const MAX_TRIES = 3;
 
-    const IMPORT    = 1;
-    const TRANSFER  = 2;
-    const DELETE    = 3;
-
     /* }}} */
 
     /* {{{ 静态变量 */
@@ -39,11 +35,6 @@ class Queque
 
     private static $objects = array();
 
-    private static $typemap = array(
-        self::IMPORT    => 'Import',
-        self::TRANSFER  => 'Transfer',
-        self::DELETE    => 'Delete',
-    );
     /* }}} */
 
     /* {{{ 成员变量 */
@@ -81,7 +72,7 @@ class Queque
      * @param  Integer $pos   : agent position
      * @return Mixture
      */
-    public function fetch($limit = 1, $pos = 0, $area = true, $type = self::FLAG_WAIT)
+    public function fetch($limit = 1, $pos = null, $area = true, $type = self::FLAG_WAIT)
     {
         $query  = sprintf(
             'SELECT autokid AS `id`,task_type AS `type`,tmp_status AS `status`,task_info AS `info` FROM %stask_queque%s',
@@ -96,18 +87,17 @@ class Queque
             'trytimes ASC',
         );
 
-        $pos    = empty($pos) ? self::$mypos : $pos;
+        $pos    = (null === $pos) ? self::$mypos : $pos;
         if (true === $area) {
-            $where[]    = sprintf('agentpos=%u', $pos);
+            $where[]    = sprintf('agentpos IN (0,%u)', $pos);
         } else {
             $order[]    = sprintf('ABS(agentpos - %u) ASC', $pos);
         }
 
         $tasks  = self::$mysql->getAll(self::$mysql->query(sprintf(
             '%s WHERE %s ORDER BY %s LIMIT 0, %d',
-            $query, implode(' AND ', $where), implode('', $order), $limit
+            $query, implode(' AND ', $where), implode(',', $order), $limit
         )));
-
         if (empty($tasks)) {
             return null;
         }
@@ -117,12 +107,6 @@ class Queque
         }
 
         return $tasks;
-        if (empty(self::$typemap[$row['task_type']])) {
-            throw new \Myfox\Lib\Exception(sprintf('Undefined task type as "%s"', $row['task_type']));
-        }
-
-        $class  = sprintf('Myfox\App\Task\%s', self::$typemap[$row['task_type']]);
-        return new $class($row['id'], json_decode($row['task_info'], true), $row['tmp_status']);
     }
     /* }}} */
 
