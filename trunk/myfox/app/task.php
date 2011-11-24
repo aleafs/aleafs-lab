@@ -214,8 +214,8 @@ abstract class Task
         return Queque::instance()->update(
             $this->id,
             array(
-                'trytimes'  => sprintf('IF(task_flag=%d,trytimes,trytimes-1)', $flag),
-                'endtime'   => sprintf("IF(task_flag=%d,endtime,'%s')", $flag, date('Y-m-d H:i:s')),
+                'trytimes'  => sprintf('IF(task_flag=%d,trytimes-1,trytimes)', Queque::FLAG_LOCK),
+                'endtime'   => sprintf("IF(task_flag=%d,'%s',endtime)", Queque::FLAG_LOCK, date('Y-m-d H:i:s')),
                 'task_flag' => $flag,
             ) + (array)$option, array(
                 'trytimes'  => true,
