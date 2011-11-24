@@ -192,8 +192,8 @@ abstract class Task
             $this->id,
             array(
                 'begtime'   => sprintf(
-                    "IF(task_flag=%d,begtime,'%s')",
-                    Queque::FLAG_LOCK, date('Y-m-d H:i:s')
+                    "IF(task_flag=%d,'%s',begtime)",
+                    Queque::FLAG_WAIT, date('Y-m-d H:i:s')
                 ),
                 'task_flag' => Queque::FLAG_LOCK,
             ),
