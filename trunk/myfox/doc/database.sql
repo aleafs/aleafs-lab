@@ -1,4 +1,4 @@
-
+-- xxx
 -- 机器表
 DROP TABLE IF EXISTS test_host_list;
 CREATE TABLE test_host_list (
