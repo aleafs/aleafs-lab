@@ -35,19 +35,32 @@ CREATE TABLE test_table_list (
 	addtime datetime not null default '0000-00-00 00:00:00',
 	modtime datetime not null default '0000-00-00 00:00:00',
 	backups tinyint(2) unsigned not null default 1,
-	loadtype tinyint(2) unsigned not null default 0,
 	split_threshold int(10) unsigned not null default 0,
 	split_drift decimal(5,2) unsigned not null default 0.00,
-	route_method tinyint(2) unsigned not null default 0,
-	route_fields varchar(128) not null default '',
-	tabname varchar(64) not null default '',
-	tabdesc varchar(128) not null default '',
-	filemd5 varchar(32) not null default '',
+	load_type tinyint(2) unsigned not null default 0,
+	route_type tinyint(2) unsigned not null default 0,
+	table_name varchar(64) not null default '',
+	table_desc varchar(128) not null default '',
+	unique_key varchar(256) not null default '',
+	xml_filemd varchar(32) not null default '',
 	PRIMARY KEY pk_table_id (autokid),
-	UNIQUE KEY uk_table_name (tabname)
-) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
+	UNIQUE KEY uk_table_name (table_name)
+) ENGINE = InnoDB DEFAULT CHARSET=UTF8;
 
-INSERT INTO test_table_list (addtime,modtime,backups,loadtype,tabname,split_threshold,split_drift,route_method,route_fields) VALUES (NOW(),NOW(),2,1,'mirror',1000,0.2,0,''), (NOW(),NOW(),2,0,'numsplit',1000,0.4,1,'{thedate:date,cid:int}');
+-- 路由字段表
+DROP TABLE IF EXISTS test_table_route;
+CREATE TABLE test_table_route (
+	autokid int(10) unsigned not null auto_increment,
+	addtime datetime not null default '0000-00-00 00:00:00',
+	modtime datetime not null default '0000-00-00 00:00:00',
+	table_name varchar(64) not null default '',
+	column_name varchar(64) not null default '',
+	tidy_method varchar(64) not null default '',
+	tidy_return tinyint(2) unsigned not null default 0,
+	is_primary tinyint(2) unsigned not null default 0,
+	PRIMARY KEY pk_auto_kid (autokid),
+	UNIQUE KEY uk_table_column (table_name, column_name)
+) ENGINE = InnoDB DEFAULT CHARSET=UTF8;
 
 DROP TABLE IF EXISTS test_table_column;
 CREATE TABLE test_table_column (
