@@ -1,4 +1,3 @@
--- xxx
 -- 系统状态表
 DROP TABLE IF EXISTS test_settings;
 CREATE TABLE IF NOT EXISTS test_settings (
@@ -33,13 +32,6 @@ CREATE TABLE test_host_list (
 	KEY idx_host_stat (host_stat, host_type),
 	KEY idx_host_pos (host_pos)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
-
-INSERT INTO test_host_list (host_id,host_type,host_stat,host_name,conn_host,conn_port,read_user,read_pass,write_user,write_pass) VALUES (1, 1, 0, 'edp1_9801', '10.232.132.78', 9801, 'db_read', '123456', 'db_write', '123456');
-INSERT INTO test_host_list (host_id,host_type,host_stat,host_name,conn_host,conn_port,read_user,read_pass,write_user,write_pass) VALUES (2, 0, 0, 'edp1_9901', '10.232.132.78', 9901, 'db_read', '123456', 'db_write', '123456');
-INSERT INTO test_host_list (host_id,host_type,host_stat,host_name,conn_host,conn_port,read_user,read_pass,write_user,write_pass) VALUES (3, 1, 0, 'edp2_9902', '10.232.36.110', 9902, 'db_read', '123456', 'db_write', '123456');
-INSERT INTO test_host_list (host_id,host_type,host_stat,host_name,conn_host,conn_port,read_user,read_pass,write_user,write_pass) VALUES (4, 2, 0, 'edp2_8510', '10.232.36.110', 8510, 'db_read', '123456', 'db_write', '123456');
-
-UPDATE test_host_list SET host_pos = INET_ATON(conn_host), addtime = NOW(), modtime = NOW();
 
 -- 配置表
 DROP TABLE IF EXISTS test_table_list;
@@ -111,33 +103,33 @@ CREATE TABLE test_table_index (
 	UNIQUE KEY uk_table_index (table_name, index_name, index_extra)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
--- xxx:以下还没review
 -- 路由表
 DROP TABLE IF EXISTS test_route_info;
 CREATE TABLE test_route_info (
 	autokid int(10) unsigned not null auto_increment,
-	idxsign int(10) unsigned not null default 0,
-	isarchive tinyint(2) unsigned not null default 0,
-	useflag tinyint(2) unsigned not null default 0,
 	addtime int(10) unsigned not null default 0,
 	modtime int(10) unsigned not null default 0,
 	hittime int(10) unsigned not null default 0,
+	route_sign int(10) unsigned not null default 0,
+	is_archive tinyint(2) unsigned not null default 0,
+	route_flag smallint(5) unsigned not null default 0,
 	table_name varchar(64) not null default '',
 	real_table varchar(128) not null default '',
 	hosts_list varchar(1024) not null default '',
 	route_text varchar(1024) not null default '',
+	unique_key varchar(1024) not null default '',
 	PRIMARY KEY pk_route_id (autokid),
-	KEY idx_route_sign (idxsign, useflag)
-) ENGINE = InnoDB DEFAULT CHARSET=UTF8;
+	KEY idx_route_sign (route_sign, route_flag),
+	KEY idx_route_time (modtime, is_archive)
+) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
--- 任务队列表
 -- namespace支持
 DROP TABLE IF EXISTS test_task_queque;
 CREATE TABLE IF NOT EXISTS test_task_queque (
 	autokid bigint(20) unsigned not null auto_increment,
 	agentpos smallint(5) unsigned not null default 0,
 	priority smallint(5) unsigned not null default 0,
-	trytimes tinyint(2) unsigned not null default 0,
+	trytimes smallint(5) unsigned not null default 0,
 	addtime datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 	begtime datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 	endtime datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
@@ -148,8 +140,7 @@ CREATE TABLE IF NOT EXISTS test_task_queque (
 	tmp_status varchar(1000) not null default '',
 	task_info text,
 	PRIMARY KEY pk_queque_id (autokid),
-	KEY idx_queque_flag (task_flag, trytimes),
-	KEY idx_queque_prio (priority),
-	KEY idx_queque_time (addtime)
+	KEY idx_queque_flag (task_flag, trytimes, priority),
+	KEY idx_queque_time (addtime, task_flag)
 ) ENGINE = MyISAM DEFAULT CHARSET=UTF8;
 
