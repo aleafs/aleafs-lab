@@ -134,7 +134,7 @@ CREATE TABLE IF NOT EXISTS test_task_queque (
 	begtime datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 	endtime datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 	task_flag tinyint(2) unsigned not null default 0,
-	task_type smallint(5) unsigned not null default 0,
+	task_type varchar(100) not null default '',
 	adduser varchar(100) not null default '',
 	last_error varchar(200) not null default '',
 	tmp_status varchar(1000) not null default '',
